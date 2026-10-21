@@ -4,7 +4,7 @@ Sdílená sada pro Claude Code ve všech projektech Brixyy. Jeden zdroj pravdy: 
 
 ## Co obsahuje (plugin `brixyy-kit`)
 - **Kontext při startu session** (`kontext.md`) — kdo je uživatel, jak komunikovat, společný workflow.
-- **Pojistka** (`hooks/pojistka.py`) — před push do main, sloučením PR, produkčním deployem, migrací produkční DB a mazáním se Claude musí zeptat; čtení `.env` je zakázané.
+- **Pojistka** (`hooks/pojistka.py`) — před přímým push do main, ručním produkčním deployem, migrací produkční DB a mazáním se Claude musí zeptat; čtení `.env` je zakázané. Sloučení PR pojistka neblokuje (uživatel ho trvale povolil).
 - **Agent `reviewer`** — nezávislá kontrola PR před sloučením.
 - **Skills:** `prace-workflow` (ticket v GitHub Issues, u robotiky v Linearu → větev → PR → kontrola → předávka), kvalita kódu, React, TypeScript, Supabase, Tailwind + shadcn, testování, plánování, brainstorming, React Flow, React Doctor.
 

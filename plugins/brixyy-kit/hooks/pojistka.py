@@ -17,7 +17,6 @@ PLATNOST_S = 15 * 60
 RIZIKOVE_PRIKAZY = [
     (r"\bgit\s+push\b[^\n;&|]*\b(main|master)\b", "push do main/master"),
     (r"\bgit\s+push\b[^\n;&|]*(\s--force\b|\s-f\b|\s--delete\b|\s:\S)", "force push nebo mazání větve na GitHubu"),
-    (r"\bgh\s+pr\s+merge\b", "sloučení PR"),
     (r"\bgh\s+repo\s+(delete|archive|rename)\b", "mazání/archivace repozitáře"),
     (r"\bgh\s+api\b[^\n]*(-X|--method)\s*(DELETE|PUT|PATCH)\b", "zápis přes GitHub API"),
     (r"\bvercel\b[^\n]*\s--prod\b", "produkční deploy na Vercel"),
