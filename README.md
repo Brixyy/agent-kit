@@ -23,3 +23,8 @@ Lokálně jednorázově: `claude plugin marketplace add Brixyy/claude-kit` a `cl
 ## Úpravy
 Změnu udělej v tomto repu přes PR, zvyš `version` v `plugins/brixyy-kit/.claude-plugin/plugin.json` a ověř `claude plugin validate .`.
 Projektově specifické věci sem nepatří — ty jsou v `AGENTS.md` a `.claude/skills/` daného projektu.
+
+## Testy
+`python -I tests/test_pojistka.py` ověří, že pojistka zastaví rizikové příkazy a nereaguje na text v popisu PR.
+
+Postup převodu existujícího projektu: [`docs/prevod-projektu.md`](docs/prevod-projektu.md).

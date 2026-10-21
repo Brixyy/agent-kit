@@ -41,6 +41,13 @@ ENV_CTENI = re.compile(
 )
 
 
+def bez_textu(prikaz):
+    """Odstraní obsah heredoců a řetězců v uvozovkách, aby pojistka nereagovala na text (popis PR, echo)."""
+    prikaz = re.sub(r"<<-?\s*['\"]?(\w+)['\"]?.*?\n.*?\n\s*\1\b", "<<HEREDOC", prikaz, flags=re.S)
+    prikaz = re.sub(r"'[^']*'", "''", prikaz)
+    return re.sub(r'"(\\.|[^"\\])*"', '""', prikaz)
+
+
 def vystup(rozhodnuti, duvod):
     print(json.dumps({"hookSpecificOutput": {
         "hookEventName": "PreToolUse",
@@ -89,8 +96,11 @@ def main():
         prikaz = str(vstup.get("command", ""))
         if ENV_CTENI.search(prikaz):
             vystup("deny", "Pojistka: vypisování souborů .env je zakázané. Pracuj jen s názvy proměnných, ne s hodnotami.")
+        # Text v uvozovkách se ignoruje, kromě případů, kdy se spouští jako příkaz (sh -c, eval, PowerShell -Command).
+        spousti_text = re.search(r"\b(sh|bash|zsh|pwsh|powershell|cmd)(\.exe)?\b[^\n]*\s(-c|-Command|/c)\b|\beval\b", prikaz, re.I)
+        kontrolovany = prikaz if spousti_text else bez_textu(prikaz)
         for vzor, nazev in RIZIKOVE_PRIKAZY:
-            if re.search(vzor, prikaz, re.IGNORECASE):
+            if re.search(vzor, kontrolovany, re.IGNORECASE):
                 popis = nazev
                 break
     elif RIZIKOVE_MCP.search(nastroj):

@@ -14,6 +14,7 @@ description: Podrobný postup práce na úkolu v projektech Brixyy — ticket (G
 ## 2. Větev a PR
 - Větev z aktuální výchozí větve: `<cislo-issue>-<kratky-popis>` (robotika: `rob-<cislo>-<popis>`), např. `12-stranky-sluzeb`. V popisu PR uveď `Refs #12` — ne `Closes`, issue zavírá uživatel.
 - Jedno PR = jeden účel, ideálně do pár set řádků. Míří vždy do výchozí větve, nikdy na jinou feature větev.
+- Popis PR předávej souborem (`gh pr create --body-file popis.md`), ne dlouhým textem v příkazu.
 - Popis PR (česky):
   - **Co a proč** (2–3 věty pro laika),
   - **Co se změnilo** (body),
