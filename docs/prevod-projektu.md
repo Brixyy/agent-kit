@@ -2,7 +2,7 @@
 
 Ověřeno pilotem na prove-webu (Brixyy/prove-web#6).
 
-1. **AGENTS.md** přepiš podle `Brixyy/project-template` (do ~200 řádků, pravdivě, bez Codexu). `CLAUDE.md` v projektu smaž, pokud jen odkazuje na AGENTS.md.
+1. **AGENTS.md** přepiš podle `Brixyy/project-template` (do ~200 řádků, pravdivě, bez Codexu). `CLAUDE.md` nech jako jediný řádek `@AGENTS.md` (import zaručí, že Claude pravidla načte; obsah patří jen do AGENTS.md).
 2. **`.claude/settings.json`**: `extraKnownMarketplaces` + `enabledPlugins` (brixyy-kit) + deny čtení `.env`, `.env.local`, `.env.production`, `.env.development`, `.env.*.local`.
 3. **`.gitignore`** musí obsahovat `.env*` soubory (kromě `.env.example`) a `.claude/worktrees/`. Zkontroluj, že v historii gitu nejsou tajné klíče (`git log -p | grep` na typické prefixy) — nález hlas uživateli, nic nepřepisuj.
 4. **`.gitattributes`**: u existujícího repa **nepřidávej** `* text=auto eol=lf` (přepsalo by konce řádků ve všech souborech). Stačí `*.sh text eol=lf`.
