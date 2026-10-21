@@ -9,7 +9,7 @@
 - Stav Done uzavírá jen uživatel.
 
 ## Workflow
-1. Práce začíná ticketem: **robotika → Linear** (tým ROB), **všechny ostatní projekty → GitHub Issues** v repozitáři projektu, zařazené do GitHub Projectu „Brixyy – projekty“. Jedna úloha = jedna větev (s číslem ticketu) = jedno malé PR do výchozí větve. Žádné řetězy PR.
+1. Práce začíná ticketem: **robotika → Linear** (tým ROB), **všechny ostatní projekty → GitHub Issues** v repozitáři projektu, zařazené do GitHub Projectu „Brixyy – projekty“ (https://github.com/users/Brixyy/projects/13). Jedna úloha = jedna větev (s číslem ticketu) = jedno malé PR do výchozí větve. Žádné řetězy PR.
 2. Před odevzdáním proběhnou testy a lint projektu; výsledek zapiš do PR i ticketu.
 3. Před sloučením review (agent `reviewer` z brixyy-kit nebo `/code-review`).
 4. Vždy se zeptej uživatele před: push do main/master, sloučením PR, produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním. Hlídá to hook pojistka; potvrzovací soubor vytvoř jen po výslovném „ano“ v chatu.
