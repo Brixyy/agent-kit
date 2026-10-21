@@ -1,17 +1,18 @@
 ---
 name: prace-workflow
-description: Podrobný postup práce na úkolu v projektech Brixyy — Linear ticket, větev, PR, kontrola, předávka. Použij na začátku každé implementační úlohy, při zakládání PR a při přerušení práce.
+description: Podrobný postup práce na úkolu v projektech Brixyy — ticket (GitHub Issue, u robotiky Linear), větev, PR, kontrola, předávka. Použij na začátku každé implementační úlohy, při zakládání PR a při přerušení práce.
 ---
 
 # Postup práce na úkolu
 
 ## 1. Ticket
-- Každá práce má ticket v Linearu. Když ho uživatel nezadal, založ ho (stručný název, popis cíle, kritéria hotovo) a pracuj až potom.
-- Stavy: Backlog/Todo → **In Progress** (začínáš) → **AI kontrola** (hotovo, běží review a testy) → **Ke schválení** (čeká na uživatele) → Done (**jen uživatel**). Když potřebuješ rozhodnutí nebo podklad: **Blokováno** + komentář s jednou konkrétní otázkou.
+- Každá práce má ticket. **Robotika:** Linear, tým ROB (řídí se vlastním `AGENTS.md` robotiky). **Ostatní projekty:** GitHub Issue v repozitáři projektu (`gh issue create`), přidané do GitHub Projectu „Brixyy – projekty“ (`gh project item-add <číslo> --owner Brixyy --url <issue-url>`).
+- Když ticket uživatel nezadal, založ ho (stručný název, popis cíle, kritéria hotovo) a pracuj až potom.
+- Stavy (pole **Stav** v GitHub Projectu, v Linearu stejnojmenné stavy): Backlog/Todo → **In Progress** (začínáš) → **AI kontrola** (hotovo, běží review a testy) → **Ke schválení** (čeká na uživatele) → Done (**jen uživatel**; issue zavírá uživatel). Když potřebuješ rozhodnutí nebo podklad: **Blokováno** + komentář s jednou konkrétní otázkou.
 - Komentáře v ticketu piš česky a krátce: co se udělalo, co je ověřené, co neověřené, odkaz na PR.
 
 ## 2. Větev a PR
-- Větev z aktuální výchozí větve: `<zkratka-ticketu>-<cislo>-<kratky-popis>`, např. `web-12-stranky-sluzeb`.
+- Větev z aktuální výchozí větve: `<cislo-issue>-<kratky-popis>` (robotika: `rob-<cislo>-<popis>`), např. `12-stranky-sluzeb`. V popisu PR uveď `Refs #12` — ne `Closes`, issue zavírá uživatel.
 - Jedno PR = jeden účel, ideálně do pár set řádků. Míří vždy do výchozí větve, nikdy na jinou feature větev.
 - Popis PR (česky):
   - **Co a proč** (2–3 věty pro laika),
