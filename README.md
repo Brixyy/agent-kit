@@ -28,3 +28,6 @@ Projektově specifické věci sem nepatří — ty jsou v `AGENTS.md` a `.claude
 `python -I tests/test_pojistka.py` ověří, že pojistka zastaví rizikové příkazy a nereaguje na text v popisu PR.
 
 Postup převodu existujícího projektu: [`docs/prevod-projektu.md`](docs/prevod-projektu.md).
+
+## Verze
+`HLAVNÍ.VEDLEJŠÍ.OPRAVA` v `plugins/brixyy-kit/.claude-plugin/plugin.json` — oprava chyby → poslední číslo, nové pravidlo/skill → prostřední, změna vyžadující úpravu všech projektů → první. Verze se nikdy nesnižuje (plugin se aktualizuje jen na vyšší číslo).
