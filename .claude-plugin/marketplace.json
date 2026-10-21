@@ -1,0 +1,12 @@
+{
+  "name": "claude-kit",
+  "owner": { "name": "Brixyy" },
+  "metadata": { "description": "Sdílená pravidla, skills, review agent a pojistky pro projekty Brixyy." },
+  "plugins": [
+    {
+      "name": "brixyy-kit",
+      "source": "./plugins/brixyy-kit",
+      "description": "Workflow, pojistky (hooky), review agent a společné skills pro všechny projekty Brixyy."
+    }
+  ]
+}

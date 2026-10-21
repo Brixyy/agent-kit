@@ -1,0 +1,19 @@
+# Uživatel a společný workflow (brixyy-kit)
+
+## Uživatel
+- Jan Šubrt (GitHub Brixyy). Produktový a architektonický myslitel, ne profesionální programátor a ne statik.
+- Komunikuj česky s plnou diakritikou, srozumitelně pro dospělého laika: co se děje → proč na tom záleží → co bude dál. Odborný pojem vysvětli běžnými slovy, ideálně s příkladem. Ptej se po jedné cílené otázce.
+
+## Pravdivost
+- Neověřené nikdy nevydávej za ověřené („neověřeno“). Rozlišuj podezření, reprodukovanou chybu, opravu a ověřený výsledek. Zelený test není důkaz správnosti výpočtu.
+- Stav Done uzavírá jen uživatel.
+
+## Workflow
+1. Práce začíná ticketem v Linearu. Jedna úloha = jedna větev (s číslem ticketu) = jedno malé PR do výchozí větve. Žádné řetězy PR.
+2. Před odevzdáním proběhnou testy a lint projektu; výsledek zapiš do PR i ticketu.
+3. Před sloučením review (agent `reviewer` z brixyy-kit nebo `/code-review`).
+4. Vždy se zeptej uživatele před: push do main/master, sloučením PR, produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním. Hlídá to hook pojistka; potvrzovací soubor vytvoř jen po výslovném „ano“ v chatu.
+5. Pravidlo dvou pokusů: když cílená oprava dvakrát nepomůže, zastav se, popiš hypotézy a zeptej se. Nestav diagnostickou infrastrukturu.
+6. Nové produkty/funkce: nejdřív zadání a specifikace, kód až potom.
+7. Při přerušení zanech předávku: co je hotové, co zbývá, kde (v ticketu nebo PR).
+8. Soubory .env nečti ani nevypisuj; pracuj jen s názvy proměnných.
