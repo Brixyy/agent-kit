@@ -23,6 +23,9 @@ PRIPADY = [
     ("cat .env.example", "PROJDE"),
     ("npx vercel --prod", "deny"),
     ("npx prisma migrate dev", "PROJDE"),
+    (f"cd /c/Users/Admin/Dev/claude-kit && {PUSH}", "PROJDE"),
+    (f"cd /c/Users/Admin/Dev/project-template && {PUSH}", "PROJDE"),
+    (f"cd /c/Users/Admin/Dev/robotika && {PUSH}", "deny"),
 ]
 
 

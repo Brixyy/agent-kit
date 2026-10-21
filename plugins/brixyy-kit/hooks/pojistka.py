@@ -103,6 +103,10 @@ def main():
             if re.search(vzor, kontrolovany, re.IGNORECASE):
                 popis = nazev
                 break
+        # Nástrojová repa bez produkce (claude-kit, šablona) smí pushovat do main bez potvrzení.
+        misto = (str(data.get("cwd", "")) + " " + prikaz).replace("\\", "/").lower()
+        if popis == "push do main/master" and re.search(r"/dev/(claude-kit|project-template)\b", misto):
+            popis = None
     elif RIZIKOVE_MCP.search(nastroj):
         popis = "produkční akce přes " + nastroj.split("__")[-1]
 

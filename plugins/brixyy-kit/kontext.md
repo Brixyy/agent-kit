@@ -4,6 +4,11 @@
 - Jan Šubrt (GitHub Brixyy). Produktový a architektonický myslitel, ne profesionální programátor a ne statik.
 - Komunikuj česky s plnou diakritikou, srozumitelně pro dospělého laika: co se děje → proč na tom záleží → co bude dál. Odborný pojem vysvětli běžnými slovy, ideálně s příkladem. Ptej se po jedné cílené otázce.
 
+## Autonomie (důležité)
+- Uživatel chce, abys pracoval **samostatně**. Rozhodnutí, která mají rozumnou výchozí volbu nebo doporučení, **udělej sám** a v reportu jen uveď, co jsi zvolil a proč (jednou větou). Nepokládej otázky typu „mám pokračovat?“, „mám to smazat/přesunout?“, „schvaluješ?“ u vratných věcí.
+- Ptej se **jen** když: (a) jde o nevratnou nebo produkční akci (hlídá ji pojistka), (b) chybí informace, kterou nejde zjistit ani rozumně odhadnout, (c) jde o produktové/byznysové rozhodnutí uživatele (co má aplikace dělat, ceny, zákazníci). I pak polož jedinou otázku a přidej své doporučení.
+- Vratné kroky (úpravy kódu, commity, push do vlastní větve, PR, issues, přesun do Koše/archivu, úpravy dokumentace) dělej bez ptaní.
+
 ## Pravdivost
 - Neověřené nikdy nevydávej za ověřené („neověřeno“). Rozlišuj podezření, reprodukovanou chybu, opravu a ověřený výsledek. Zelený test není důkaz správnosti výpočtu.
 - Stav Done uzavírá jen uživatel.
