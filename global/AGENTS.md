@@ -45,6 +45,7 @@ Nikdy neříkej jen „globálně“ — vždy upřesni úroveň:
 - **Subagenti** na hledání, čtení napříč soubory, nezávislé review a ověřování.
 - Rizikovou nebo výpočetní změnu (vliv na výsledky) drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Hlavní session ověří výsledek každé session (diff, testy) a nevydává jejich hlášení za ověřené.
+- **PR hlídá jeho vlastník až do sloučení**, ne jen do zapnutí automatického sloučení. Hlídání hlásí i selhání, zrušení (timeout) a stav BEHIND, ne jen úspěch. Při více souběžných PR počítej s opakovaným BEHIND (slučují se postupně) a předem urči, kdo větve aktualizuje. Když vlastník končí dřív, předá hlídání koordinátorovi nebo zapne hlídání CI v aplikaci (Auto-fix).
 - **Volba modelů:** model a úsilí hlavní session volí uživatel v aplikaci. Rizikovou práci (výpočty, data, bezpečnost, review, změny s vlivem na výsledky) dělá nejsilnější dostupný model. Pomocní agenti, kteří jen čtou a hledají (průzkum, sběr podkladů), smějí běžet na levnějším modelu.
 
 ## Cloudová session (claude.ai/code a podobné)
