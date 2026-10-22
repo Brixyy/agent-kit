@@ -38,6 +38,8 @@ RIZIKOVE_MCP = re.compile(
     r"delete_[a-z_]+|create_project|update_project|edit_project_env|create_project_env|"
     r"add_project_domain|buy_domain|replace_domain_dns_records|update_record|create_record)$"
 )
+# Plánované úlohy agent spravuje sám (uživatel 22. 10. 2026: „chci, aby sis nastavoval tyhle rutiny“).
+VOLNE_MCP = re.compile(r"^mcp__scheduled-tasks__")
 
 ENV_CTENI = re.compile(
     r"\b(cat|type|less|more|head|tail|Get-Content|gc|bat|xxd|strings)\b[^\n|;&]*"
@@ -116,7 +118,7 @@ def main():
         misto = (str(data.get("cwd", "")) + " " + prikaz).replace("\\", "/").lower()
         if popis == "push do main/master" and re.search(r"/dev/(agent-kit|project-template)\b", misto):
             popis = None
-    elif RIZIKOVE_MCP.search(nastroj):
+    elif RIZIKOVE_MCP.search(nastroj) and not VOLNE_MCP.search(nastroj):
         popis = "produkční akce přes " + nastroj.split("__")[-1]
 
     if popis is None:

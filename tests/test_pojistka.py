@@ -51,6 +51,12 @@ for prikaz, ocekavano in PRIPADY:
     skutecne = rozhodnuti(prikaz)
     chyby += skutecne != ocekavano
     print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + prikaz.replace("\n", " ⏎ ")[:70])
+for nastroj, ocekavano in [("mcp__scheduled-tasks__delete_scheduled_task", "PROJDE"), ("mcp__x__delete_branch", "deny")]:
+    vstup = json.dumps({"tool_name": nastroj, "tool_use_id": "test", "tool_input": {}})
+    vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True, encoding="utf-8").stdout
+    skutecne = "deny" if '"deny"' in vystup else "PROJDE"
+    chyby += skutecne != ocekavano
+    print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + nastroj)
 for prikaz, ocekavano in [(PUSH, "deny"), ("git status", "PROJDE")]:
     skutecne = codex(prikaz)
     chyby += skutecne != ocekavano
