@@ -25,7 +25,7 @@ description: Podrobný postup práce na úkolu v projektech Brixyy — ticket (G
 ## 3. Kontrola a sloučení
 - Spusť testy, lint a typecheck projektu (příkazy jsou v `AGENTS.md`). U UI změn ověř stránku v prohlížeči na desktopu i mobilu.
 - Před sloučením nezávislé review (Claude Code: agent `reviewer`). Nálezy oprav nebo je výslovně uveď v PR. U větší změny použij i skill `rozhodnuti`.
-- Sloučení PR je trvale povolené. Po review zapni **automatické sloučení** `gh pr merge <č> --auto --squash` — GitHub PR sloučí sám po povinných kontrolách. Na zelené CI nečekej a uživatele se kvůli sloučení neptej. Repo bez CI slučuj ručně až po ověření.
+- Sloučení PR je trvale povolené. Po review zapni **automatické sloučení** `gh pr merge <č> --auto --squash` — GitHub PR sloučí sám po povinných kontrolách. Uživatele se kvůli sloučení neptej. Hotovo ale není zapnutím auto-merge: ověř, že PR opravdu doběhl do sloučení (selhání, timeout nebo BEHIND řeš, nebo předej hlídání dál). Repo bez CI slučuj ručně až po ověření.
 
 ## 4. Cloudová session
 - Prostředí připraví `sh scripts/cloud-setup.sh` (je v každém projektu).
