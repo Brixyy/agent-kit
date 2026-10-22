@@ -26,6 +26,9 @@ PRIPADY = [
     (f"cd /c/Users/Admin/Dev/agent-kit && {PUSH}", "PROJDE"),
     (f"cd /c/Users/Admin/Dev/project-template && {PUSH}", "PROJDE"),
     (f"cd /c/Users/Admin/Dev/robotika && {PUSH}", "deny"),
+    ("gh api -X " + "PATCH repos/Brixyy/asistent/issues/5 -f state=closed", "PROJDE"),
+    ("gh api -X " + "PATCH repos/Brixyy/asistent -F allow_auto_merge=true", "deny"),
+    ("gh api -X " + "DELETE repos/Brixyy/asistent/git/refs/heads/x", "deny"),
 ]
 
 
