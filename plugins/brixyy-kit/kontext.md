@@ -22,3 +22,5 @@
 6. Nové produkty/funkce: nejdřív zadání a specifikace, kód až potom.
 7. Při přerušení zanech předávku: co je hotové, co zbývá, kde (v ticketu nebo PR).
 8. Soubory .env nečti ani nevypisuj; pracuj jen s názvy proměnných.
+9. V cloudové session (claude.ai/code) nefunguje `gh` přes GraphQL (`gh issue list`, `gh pr view` → 403); používej `gh api` (REST) nebo GitHub MCP. Podrobnosti ve skillu `prace-workflow`.
+10. Tento repozitář (`Brixyy/claude-kit`) je **veřejný**: nepiš sem hesla, klíče, ID projektů ani údaje o zákaznících — ty patří do `AGENTS.md` projektu.

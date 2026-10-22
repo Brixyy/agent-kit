@@ -25,7 +25,13 @@ description: Podrobný postup práce na úkolu v projektech Brixyy — ticket (G
 ## 3. Kontrola
 - Spusť testy, lint a typecheck projektu (příkazy jsou v `AGENTS.md`). U UI změn ověř stránku v prohlížeči na desktopu i mobilu.
 - Před sloučením použij agenta `reviewer`. Nálezy oprav nebo je výslovně uveď v PR.
-- Sloučení PR, produkční deploy a migrace produkční DB jen po výslovném souhlasu uživatele.
+- Sloučení PR má uživatel trvale povolené: po zeleném CI a review slučuj sám (`gh pr merge --squash --match-head-commit <sha>`). Ruční produkční deploy a migrace produkční DB mimo PR jen po výslovném souhlasu uživatele.
+
+## Cloudová session (claude.ai/code)
+- Vidí jen repozitář, nad kterým běží, a tento veřejný `claude-kit`. Nemá `.env*`, složku `Dev`, Chrome ani lokální konektory — práce, která potřebuje Vercel, Supabase nebo prohlížeč, patří do lokální session.
+- Prostředí připraví `sh scripts/cloud-setup.sh` (je v každém projektu).
+- `gh` přes GraphQL v cloudu nefunguje (HTTP 403 — týká se `gh issue list`, `gh pr list`, `gh pr view` …). Používej REST: `gh api repos/Brixyy/<repo>/issues`, `gh api repos/Brixyy/<repo>/pulls`, komentář `gh api -X POST repos/Brixyy/<repo>/issues/<č>/comments -f body=…`, nebo nástroje GitHub MCP. Pozor: `gh` při chybě 403 může skončit kódem 0 — kontroluj výstup.
+- Výsledek odevzdej jako větev + PR; předávku napiš do ticketu.
 
 ## 4. Když se to nedaří
 - Po dvou neúspěšných cílených pokusech zastav. Napiš: co jsi zkusil, co se stalo, 2–3 hypotézy, co navrhuješ. Polož jednu otázku.

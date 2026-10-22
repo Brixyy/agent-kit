@@ -2,7 +2,7 @@
 name: supabase-patterns
 description: |
   Complete Supabase development skill covering Auth, RLS policies, queries, Edge Functions,
-  Storage, migrations, types, and real-time subscriptions. Accounts: Prove servis s.r.o. and Brixy.
+  Storage, migrations, types, and real-time subscriptions.
 
   Use when working with Supabase auth flows, writing RLS policies, creating Edge Functions,
   managing storage buckets, running migrations, or generating TypeScript types.
@@ -12,12 +12,9 @@ author: Brixyy
 
 # Supabase Complete Development Guide
 
-## Account Structure
+## Projekty a účty
 
-| Account | Projects | Access Token Variable |
-|---------|----------|-----------------------|
-| **Prove servis s.r.o.** | Web / prove-web (`fbzfxkyeljvvjtjvegfk`), Interní aplikace / prove-aplikace (`xknipctbkkeoarhzwyhj`) | `SUPABASE_ACCESS_TOKEN_PROVE` |
-| **Brixy** | Robotika (`jqesexzbilrankxeyemg`, produkce); ostatní projekty pozastavené/archivní | `SUPABASE_ACCESS_TOKEN_BRIXY` |
+Který Supabase projekt (ref) a organizace patří k projektu, je v `AGENTS.md` daného projektu — sem ID nepatří (repozitář je veřejný).
 
 Produkční databázi měň jen migracemi přes CI/workflow projektu a po souhlasu uživatele (hlídá hook pojistka).
 
