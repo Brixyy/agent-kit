@@ -66,21 +66,29 @@ def vystup(rozhodnuti, duvod):
     sys.exit(0)
 
 
+def pouzito_pro(tool_use_id):
+    try:
+        return bool(tool_use_id) and open(POTVRZENI + ".pouzito", encoding="utf-8").read().strip() == tool_use_id
+    except OSError:
+        return False
+
+
 def potvrzeno(tool_use_id):
     # Potvrzení se spotřebuje pro jedno konkrétní volání nástroje; další hook nad stejným voláním ho uzná také.
-    pouzito = POTVRZENI + ".pouzito"
-    try:
-        if tool_use_id and open(pouzito, encoding="utf-8").read().strip() == tool_use_id:
-            return True
-    except OSError:
-        pass
+    if pouzito_pro(tool_use_id):
+        return True
     try:
         cerstve = time.time() - os.path.getmtime(POTVRZENI) <= PLATNOST_S
         os.remove(POTVRZENI)
     except OSError:
+        # Souběžný hook nad stejným voláním mohl potvrzení právě spotřebovat; chvíli počkej na jeho zápis.
+        for _ in range(10):
+            time.sleep(0.05)
+            if pouzito_pro(tool_use_id):
+                return True
         return False
     if cerstve and tool_use_id:
-        with open(pouzito, "w", encoding="utf-8") as f:
+        with open(POTVRZENI + ".pouzito", "w", encoding="utf-8") as f:
             f.write(tool_use_id)
     return cerstve
 
