@@ -6,7 +6,7 @@ Společná pravidla a nástroje pro AI agenty ve všech projektech Brixyy — ne
 | Složka | Co | Formát |
 |---|---|---|
 | `global/AGENTS.md` | Globální pravidla: kdo je uživatel, komunikace, pravdivost, autonomie, způsob práce, orchestrace | prostý Markdown (čte každý agent) |
-| `skills/` | Vlastní pracovní postupy: `prace-workflow`, `predavka`, `rozhodnuti`, `nez-zacnes-stavet`, `prevod-projektu` | otevřený standard Agent Skills (`SKILL.md`) |
+| `skills/` | Vlastní pracovní postupy: `prace-workflow`, `predavka`, `rozhodnuti`, `nez-zacnes-stavet`, `prevod-projektu`, `poznamka` (zápis do osobního asistenta Brixyy/asistent) | otevřený standard Agent Skills (`SKILL.md`) |
 | `agents/reviewer.md` | Nezávislá kontrola PR před sloučením | subagent Claude Code |
 | `hooks/pojistka.py` | Zastaví nevratné a produkční akce, zakáže čtení `.env` | Claude Code (JSON) i Codex (`--exit-code`) |
 | `scripts/` | `install.py` (počítač, Codex), `napojit-projekt.py` (projekt), `cloud-bootstrap.sh` + `cloud-pojistka.sh` (cloudové sessions) | |

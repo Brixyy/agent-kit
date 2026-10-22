@@ -36,6 +36,7 @@ Nikdy neříkej jen „globálně“ — vždy upřesni úroveň:
 4. Pravidlo dvou pokusů: když cílená oprava dvakrát nepomůže, zastav se, popiš hypotézy a zeptej se. Nestav diagnostickou ani „důkazní“ infrastrukturu.
 5. Audity a průzkumy jsou jen čtení — nic neopravuj, nenasazuj a neměň data bez souhlasu.
 6. Při přerušení nebo konci session zanech předávku (skill `predavka`): co je hotové, co zbývá, kde.
+7. **Osobní asistent** (repozitář `Brixyy/asistent`, složka `Dev/asistent`) drží paměť o uživateli, schránku podnětů a přehled portfolia. Když uživatel řekne „poznamenej si / zapamatuj si / podnět / nápad / stížnost“ nebo chce změnit globální pravidla mimo session asistenta, **použij skill `poznamka`** (issue v `Brixyy/asistent`) a vrať se k práci — neměň kvůli tomu pravidla ani paměť sám.
 
 ## Orchestrace (paralelní práce)
 - Cíl: odpracovat úkoly **co nejrychleji a nejefektivněji**. Paralelní agenty a sessions používej, kde je to **adekvátní a užitečné** (uživatel 22. 10. 2026: „nebál bych se více agentů, ale zbytečné to dělat nebudeme“).

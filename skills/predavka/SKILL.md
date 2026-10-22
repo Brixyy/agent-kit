@@ -18,7 +18,7 @@ Zachyť jen to, co nový agent potřebuje, aby pokračoval bez opakovaného ptan
 ## Postup
 1. Přečti `AGENTS.md` projektu, ať předávka neopakuje jeho obsah.
 2. Pokud už předávka existuje (ticket, `STAV.md`, PR), aktualizuj ji místo nové.
-3. Předávku zapiš **do ticketu** (komentář) nebo do PR; u práce napříč projekty do `Dev/STAV.md`. Uživateli ji ukaž v jednom bloku a připoj prompt pro novou session.
+3. Předávku zapiš **do ticketu** (komentář) nebo do PR; u práce napříč projekty do `portfolio/STAV.md` v repozitáři Brixyy/asistent. Uživateli ji ukaž v jednom bloku a připoj prompt pro novou session.
 
 ## Šablona
 ```
