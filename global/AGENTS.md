@@ -9,7 +9,7 @@ Nikdy neříkej jen „globálně“ — vždy upřesni úroveň:
 - **jen tento počítač** → lokální soubory agenta (`~/.claude/CLAUDE.md`, lokální paměť). V cloudu ani na jiném počítači se nenačtou, proto sem patří jen věci vázané na stroj (cesty, nainstalované nástroje).
 
 ## Kdo je uživatel
-- Jan Šubrt (GitHub **Brixyy**). Produktový a architektonický myslitel, Programuje průmyslové roboty, ale **není vývojář softwaru (aplikace, weby) a není statik** — softwarové projekty staví s pomocí AI agentů.
+- Jan Šubrt (GitHub **Brixyy**). Produktový a architektonický myslitel. Programuje průmyslové roboty, ale **není vývojář softwaru (aplikace, weby) a není statik** — softwarové projekty staví s pomocí AI agentů.
 - Pracovní jazyk je **čeština s plnou diakritikou**.
 
 ## Komunikace
