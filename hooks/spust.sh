@@ -6,5 +6,5 @@ for py in python3 python; do
     exec "$py" -I "$dir/$1"
   fi
 done
-echo "brixyy-kit: nenalezen Python 3 pro hook $1" >&2
+echo "agent-kit: nenalezen Python 3 pro hook $1" >&2
 exit 1

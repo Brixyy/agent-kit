@@ -1,9 +1,12 @@
 """PreToolUse pojistka: zastaví nevratné a produkční akce v jakémkoli režimu oprávnění.
 
 Akci pustí jen tehdy, když existuje čerstvé jednorázové potvrzení
-~/.claude/hooks/potvrzeno.txt (max. 15 minut staré). Claude ho smí vytvořit
+~/.agents/potvrzeno.txt (max. 15 minut staré). Agent ho smí vytvořit
 jedině poté, co uživatel akci výslovně schválil v chatu. Po použití se smaže.
 Čtení souborů .env se blokuje vždy, bez možnosti potvrzení.
+
+Výstup: Claude Code dostane JSON s permissionDecision. S argumentem --exit-code
+(Codex a další agenti) se zákaz hlásí kódem 2 a důvodem na stderr.
 """
 import json
 import os
@@ -11,7 +14,8 @@ import re
 import sys
 import time
 
-POTVRZENI = os.path.join(os.path.expanduser("~"), ".claude", "hooks", "potvrzeno.txt")
+POTVRZENI = os.path.join(os.path.expanduser("~"), ".agents", "potvrzeno.txt")
+EXIT_KOD = "--exit-code" in sys.argv
 PLATNOST_S = 15 * 60
 
 RIZIKOVE_PRIKAZY = [
@@ -48,6 +52,9 @@ def bez_textu(prikaz):
 
 
 def vystup(rozhodnuti, duvod):
+    if EXIT_KOD:
+        print(duvod, file=sys.stderr)
+        sys.exit(2)
     print(json.dumps({"hookSpecificOutput": {
         "hookEventName": "PreToolUse",
         "permissionDecision": rozhodnuti,
@@ -77,12 +84,14 @@ def potvrzeno(tool_use_id):
 
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
     try:
         data = json.load(sys.stdin)
     except ValueError:
         sys.exit(0)
-    nastroj = data.get("tool_name", "")
     vstup = data.get("tool_input") or {}
+    # Codex a jiní agenti nemusí posílat tool_name; příkaz v tool_input.command znamená shell.
+    nastroj = data.get("tool_name") or ("Bash" if vstup.get("command") else "")
 
     if nastroj in ("Read", "Edit", "Write"):
         cesta = os.path.basename(str(vstup.get("file_path", "")))
@@ -91,7 +100,7 @@ def main():
         sys.exit(0)
 
     popis = None
-    if nastroj in ("Bash", "PowerShell"):
+    if nastroj in ("Bash", "PowerShell") or (vstup.get("command") and "__" not in nastroj):
         prikaz = str(vstup.get("command", ""))
         if ENV_CTENI.search(prikaz):
             vystup("deny", "Pojistka: vypisování souborů .env je zakázané. Pracuj jen s názvy proměnných, ne s hodnotami.")
@@ -102,9 +111,9 @@ def main():
             if re.search(vzor, kontrolovany, re.IGNORECASE):
                 popis = nazev
                 break
-        # Nástrojová repa bez produkce (claude-kit, šablona) smí pushovat do main bez potvrzení.
+        # Nástrojová repa bez produkce (agent-kit, šablona) smí pushovat do main bez potvrzení.
         misto = (str(data.get("cwd", "")) + " " + prikaz).replace("\\", "/").lower()
-        if popis == "push do main/master" and re.search(r"/dev/(claude-kit|project-template)\b", misto):
+        if popis == "push do main/master" and re.search(r"/dev/(agent-kit|project-template)\b", misto):
             popis = None
     elif RIZIKOVE_MCP.search(nastroj):
         popis = "produkční akce přes " + nastroj.split("__")[-1]

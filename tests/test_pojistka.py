@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-HOOK = os.path.join(os.path.dirname(__file__), "..", "plugins", "brixyy-kit", "hooks", "pojistka.py")
+HOOK = os.path.join(os.path.dirname(__file__), "..", "hooks", "pojistka.py")
 PUSH = "git push origin " + "main"
 MERGE = "gh pr " + "merge 5"
 ENV = "cat " + ".env"
@@ -23,7 +23,7 @@ PRIPADY = [
     ("cat .env.example", "PROJDE"),
     ("npx vercel --prod", "deny"),
     ("npx prisma migrate dev", "PROJDE"),
-    (f"cd /c/Users/Admin/Dev/claude-kit && {PUSH}", "PROJDE"),
+    (f"cd /c/Users/Admin/Dev/agent-kit && {PUSH}", "PROJDE"),
     (f"cd /c/Users/Admin/Dev/project-template && {PUSH}", "PROJDE"),
     (f"cd /c/Users/Admin/Dev/robotika && {PUSH}", "deny"),
 ]
@@ -35,11 +35,22 @@ def rozhodnuti(prikaz):
     return "deny" if '"deny"' in vystup else "PROJDE"
 
 
+def codex(prikaz):
+    """Režim --exit-code (Codex): zákaz = kód 2, bez tool_name."""
+    vstup = json.dumps({"tool_input": {"command": prikaz}})
+    vysledek = subprocess.run([sys.executable, "-I", HOOK, "--exit-code"], input=vstup, capture_output=True, text=True, encoding="utf-8")
+    return "deny" if vysledek.returncode == 2 else "PROJDE"
+
+
 sys.stdout.reconfigure(encoding="utf-8")
 chyby = 0
 for prikaz, ocekavano in PRIPADY:
     skutecne = rozhodnuti(prikaz)
     chyby += skutecne != ocekavano
     print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + prikaz.replace("\n", " ⏎ ")[:70])
+for prikaz, ocekavano in [(PUSH, "deny"), ("git status", "PROJDE")]:
+    skutecne = codex(prikaz)
+    chyby += skutecne != ocekavano
+    print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + "codex: " + prikaz)
 print("VŠE OK" if not chyby else f"{chyby} CHYB")
 sys.exit(1 if chyby else 0)

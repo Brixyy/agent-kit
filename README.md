@@ -1,36 +1,33 @@
-# claude-kit
+# agent-kit
 
-Sdílená sada pro Claude Code ve všech projektech Brixyy. Jeden zdroj pravdy: co se opraví tady, platí všude.
+Společná pravidla a nástroje pro AI agenty ve všech projektech Brixyy — nezávislé na konkrétním nástroji (Claude Code, Codex, …). Jeden zdroj pravdy: co se opraví tady, platí všude. Repozitář je **veřejný**: nepatří sem hesla, klíče, ID projektů ani údaje o zákaznících.
 
-## Co obsahuje (plugin `brixyy-kit`)
-- **Kontext při startu session** (`kontext.md`) — kdo je uživatel, jak komunikovat, společný workflow.
-- **Pojistka** (`hooks/pojistka.py`) — před přímým push do main, ručním produkčním deployem, migrací produkční DB a mazáním se Claude musí zeptat; čtení `.env` je zakázané. Sloučení PR pojistka neblokuje (uživatel ho trvale povolil).
-- **Agent `reviewer`** — nezávislá kontrola PR před sloučením.
-- **Skills:** `prace-workflow` (ticket v GitHub Issues, u robotiky v Linearu → větev → PR → kontrola → předávka), kvalita kódu, React, TypeScript, Supabase, Tailwind + shadcn, testování, plánování, brainstorming, React Flow, React Doctor.
+## Co obsahuje
+| Složka | Co | Formát |
+|---|---|---|
+| `global/AGENTS.md` | Globální pravidla: kdo je uživatel, komunikace, pravdivost, autonomie, způsob práce, orchestrace | prostý Markdown (čte každý agent) |
+| `skills/` | Vlastní pracovní postupy: `prace-workflow`, `predavka`, `rozhodnuti`, `nez-zacnes-stavet`, `prevod-projektu` | otevřený standard Agent Skills (`SKILL.md`) |
+| `agents/reviewer.md` | Nezávislá kontrola PR před sloučením | subagent Claude Code |
+| `hooks/pojistka.py` | Zastaví nevratné a produkční akce, zakáže čtení `.env` | Claude Code (JSON) i Codex (`--exit-code`) |
+| `scripts/` | `install.py` (počítač, Codex), `napojit-projekt.py` (projekt), `cloud-bootstrap.sh` + `cloud-pojistka.sh` (cloudové sessions) | |
 
-## Zapojení do projektu
-Do `.claude/settings.json` projektu:
-```json
-{
-  "extraKnownMarketplaces": {
-    "claude-kit": { "source": { "source": "github", "repo": "Brixyy/claude-kit" } }
-  },
-  "enabledPlugins": { "brixyy-kit@claude-kit": true }
-}
+Kam patří které pravidlo: **celé portfolio** → tento repozitář · **jeden projekt** → `AGENTS.md` projektu · **jen tento počítač** → lokální soubory agenta.
+
+## Instalace
+**Claude Code** (plugin, kořen repozitáře je plugin):
 ```
-Lokálně jednorázově: `claude plugin marketplace add Brixyy/claude-kit` a `claude plugin install brixyy-kit@claude-kit`.
+/plugin install agent-kit --marketplace Brixyy/agent-kit
+```
+nebo v terminálu `claude plugin marketplace add Brixyy/agent-kit` a `claude plugin install agent-kit@agent-kit`. Plugin vloží globální pravidla do každé session, přidá skills, agenta `reviewer` a pojistku.
 
-## Úpravy
-Změnu udělej v tomto repu přes PR, zvyš `version` v `plugins/brixyy-kit/.claude-plugin/plugin.json` a ověř `claude plugin validate .`.
-Projektově specifické věci sem nepatří — ty jsou v `AGENTS.md` a `.claude/skills/` daného projektu.
+**Codex a další agenti** na tomto počítači: `python -I scripts/install.py` — zkopíruje pravidla do `~/.agents/AGENTS.md` a `~/.codex/AGENTS.md`, skills do `~/.agents/skills/` a napojí pojistku do `~/.codex/hooks.json`.
 
-## Testy
-`python -I tests/test_pojistka.py` ověří, že pojistka zastaví rizikové příkazy a nereaguje na text v popisu PR.
+**Projekt:** `python -I scripts/napojit-projekt.py <projekt>/.claude/settings.json` — marketplace, plugin a cloudové hooky. Celý postup: skill `prevod-projektu`.
 
 ## Cloud (claude.ai/code)
-Cloudová session pluginy z `.claude/settings.json` projektu neinstaluje. Projekty proto mají hooky (generuje `scripts/zapojit-cloud.py`), které v cloudu spustí `scripts/cloud-bootstrap.sh` (stáhne tento repozitář, nainstaluje plugin, vloží pravidla) a `scripts/cloud-pojistka.sh` (pojistka). Lokálně nedělají nic. Repozitář je proto **veřejný** — nepatří sem hesla, ID projektů ani údaje o zákaznících.
+Cloudová session pluginy z `.claude/settings.json` projektu neinstaluje. Hooky projektu proto v cloudu spustí `scripts/cloud-bootstrap.sh` (stáhne tento repozitář do `~/.agents/agent-kit`, nainstaluje plugin, vloží pravidla) a `scripts/cloud-pojistka.sh` (pojistka). Lokálně nedělají nic. Ověřeno v Brixyy/trading 22. 10. 2026.
 
-Postup převodu existujícího projektu: [`docs/prevod-projektu.md`](docs/prevod-projektu.md).
-
-## Verze
-`HLAVNÍ.VEDLEJŠÍ.OPRAVA` v `plugins/brixyy-kit/.claude-plugin/plugin.json` — oprava chyby → poslední číslo, nové pravidlo/skill → prostřední, změna vyžadující úpravu všech projektů → první. Verze se nikdy nesnižuje (plugin se aktualizuje jen na vyšší číslo).
+## Úpravy, testy, verze
+- Změna → zvyš `version` v `.claude-plugin/plugin.json` a ověř `claude plugin validate .` a `python -I tests/test_pojistka.py`.
+- Nový skill jen z opakovaného postupu, který agent sám neumí (ne obecné znalosti typu React nebo TypeScript). Skills `predavka`, `rozhodnuti` a `nez-zacnes-stavet` jsou upravené podle [davidondrej/skills](https://github.com/davidondrej/skills) (MIT).
+- Verze `HLAVNÍ.VEDLEJŠÍ.OPRAVA`: oprava → poslední číslo, nové pravidlo/skill → prostřední, změna vyžadující úpravu všech projektů → první. Nikdy se nesnižuje.
