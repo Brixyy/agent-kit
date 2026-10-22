@@ -25,7 +25,7 @@ description: Podrobný postup práce na úkolu v projektech Brixyy — ticket (G
 ## 3. Kontrola
 - Spusť testy, lint a typecheck projektu (příkazy jsou v `AGENTS.md`). U UI změn ověř stránku v prohlížeči na desktopu i mobilu.
 - Před sloučením použij agenta `reviewer`. Nálezy oprav nebo je výslovně uveď v PR.
-- Sloučení PR má uživatel trvale povolené: po zeleném CI a review slučuj sám (`gh pr merge --squash --match-head-commit <sha>`). Ruční produkční deploy a migrace produkční DB mimo PR jen po výslovném souhlasu uživatele.
+- Sloučení PR má uživatel trvale povolené. Po review zapni **automatické sloučení**: `gh pr merge <č> --auto --squash` — GitHub PR sloučí sám, jakmile projdou povinné kontroly (nastavené ve všech repozitářích s CI). Na zelené CI nečekej a uživatele se kvůli sloučení neptej. Bez povinných kontrol (repo bez CI) slučuj ručně až po ověření. Ruční produkční deploy a migrace produkční DB mimo PR jen po výslovném souhlasu uživatele.
 
 ## Cloudová session (claude.ai/code)
 - Vidí jen repozitář, nad kterým běží, a tento veřejný `claude-kit`. Nemá `.env*`, složku `Dev`, Chrome ani lokální konektory — práce, která potřebuje Vercel, Supabase nebo prohlížeč, patří do lokální session.
