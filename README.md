@@ -27,6 +27,9 @@ Projektově specifické věci sem nepatří — ty jsou v `AGENTS.md` a `.claude
 ## Testy
 `python -I tests/test_pojistka.py` ověří, že pojistka zastaví rizikové příkazy a nereaguje na text v popisu PR.
 
+## Cloud (claude.ai/code)
+Cloudová session pluginy z `.claude/settings.json` projektu neinstaluje. Projekty proto mají hooky (generuje `scripts/zapojit-cloud.py`), které v cloudu spustí `scripts/cloud-bootstrap.sh` (stáhne tento repozitář, nainstaluje plugin, vloží pravidla) a `scripts/cloud-pojistka.sh` (pojistka). Lokálně nedělají nic. Repozitář je proto **veřejný** — nepatří sem hesla, ID projektů ani údaje o zákaznících.
+
 Postup převodu existujícího projektu: [`docs/prevod-projektu.md`](docs/prevod-projektu.md).
 
 ## Verze
