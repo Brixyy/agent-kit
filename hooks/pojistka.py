@@ -22,8 +22,9 @@ RIZIKOVE_PRIKAZY = [
     (r"\bgit\s+push\b[^\n;&|]*\b(main|master)\b", "push do main/master"),
     (r"\bgit\s+push\b[^\n;&|]*(\s--force\b|\s-f\b|\s--delete\b|\s:\S)", "force push nebo mazání větve na GitHubu"),
     (r"\bgh\s+repo\s+(delete|archive|rename)\b", "mazání/archivace repozitáře"),
-    # Úpravy issues (zavřít, štítek, komentář) jsou vratné; hlídají se zápisy do nastavení, větví a obsahu.
-    (r"\bgh\s+api\b(?![^\n]*\brepos/[^/\s]+/[^/\s]+/issues\b)[^\n]*(-X|--method)\s*(DELETE|PUT|PATCH)\b", "zápis přes GitHub API"),
+    # Úpravy issues (zavřít, štítek, komentář) jsou vratné a sloučení PR je trvale povolené (i přes REST v cloudu);
+    # hlídají se zápisy do nastavení, větví a obsahu.
+    (r"\bgh\s+api\b(?![^\n]*\brepos/[^/\s]+/[^/\s]+/(issues\b|pulls/\d+/merge\b))[^\n]*(-X|--method)\s*(DELETE|PUT|PATCH)\b", "zápis přes GitHub API"),
     (r"\bvercel\b[^\n]*\s--prod\b", "produkční deploy na Vercel"),
     (r"\bvercel\s+(deploy|promote|rollback|remove|rm|env\s+(add|rm|update)|domains\s+rm)\b", "změna na Vercelu"),
     (r"\bvercel\s+api\b[^\n]*--method\s+(POST|PATCH|PUT|DELETE)\b", "zápis přes Vercel API"),

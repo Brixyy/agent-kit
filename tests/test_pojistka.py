@@ -29,6 +29,8 @@ PRIPADY = [
     ("gh api -X " + "PATCH repos/Brixyy/asistent/issues/5 -f state=closed", "PROJDE"),
     ("gh api -X " + "PATCH repos/Brixyy/asistent -F allow_auto_merge=true", "deny"),
     ("gh api -X " + "DELETE repos/Brixyy/asistent/git/refs/heads/x", "deny"),
+    ("gh api -X " + "PUT repos/Brixyy/asistent/pulls/12/merge -f merge_method=squash", "PROJDE"),
+    ("gh api -X " + "PUT repos/Brixyy/asistent/branches/main/protection", "deny"),
 ]
 
 
