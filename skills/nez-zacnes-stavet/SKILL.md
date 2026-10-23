@@ -23,4 +23,9 @@ Po odpovědích se doptávej **po jedné otázce** (s doporučením), dokud nen�
 - jak poznáme, že je hotovo (měřítka přijetí, která jde ověřit),
 - dopad na data, výpočet a produkci.
 
+Navíc:
+- Před stavbou vlastního nástroje najdi hotové (open-source) řešení a porovnej (uživatel: „neříkej mi, že na GitHubu není žádná hotová aplikace“).
+- U UI nejdřív klikací maketa s vymyšlenými daty nebo 2–3 opravdu odlišné obrázky k výběru. Navrhuj do skutečné aplikace, ne do odděleného dema. Vybraný obrázek je závazný cíl.
+- Když produkt sbírá osobní údaje, cizí data (scraping) nebo zprostředkovává práci, patří do specifikace i právní rámec (GDPR, licence).
+
 Specifikaci zapiš do ticketu nebo do `docs/` projektu (podle jeho `AGENTS.md`) a nech ji uživatele schválit. **Kód až po schválení.**
