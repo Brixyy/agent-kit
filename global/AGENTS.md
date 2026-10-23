@@ -48,6 +48,11 @@ Nikdy neříkej jen „globálně“ — vždy upřesni úroveň:
 - **PR hlídá jeho vlastník až do sloučení**, ne jen do zapnutí automatického sloučení. Hlídání hlásí i selhání, zrušení (timeout) a stav BEHIND, ne jen úspěch. Při více souběžných PR počítej s opakovaným BEHIND (slučují se postupně) a předem urči, kdo větve aktualizuje. Když vlastník končí dřív, předá hlídání koordinátorovi nebo zapne hlídání CI v aplikaci (Auto-fix).
 - **Volba modelů:** model a úsilí hlavní session volí uživatel v aplikaci. Rizikovou práci (výpočty, data, bezpečnost, review, změny s vlivem na výsledky) dělá nejsilnější dostupný model. Pomocní agenti, kteří jen čtou a hledají (průzkum, sběr podkladů), smějí běžet na levnějším modelu.
 
+## Noční a dlouhé běhy
+- Dlouhou úlohu (uživatel 23. 10. 2026: „ideální pro noční běhy“) nepouštěj jako jednu session vázanou na zapnutý počítač. Rozděl ji na dávky a pusť jako cloudovou rutinu, která si drží stav („hotovo X z Y“) v issue nebo souboru v repozitáři a každý běh zpracuje jednu dávku.
+- Ráno přijde jedno shrnutí (notifikace); selhání se hlásí hned. Když není co dělat, běh skončí bez hlášení.
+- Úloha, která potřebuje lokální Chrome nebo počítač (např. sledování účtů na X), cloud nezvládne: pouští se lokálně jako výjimka a řekne se to uživateli.
+
 ## Cloudová session (claude.ai/code a podobné)
 - Vidí jen svůj repozitář a veřejný agent-kit. Nemá `.env*`, složku `Dev`, prohlížeč ani lokální konektory — práce s Vercelem, Supabase nebo prohlížečem patří do lokální session.
 - `gh` přes GraphQL nefunguje (`gh issue list`, `gh pr view` → 403); používej `gh api` (REST) nebo GitHub MCP.
