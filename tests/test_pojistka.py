@@ -71,5 +71,40 @@ for prikaz, ocekavano in [(PUSH, "deny"), ("git status", "PROJDE")]:
     skutecne = codex(prikaz)
     chyby += skutecne != ocekavano
     print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + "codex: " + prikaz)
+
+
+def s_potvrzenim(obsah, prikazy, stari_s=0):
+    """Spustí příkazy postupně s potvrzením v dočasném domově; vrátí rozhodnutí a zda soubor zůstal."""
+    import tempfile
+    import time
+    domov = tempfile.mkdtemp()
+    os.makedirs(os.path.join(domov, ".agents"))
+    soubor = os.path.join(domov, ".agents", "potvrzeno.txt")
+    with open(soubor, "w", encoding="utf-8") as f:
+        f.write(obsah)
+    if stari_s:
+        os.utime(soubor, (time.time() - stari_s,) * 2)
+    prostredi = dict(os.environ, HOME=domov, USERPROFILE=domov)
+    vysledky = []
+    for i, prikaz in enumerate(prikazy):
+        vstup = json.dumps({"tool_name": "Bash", "tool_use_id": f"t{i}", "tool_input": {"command": prikaz}})
+        vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True,
+                                encoding="utf-8", env=prostredi).stdout
+        vysledky.append("deny" if '"deny"' in vystup else "PROJDE")
+    return vysledky, os.path.exists(soubor)
+
+
+VERCEL = "npx vercel --prod"
+SUPA = "supabase db push"
+for nazev, obsah, prikazy, ocekavano, stari in [
+    ("jednorázové: jen jednou", "ano", [PUSH, PUSH], ["PROJDE", "deny"], 0),
+    ("dávka: všechny kroky, opakovaně", "krok: vercel --prod\nkrok: supabase db push\n", [VERCEL, SUPA, SUPA, VERCEL], ["PROJDE"] * 4, 0),
+    ("dávka: jiný krok zastaví", "krok: supabase db push\n", [PUSH, SUPA], ["deny", "PROJDE"], 0),
+    ("dávka: po 15 minutách neplatí", "krok: supabase db push\n", [SUPA], ["deny"], 16 * 60),
+]:
+    skutecne, _ = s_potvrzenim(obsah, prikazy, stari)
+    chyby += skutecne != ocekavano
+    print(("OK    " if skutecne == ocekavano else "CHYBA ") + nazev + " " + str(skutecne))
+
 print("VŠE OK" if not chyby else f"{chyby} CHYB")
 sys.exit(1 if chyby else 0)
