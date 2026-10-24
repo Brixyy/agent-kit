@@ -3,7 +3,8 @@
 Akci pustí jen tehdy, když existuje čerstvé jednorázové potvrzení
 ~/.agents/potvrzeno.txt (max. 15 minut staré). Agent ho smí vytvořit
 jedině poté, co uživatel akci výslovně schválil v chatu. Po použití se smaže.
-Čtení souborů .env se blokuje vždy, bez možnosti potvrzení.
+Otevírání a vypisování souborů .env se blokuje vždy, bez možnosti potvrzení.
+Načíst je do procesu (source, --env-file) se smí; zápis jen skriptem scripts/env_nastav.py se zálohou.
 
 Výstup: Claude Code dostane JSON s permissionDecision. S argumentem --exit-code
 (Codex a další agenti) se zákaz hlásí kódem 2 a důvodem na stderr.
@@ -43,7 +44,7 @@ RIZIKOVE_MCP = re.compile(
 VOLNE_MCP = re.compile(r"^mcp__scheduled-tasks__")
 
 ENV_CTENI = re.compile(
-    r"\b(cat|type|less|more|head|tail|Get-Content|gc|bat|xxd|strings)\b[^\n|;&]*"
+    r"\b(cat|type|less|more|head|tail|Get-Content|gc|bat|xxd|strings|grep|findstr|Select-String|sed|awk)\b[^\n|;&]*"
     r"(^|[\\/\s\"'])\.env(\.local|\.production|\.development|\.[\w-]+\.local)?([\s\"']|$)"
 )
 
@@ -108,14 +109,14 @@ def main():
     if nastroj in ("Read", "Edit", "Write"):
         cesta = os.path.basename(str(vstup.get("file_path", "")))
         if re.fullmatch(r"\.env(\.local|\.production|\.development|\.[\w-]+\.local)?", cesta):
-            vystup("deny", "Pojistka: soubory .env s hesly a klíči se nečtou ani neupravují. Ptej se uživatele na konkrétní název proměnné.")
+            vystup("deny", "Pojistka: soubory .env se neotevírají (hodnoty by byly v kontextu). Načti je do procesu (`set -a; . ./.env; set +a`, `--env-file`) a zapisuj skriptem scripts/env_nastav.py z agent-kitu (dělá zálohu).")
         sys.exit(0)
 
     popis = None
     if nastroj in ("Bash", "PowerShell") or (vstup.get("command") and "__" not in nastroj):
         prikaz = str(vstup.get("command", ""))
         if ENV_CTENI.search(prikaz):
-            vystup("deny", "Pojistka: vypisování souborů .env je zakázané. Pracuj jen s názvy proměnných, ne s hodnotami.")
+            vystup("deny", "Pojistka: vypisování souborů .env je zakázané. Hodnoty smíš jen načíst do procesu (`set -a; . ./.env; set +a`, `--env-file`) a použít, nikdy je nevypisuj.")
         # Text v uvozovkách se ignoruje, kromě případů, kdy se spouští jako příkaz (sh -c, eval, PowerShell -Command).
         spousti_text = re.search(r"\b(sh|bash|zsh|pwsh|powershell|cmd)(\.exe)?\b[^\n]*\s(-c|-Command|/c)\b|\beval\b", prikaz, re.I)
         kontrolovany = prikaz if spousti_text else bez_textu(prikaz)
