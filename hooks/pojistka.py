@@ -1,8 +1,11 @@
 """PreToolUse pojistka: zastaví nevratné a produkční akce v jakémkoli režimu oprávnění.
 
-Akci pustí jen tehdy, když existuje čerstvé jednorázové potvrzení
-~/.agents/potvrzeno.txt (max. 15 minut staré). Agent ho smí vytvořit
-jedině poté, co uživatel akci výslovně schválil v chatu. Po použití se smaže.
+Akci pustí jen tehdy, když existuje čerstvé potvrzení ~/.agents/potvrzeno.txt
+(max. 15 minut staré). Agent ho smí vytvořit jedině poté, co uživatel akci
+výslovně schválil v chatu. Dva druhy:
+- jednorázové (bez řádků „krok:“): pustí jednu akci a smaže se;
+- dávka (řádky „krok: <text>“): 15 minut pustí každou akci, jejíž příkaz nebo volání
+  nástroje obsahuje text některého kroku; jiná riziková akce se zastaví.
 Otevírání a vypisování souborů .env se blokuje vždy, bez možnosti potvrzení.
 Načíst je do procesu (source, --env-file) se smí; zápis jen skriptem scripts/env_nastav.py se zálohou.
 
@@ -77,6 +80,34 @@ def pouzito_pro(tool_use_id):
         return False
 
 
+def kroky_davky():
+    try:
+        with open(POTVRZENI, encoding="utf-8") as f:
+            radky = f.read().splitlines()
+    except OSError:
+        return []
+    return [r.split(":", 1)[1].strip() for r in radky if r.lower().startswith("krok:") and r.split(":", 1)[1].strip()]
+
+
+def jednotne(text):
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def potvrzeno_davkou(akce):
+    """Dávka: platí 15 minut na všechny vyjmenované kroky, nespotřebuje se."""
+    kroky = kroky_davky()
+    if not kroky:
+        return None
+    try:
+        if time.time() - os.path.getmtime(POTVRZENI) > PLATNOST_S:
+            os.remove(POTVRZENI)
+            return False
+    except OSError:
+        return False
+    akce = jednotne(akce)
+    return any(jednotne(k) in akce for k in kroky)
+
+
 def potvrzeno(tool_use_id):
     # Potvrzení se spotřebuje pro jedno konkrétní volání nástroje; další hook nad stejným voláním ho uzná také.
     if pouzito_pro(tool_use_id):
@@ -141,12 +172,16 @@ def main():
 
     if popis is None:
         sys.exit(0)
-    if potvrzeno(data.get("tool_use_id", "")):
+    davka = potvrzeno_davkou(nastroj + " " + json.dumps(vstup, ensure_ascii=False))
+    if davka:
+        sys.exit(0)
+    if davka is None and potvrzeno(data.get("tool_use_id", "")):
         sys.exit(0)
     vystup("deny", (
         f"Pojistka: {popis}. Tohle je nevratná nebo produkční akce. Nejdřív se zeptej uživatele v chatu "
         f"a řekni mu přesně, co se stane. Teprve po jeho výslovném souhlasu vytvoř soubor {POTVRZENI} "
-        f"a akci zopakuj (potvrzení platí 15 minut a jednou)."
+        f"a akci zopakuj (potvrzení platí 15 minut a jednou). U schválené dávky více kroků zapiš do souboru "
+        f"pro každý krok řádek „krok: <text, který je v příkazu>“ — pak platí 15 minut na všechny tyto kroky."
     ))
 
 
