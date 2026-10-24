@@ -43,9 +43,11 @@ RIZIKOVE_MCP = re.compile(
 # Plánované úlohy agent spravuje sám (uživatel 22. 10. 2026: „chci, aby sis nastavoval tyhle rutiny“).
 VOLNE_MCP = re.compile(r"^mcp__scheduled-tasks__")
 
+# Každý soubor .env* kromě šablon (.env.example, .env.sample, .env.template) — i zálohy a .env.staging.
+ENV_SOUBOR = r"\.env(?!\.(example|sample|template)\b)[\w.-]*"
 ENV_CTENI = re.compile(
-    r"\b(cat|type|less|more|head|tail|Get-Content|gc|bat|xxd|strings|grep|findstr|Select-String|sed|awk)\b[^\n|;&]*"
-    r"(^|[\\/\s\"'])\.env(\.local|\.production|\.development|\.[\w-]+\.local)?([\s\"']|$)"
+    r"\b(cat|type|less|more|head|tail|Get-Content|gc|bat|xxd|strings|grep|rg|findstr|Select-String|sed|awk|"
+    r"base64|sort|nl|diff)\b[^\n|;&]*(^|[\\/\s\"'<])" + ENV_SOUBOR + r"([\s\"']|$)"
 )
 
 
@@ -106,9 +108,15 @@ def main():
     # Codex a jiní agenti nemusí posílat tool_name; příkaz v tool_input.command znamená shell.
     nastroj = data.get("tool_name") or ("Bash" if vstup.get("command") else "")
 
+    if nastroj == "Grep":
+        cil = os.path.basename(str(vstup.get("path", ""))) + " " + str(vstup.get("glob", ""))
+        if re.search(r"(^|[\s*/\\])" + ENV_SOUBOR + r"(\s|$)", cil):
+            vystup("deny", "Pojistka: soubory .env se neprohledávají (hodnoty by byly v kontextu). Načti je do procesu a použij.")
+        sys.exit(0)
+
     if nastroj in ("Read", "Edit", "Write"):
         cesta = os.path.basename(str(vstup.get("file_path", "")))
-        if re.fullmatch(r"\.env(\.local|\.production|\.development|\.[\w-]+\.local)?", cesta):
+        if re.fullmatch(ENV_SOUBOR, cesta):
             vystup("deny", "Pojistka: soubory .env se neotevírají (hodnoty by byly v kontextu). Načti je do procesu (`set -a; . ./.env; set +a`, `--env-file`) a zapisuj skriptem scripts/env_nastav.py z agent-kitu (dělá zálohu).")
         sys.exit(0)
 
