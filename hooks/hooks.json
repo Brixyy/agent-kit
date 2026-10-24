@@ -13,7 +13,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash|PowerShell|Read|Edit|Write|mcp__.*",
+        "matcher": "Bash|PowerShell|Read|Edit|Write|Grep|mcp__.*",
         "hooks": [
           {
             "type": "command",
