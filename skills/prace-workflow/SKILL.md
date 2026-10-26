@@ -8,11 +8,11 @@ description: Podrobný postup práce na úkolu v projektech Brixyy — ticket (G
 ## 1. Ticket
 - Každá práce má ticket. **Robotika:** Linear, tým ROB (řídí se vlastním `AGENTS.md` robotiky). **Ostatní projekty:** GitHub Issue v repozitáři projektu (`gh issue create`), přidané do GitHub Projectu „Brixyy – projekty“ (`gh project item-add 13 --owner Brixyy --url <issue-url>`; https://github.com/users/Brixyy/projects/13).
 - Když ticket uživatel nezadal, založ ho (stručný název, popis cíle, kritéria hotovo) a pracuj až potom.
-- Stavy (pole **Stav** v GitHub Projectu, v Linearu stejnojmenné stavy): Backlog/Todo → **In Progress** (začínáš) → **AI kontrola** (hotovo, běží review a testy) → **Ke schválení** (čeká na uživatele) → Done (**jen uživatel**; issue zavírá uživatel). Když potřebuješ rozhodnutí nebo podklad: **Blokováno** + komentář s jednou konkrétní otázkou.
+- Stavy (pole **Stav** v GitHub Projectu, v Linearu stejnojmenné stavy): Backlog/Todo → **In Progress** (začínáš) → **AI kontrola** (hotovo, běží review a testy) → Done (issue zavře sloučení PR s `Closes`; agent pak ověří změnu v produkci a výsledek zapíše do issue, při selhání issue znovu otevře). **Ke schválení** jen tam, kde opravdu čeká na rozhodnutí uživatele. Když potřebuješ rozhodnutí nebo podklad: **Blokováno** + komentář s jednou konkrétní otázkou.
 - Komentáře v ticketu piš česky a krátce: co se udělalo, co je ověřené, co neověřené, odkaz na PR.
 
 ## 2. Větev a PR
-- Větev z aktuální výchozí větve: `<cislo-issue>-<kratky-popis>` (robotika: `rob-<cislo>-<popis>`), např. `12-stranky-sluzeb`. V popisu PR uveď `Refs #12` — ne `Closes`, issue zavírá uživatel.
+- Větev z aktuální výchozí větve: `<cislo-issue>-<kratky-popis>` (robotika: `rob-<cislo>-<popis>`), např. `12-stranky-sluzeb`. PR, které úkol dokončuje, má v popisu `Closes #12` (issue se zavře při sloučení); průběžné PR k témuž úkolu `Refs #12`.
 - Jedno PR = jeden účel, ideálně do pár set řádků. Míří vždy do výchozí větve, nikdy na jinou feature větev.
 - Popis PR předávej souborem (`gh pr create --body-file popis.md`), ne dlouhým textem v příkazu.
 - Popis PR (česky):
