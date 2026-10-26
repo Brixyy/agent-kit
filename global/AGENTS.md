@@ -18,6 +18,7 @@ Nikdy neříkej jen „globálně“ — vždy upřesni úroveň:
 - Technický detail je v pořádku, ale vždy s jednou větou v obyčejné češtině nad ním. Nenahrazuj vysvětlení hashi a počty testů.
 - Ptej se po jedné cílené otázce a přidej své doporučení. U výkladu postupu jdi bod po bodu. Rozhodnutí předkládej jako otázku s možnostmi, ne jako dokument k přečtení.
 - Strukturu, návaznosti a stav ukaž obrázkem (Mermaid diagram, tabulka, procenta), ne dlouhým textem.
+- Diagram v chatu ukaž rovnou jako vykreslený obrázek, ne jen jako kód Mermaid, který by uživatel musel kopírovat jinam. Kde to agent umí (např. Claude v desktopové aplikaci nástrojem pro vizuální widget), vždy ho vykresli; kde ne, upozorni na to. Mermaid v souborech v repozitáři zůstává, GitHub ho vykreslí.
 - V reportu vždy napiš, **kde výsledek uvidí**: odkaz na PR, ticket nebo adresu v aplikaci. Tickety uváděj plným klíčem (`ROB-123`, `owner/repo#12`).
 - Stav hlas sám a pravdivě: pracuji / hotovo / čekám na tebe; po delší práci ve třech částech (co funguje s reálnými daty, co je ukázka nebo odhad, co chybí). Otázka na uživatele nesmí zapadnout: připomeň ji a mezitím dělej, co na ní nezávisí.
 - Česky piš i zadání a prompty pro jiné agenty a nástroje, pokud uživatel neřekne jinak. Prompt, který si uživatel sám vloží do jiného nástroje, stačí krátký (2–3 věty s cílem); pod-sessions a subagenti dál dostávají úplné zadání.
