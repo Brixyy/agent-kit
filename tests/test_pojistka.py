@@ -51,6 +51,15 @@ PRIPADY = [
     ("python -I tests/test_pojistka.py", "PROJDE"),
     ('git commit -m "pojistka.py: úprava"', "PROJDE"),
     ("claude plugin " + "disable agent-kit@agent-kit", "deny"),
+    ("rm -rf " + ".github", "deny"),
+    ("rm -rf " + "hooks", "deny"),
+    ("rmdir /s .github\\workflows", "deny"),
+    ("git checkout main -- hooks/" + "pojistka.py", "deny"),
+    ("git checkout -b nova-vetev", "PROJDE"),
+    ("rm tests/test_pojistka.py", "PROJDE"),
+    ("cp hooks/pojistka.py /tmp/zaloha.py", "PROJDE"),
+    ("docker run --rm img python hooks/pojistka.py", "PROJDE"),
+    ("grep -n disableAllHooks README.md", "PROJDE"),
 ]
 
 
@@ -86,6 +95,9 @@ for nastroj, cesta, text, ocekavano in [
     ("Edit", "/repo/.claude/settings.local.json", '"permissions": {"allow": []}', "PROJDE"),
     ("Edit", "/repo/.github/workflows/ci.yml", "timeout-minutes: 10", "PROJDE"),
     ("Read", "/repo/hooks/pojistka.py", "", "PROJDE"),
+    ("Edit", "/repo/tests/test_pojistka.py", "x", "PROJDE"),
+    ("Edit", "C:\\Dev\\agent-kit\\Hooks\\Hooks.json", "x", "deny"),
+    ("Edit", "/home/u/.claude/settings.json", '"agent-kit@agent-kit": false', "deny"),
 ]:
     vstup = json.dumps({"tool_name": nastroj, "tool_use_id": "test", "tool_input": {"file_path": cesta, "new_string": text}})
     vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True, encoding="utf-8").stdout

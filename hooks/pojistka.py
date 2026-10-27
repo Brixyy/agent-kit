@@ -25,8 +25,10 @@ EXIT_KOD = "--exit-code" in sys.argv
 PLATNOST_S = 15 * 60
 
 # Soubory, kterými agent vypíná vlastní kontroly: pojistka, hooky pluginu, nastavení s hooky.
-VLASTNI_KONTROLY = r"(pojistka\.py|cloud-pojistka\.sh|hooks[\\/]hooks\.json|\.codex[\\/]hooks\.json)"
-NASTAVENI = re.compile(r"/\.claude/settings(\.local)?\.json$")
+VLASTNI_KONTROLY = r"(?<![\w-])(pojistka\.py|cloud-pojistka\.sh|hooks[\\/]hooks\.json|\.codex[\\/]hooks\.json)"
+NASTAVENI = re.compile(r"/\.claude/settings(\.local)?\.json$", re.I)
+# Příkazy, které soubor mažou, přesouvají, přepisují nebo vrací do jiné verze.
+MENI_SOUBOR = r"(?<![\w-])(rm|rmdir|rd|del|Remove-Item|mv|move|Move-Item|tee|truncate|sed\s+-i|git\s+(rm|mv|checkout|restore))\b"
 
 RIZIKOVE_PRIKAZY = [
     (r"\bgit\s+push\b[^\n;&|]*\b(main|master)\b", "push do main/master"),
@@ -43,11 +45,12 @@ RIZIKOVE_PRIKAZY = [
     (r"\b(poe|npm\s+run|pnpm|yarn)\s+[^\n]*\b(deploy|release)[:\w-]*\b", "deploy/release skript"),
     # Agent nesmí potichu vypnout vlastní kontroly (Brixyy/asistent#105). Úpravy workflow v PR projdou, hlídá je audit testování.
     (r"\bgh\s+workflow\s+disable\b", "vypnutí kontroly (GitHub workflow)"),
-    (r"\b(rm|del|Remove-Item|mv|move|Move-Item)\b[^\n;&|]*\.github[\\/]workflows", "smazání kontroly (GitHub workflow)"),
-    (r"\b(rm|del|Remove-Item|mv|move|Move-Item|cp|copy|tee|truncate|sed\s+-i)\b[^\n;&|]*" + VLASTNI_KONTROLY
-     + r"|>\s*\S*" + VLASTNI_KONTROLY, "úprava pojistky nebo hooků"),
+    (MENI_SOUBOR + r"[^\n;&|]*(?<![\w-])\.github([\\/]workflows)?([\\/]?\s|[\\/]?$)", "smazání kontroly (GitHub workflow)"),
+    (MENI_SOUBOR + r"[^\n;&|]*\.github[\\/]workflows[\\/]", "smazání kontroly (GitHub workflow)"),
+    (MENI_SOUBOR + r"[^\n;&|]*(" + VLASTNI_KONTROLY + r"|(?<![\w-])hooks[\\/]?(\s|$))|>\s*\S*" + VLASTNI_KONTROLY,
+     "úprava pojistky nebo hooků"),
     (r"\bclaude\s+plugins?\s+(disable|uninstall|remove)\b[^\n;&|]*agent-kit", "vypnutí pluginu agent-kit (pojistka)"),
-    (r"\bdisableAllHooks\b", "vypnutí hooků"),
+    (r"\bdisableAllHooks\W*[:=]\s*true", "vypnutí hooků"),
 ]
 
 RIZIKOVE_MCP = re.compile(
@@ -167,7 +170,8 @@ def main():
             sys.exit(0)
         cela = str(vstup.get("file_path", "")).replace("\\", "/")
         text = " ".join(str(vstup.get(k, "")) for k in ("old_string", "new_string", "content"))
-        if re.search(VLASTNI_KONTROLY + "$", cela) or (NASTAVENI.search(cela) and re.search(r"\bhooks\b|disableAllHooks", text)):
+        if re.search(VLASTNI_KONTROLY + "$", cela, re.I) or (
+                NASTAVENI.search(cela) and re.search(r"\bhooks\b|disableAllHooks|PreToolUse|pojistka|agent-kit@", text)):
             popis = "úprava pojistky nebo hooků"
         else:
             sys.exit(0)
