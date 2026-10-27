@@ -39,6 +39,18 @@ PRIPADY = [
     ("gh api -X " + "DELETE repos/Brixyy/asistent/git/refs/heads/x", "deny"),
     ("gh api -X " + "PUT repos/Brixyy/asistent/pulls/12/merge -f merge_method=squash", "PROJDE"),
     ("gh api -X " + "PUT repos/Brixyy/asistent/branches/main/protection", "deny"),
+    # Vlastní kontroly (Brixyy/asistent#105)
+    ("gh workflow " + "disable ci.yml", "deny"),
+    ("gh workflow run ci.yml", "PROJDE"),
+    ("git rm .github/workflows/ci.yml", "deny"),
+    ("rm -f .github\\workflows\\ci.yml", "deny"),
+    ("cat .github/workflows/ci.yml", "PROJDE"),
+    ("rm hooks/" + "pojistka.py", "deny"),
+    ("echo x > hooks/" + "pojistka.py", "deny"),
+    ("sed -i s/deny/allow/ hooks/hooks.json", "deny"),
+    ("python -I tests/test_pojistka.py", "PROJDE"),
+    ('git commit -m "pojistka.py: úprava"', "PROJDE"),
+    ("claude plugin " + "disable agent-kit@agent-kit", "deny"),
 ]
 
 
@@ -67,6 +79,19 @@ for nastroj, ocekavano in [("mcp__scheduled-tasks__delete_scheduled_task", "PROJ
     skutecne = "deny" if '"deny"' in vystup else "PROJDE"
     chyby += skutecne != ocekavano
     print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + nastroj)
+for nastroj, cesta, text, ocekavano in [
+    ("Edit", "C:\\Users\\Admin\\Dev\\agent-kit\\hooks\\pojistka.py", "x", "deny"),
+    ("Write", "/home/u/.codex/hooks.json", "{}", "deny"),
+    ("Edit", "C:\\Users\\Admin\\.claude\\settings.json", '"hooks": {}', "deny"),
+    ("Edit", "/repo/.claude/settings.local.json", '"permissions": {"allow": []}', "PROJDE"),
+    ("Edit", "/repo/.github/workflows/ci.yml", "timeout-minutes: 10", "PROJDE"),
+    ("Read", "/repo/hooks/pojistka.py", "", "PROJDE"),
+]:
+    vstup = json.dumps({"tool_name": nastroj, "tool_use_id": "test", "tool_input": {"file_path": cesta, "new_string": text}})
+    vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True, encoding="utf-8").stdout
+    skutecne = "deny" if '"deny"' in vystup else "PROJDE"
+    chyby += skutecne != ocekavano
+    print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + nastroj + " " + cesta)
 for prikaz, ocekavano in [(PUSH, "deny"), ("git status", "PROJDE")]:
     skutecne = codex(prikaz)
     chyby += skutecne != ocekavano

@@ -6,6 +6,8 @@ výslovně schválil v chatu. Dva druhy:
 - jednorázové (bez řádků „krok:“): pustí jednu akci a smaže se;
 - dávka (řádky „krok: <text>“): 15 minut pustí každou akci, jejíž příkaz nebo volání
   nástroje obsahuje text některého kroku; jiná riziková akce se zastaví.
+Potvrzení chce i vypnutí vlastních kontrol: úprava pojistky a hooků, hooky v nastavení
+agenta, vypnutí nebo smazání GitHub workflow (Brixyy/asistent#105).
 Otevírání a vypisování souborů .env se blokuje vždy, bez možnosti potvrzení.
 Načíst je do procesu (source, --env-file) se smí; zápis jen skriptem scripts/env_nastav.py se zálohou.
 
@@ -22,6 +24,10 @@ POTVRZENI = os.path.join(os.path.expanduser("~"), ".agents", "potvrzeno.txt")
 EXIT_KOD = "--exit-code" in sys.argv
 PLATNOST_S = 15 * 60
 
+# Soubory, kterými agent vypíná vlastní kontroly: pojistka, hooky pluginu, nastavení s hooky.
+VLASTNI_KONTROLY = r"(pojistka\.py|cloud-pojistka\.sh|hooks[\\/]hooks\.json|\.codex[\\/]hooks\.json)"
+NASTAVENI = re.compile(r"/\.claude/settings(\.local)?\.json$")
+
 RIZIKOVE_PRIKAZY = [
     (r"\bgit\s+push\b[^\n;&|]*\b(main|master)\b", "push do main/master"),
     (r"\bgit\s+push\b[^\n;&|]*(\s--force\b|\s-f\b|\s--delete\b|\s:\S)", "force push nebo mazání větve na GitHubu"),
@@ -35,6 +41,13 @@ RIZIKOVE_PRIKAZY = [
     (r"\bsupabase\s+(db\s+(push|reset)|functions\s+deploy|migration\s+repair|secrets\s+(set|unset))\b", "změna v Supabase"),
     (r"\bprisma\s+(migrate\s+(deploy|reset)|db\s+push)\b", "migrace databáze"),
     (r"\b(poe|npm\s+run|pnpm|yarn)\s+[^\n]*\b(deploy|release)[:\w-]*\b", "deploy/release skript"),
+    # Agent nesmí potichu vypnout vlastní kontroly (Brixyy/asistent#105). Úpravy workflow v PR projdou, hlídá je audit testování.
+    (r"\bgh\s+workflow\s+disable\b", "vypnutí kontroly (GitHub workflow)"),
+    (r"\b(rm|del|Remove-Item|mv|move|Move-Item)\b[^\n;&|]*\.github[\\/]workflows", "smazání kontroly (GitHub workflow)"),
+    (r"\b(rm|del|Remove-Item|mv|move|Move-Item|cp|copy|tee|truncate|sed\s+-i)\b[^\n;&|]*" + VLASTNI_KONTROLY
+     + r"|>\s*\S*" + VLASTNI_KONTROLY, "úprava pojistky nebo hooků"),
+    (r"\bclaude\s+plugins?\s+(disable|uninstall|remove)\b[^\n;&|]*agent-kit", "vypnutí pluginu agent-kit (pojistka)"),
+    (r"\bdisableAllHooks\b", "vypnutí hooků"),
 ]
 
 RIZIKOVE_MCP = re.compile(
@@ -139,20 +152,27 @@ def main():
     # Codex a jiní agenti nemusí posílat tool_name; příkaz v tool_input.command znamená shell.
     nastroj = data.get("tool_name") or ("Bash" if vstup.get("command") else "")
 
+    popis = None
     if nastroj == "Grep":
         cil = os.path.basename(str(vstup.get("path", ""))) + " " + str(vstup.get("glob", ""))
         if re.search(r"(^|[\s*/\\])" + ENV_SOUBOR + r"(\s|$)", cil):
             vystup("deny", "Pojistka: soubory .env se neprohledávají (hodnoty by byly v kontextu). Načti je do procesu a použij.")
         sys.exit(0)
 
-    if nastroj in ("Read", "Edit", "Write"):
+    elif nastroj in ("Read", "Edit", "Write"):
         cesta = os.path.basename(str(vstup.get("file_path", "")))
         if re.fullmatch(ENV_SOUBOR, cesta):
             vystup("deny", "Pojistka: soubory .env se neotevírají (hodnoty by byly v kontextu). Načti je do procesu (`set -a; . ./.env; set +a`, `--env-file`) a zapisuj skriptem scripts/env_nastav.py z agent-kitu (dělá zálohu).")
-        sys.exit(0)
+        if nastroj == "Read":
+            sys.exit(0)
+        cela = str(vstup.get("file_path", "")).replace("\\", "/")
+        text = " ".join(str(vstup.get(k, "")) for k in ("old_string", "new_string", "content"))
+        if re.search(VLASTNI_KONTROLY + "$", cela) or (NASTAVENI.search(cela) and re.search(r"\bhooks\b|disableAllHooks", text)):
+            popis = "úprava pojistky nebo hooků"
+        else:
+            sys.exit(0)
 
-    popis = None
-    if nastroj in ("Bash", "PowerShell") or (vstup.get("command") and "__" not in nastroj):
+    elif nastroj in ("Bash", "PowerShell") or (vstup.get("command") and "__" not in nastroj):
         prikaz = str(vstup.get("command", ""))
         if ENV_CTENI.search(prikaz):
             vystup("deny", "Pojistka: vypisování souborů .env je zakázané. Hodnoty smíš jen načíst do procesu (`set -a; . ./.env; set +a`, `--env-file`) a použít, nikdy je nevypisuj.")
