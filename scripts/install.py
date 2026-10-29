@@ -1,7 +1,7 @@
 """Nainstaluje agent-kit na tento počítač pro agenty mimo Claude Code (Codex a další).
 
 Použití (z kořene agent-kitu): python -I scripts/install.py
-- globální pravidla  global/AGENTS.md → ~/.agents/AGENTS.md a ~/.codex/AGENTS.md
+- globální pravidla  global/AGENTS.md a PODROBNOSTI.md → ~/.agents/ a ~/.codex/
 - skills             skills/*         → ~/.agents/skills/ (sdílené umístění pro Codex a další agenty)
 - pojistka           hooks/pojistka.py → ~/.agents/hooks/pojistka.py + PreToolUse v ~/.codex/hooks.json
 Claude Code dostává totéž přes plugin agent-kit@agent-kit (marketplace Brixyy/agent-kit).
@@ -30,9 +30,10 @@ def kopiruj(zdroj, cil):
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     print("Globální pravidla:")
-    kopiruj(os.path.join(KIT, "global", "AGENTS.md"), os.path.join(AGENTS, "AGENTS.md"))
-    if os.path.isdir(CODEX):
-        kopiruj(os.path.join(KIT, "global", "AGENTS.md"), os.path.join(CODEX, "AGENTS.md"))
+    for nazev in ("AGENTS.md", "PODROBNOSTI.md"):
+        kopiruj(os.path.join(KIT, "global", nazev), os.path.join(AGENTS, nazev))
+        if os.path.isdir(CODEX):
+            kopiruj(os.path.join(KIT, "global", nazev), os.path.join(CODEX, nazev))
 
     print("Skills:")
     for nazev in sorted(os.listdir(os.path.join(KIT, "skills"))):

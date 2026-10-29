@@ -1,0 +1,16 @@
+name: testy
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  testy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -I tests/test_kontext.py
+      - run: python -I tests/test_pojistka.py
+      - run: python -I tests/test_env_nastav.py

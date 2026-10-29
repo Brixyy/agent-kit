@@ -28,3 +28,5 @@ echo "# agent-kit (cloud)"
 echo "Globální pravidla načtena skriptem cloud-bootstrap.sh; pojistka běží přes PreToolUse hook projektu."
 echo
 cat "$KIT/global/AGENTS.md"
+echo
+echo "Podrobnosti globálních pravidel: \`$KIT/global/PODROBNOSTI.md\`"
