@@ -1,6 +1,6 @@
 # Globální pravidla – podrobnosti (agent-kit)
 
-Doplněk k `global/AGENTS.md`. Jádro pravidel se vkládá do každé session; tento soubor ne (limit Claude Code je 10 000 znaků na vložený text). Agent ho čte, když řeší téma níže: potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy nebo cloudovou session. Platí stejně závazně jako jádro.
+Doplněk k `global/AGENTS.md`. Jádro pravidel se vkládá do každé session; tento soubor ne (limit Claude Code je 10 000 znaků na vložený text). Agent ho čte, když řeší téma níže: potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloudovou session, Vercel nebo vzhled frontendu. Platí stejně závazně jako jádro.
 
 ## Potvrzení nevratných akcí (pojistka)
 Nevratné akce hlídá pojistka z agent-kitu; potvrzovací soubor `~/.agents/potvrzeno.txt` vytvoř jen po výslovném „ano“ uživatele v chatu. Jednorázový souhlas platí na jednu akci.
@@ -53,3 +53,10 @@ Každou založenou, změněnou nebo smazanou rutinu zapiš do rejstříku `portf
 - Produkční build běží **jen při změně frontendu** (Ignored Build Step, např. `git diff --quiet HEAD^ HEAD -- <složka frontendu>/`).
 - Změny frontendu ověřují CI testy a snímky obrazovky v PR, ne náhledy Vercelu.
 - Výjimka jen na výslovnou žádost uživatele u konkrétního projektu (zapsat do `AGENTS.md` projektu).
+
+## Vzhled frontendu (`DESIGN.md`)
+- Každý projekt s obrazovkami má v kořeni **`DESIGN.md`**: závazná pravidla vzhledu (barvy a témata, písmo, mezery, sdílené komponenty, stavy, mobil). Je to rozšířená konvence pro AI agenty vedle `README.md` a `AGENTS.md`. `AGENTS.md` projektu na něj odkazuje. Projekt bez obrazovek ho nemá.
+- **Jeden zdroj pravdy:** skutečné hodnoty žijí v kódu (CSS proměnné, Tailwind téma). `DESIGN.md` na ně odkazuje a popisuje pravidla, hodnoty neopisuje, aby nezastaral. Když už projekt pravidla vzhledu má jinde (skill, `docs/…`), je `DESIGN.md` jen krátký rozcestník na ně.
+- **Změna vzhledu:** nejdřív přečti `DESIGN.md`. Novou barvu, písmo nebo komponentu nevymýšlej mimo něj. Změnu pravidla zapiš do `DESIGN.md` ve stejném PR. Ověř v prohlížeči na desktopu i mobilu a snímek přilož k PR.
+- **Plugin `frontend-design`** (Anthropic, marketplace `claude-plugins-official`) používej na **nové** obrazovky a stránky a na návrh vzhledu nového projektu: nejdřív plán (barvy, písmo, rozvržení), porovnání se zadáním, pak kód a kontrola na snímcích. V existujícím projektu má přednost jeho `DESIGN.md` a pravidlo „nejmenší zásah“; plugin nesmí měnit zavedený vzhled bez zadání.
+- Proč: bez vedení AI sklouzává k průměrnému vzhledu („distributional convergence“, Anthropic, 12. 11. 2025: https://claude.com/blog/improving-frontend-design-through-skills). Uživatel 29. 10. 2026, Brixyy/asistent#98.

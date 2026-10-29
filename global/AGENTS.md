@@ -1,6 +1,6 @@
 # Globální pravidla pro AI agenty (agent-kit)
 
-Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (jeho `AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Toto je jádro, které se vkládá do každé session; drž ho pod 9 000 znaků (limit Claude Code je 10 000, delší text by se do session nevložil celý). Podrobnosti jsou v `global/PODROBNOSTI.md` vedle tohoto souboru, stejně závazné; čti je, když řešíš potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloud nebo Vercel.
+Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (jeho `AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Toto je jádro, které se vkládá do každé session; drž ho pod 9 000 znaků (limit Claude Code je 10 000, delší text by se do session nevložil celý). Podrobnosti jsou v `global/PODROBNOSTI.md` vedle tohoto souboru, stejně závazné; čti je, když řešíš potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloud, Vercel nebo vzhled frontendu.
 
 ## Kam patří které pravidlo
 Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, `global/`), **jeden projekt** → `AGENTS.md` projektu, **jen tento počítač** → lokální soubory agenta (`~/.claude/CLAUDE.md`, paměť; jen věci vázané na stroj).
@@ -47,6 +47,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 3. Před odevzdáním testy a lint, výsledek do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně: během práce rychlé a cílené, plná sada jednou před PR, velké běhy (celý repozitář, bezpečnostní sken) denně nebo týdně.
    - **Nejmenší zásah:** udělej zadané a nic navíc. Neměň vzhled, strukturu ani nesouvisející části, nevyhazuj obsah a nepřidávej nevyžádané texty ani funkce. Když formát nedovolí změnu bez rozbití (PDF), řekni to předem a vyžádej si zdroj.
    - **Jeden zdroj pravdy:** nic natvrdo, žádná mock data ani tiché náhradní hodnoty; připomínku uplatni v celé aplikaci.
+   - **Vzhled:** projekt s obrazovkami má v kořeni `DESIGN.md`; před každou změnou vzhledu ho přečti a drž se ho (podrobnosti).
    - **Co se dohodne, zapiš hned:** úkol jako ticket, pravidlo projektu a trvalý souhlas do `AGENTS.md` projektu. Opakovanou chybu řeš pravidlem, kontrolou nebo skriptem.
 4. Dvakrát neúspěšná oprava → zastav se, popiš hypotézy, zeptej se. Nestav diagnostickou ani „důkazní“ infrastrukturu.
 5. Audity a průzkumy jen čtou: nic neopravuj, nenasazuj a neměň data bez souhlasu.
