@@ -47,3 +47,9 @@ Každou založenou, změněnou nebo smazanou rutinu zapiš do rejstříku `portf
 ## Cloudová session (claude.ai/code a podobné)
 - Vidí jen svůj repozitář a veřejný agent-kit. Nemá `.env*`, složku `Dev`, prohlížeč ani lokální konektory; práce s Vercelem, Supabase nebo prohlížečem patří do lokální session.
 - `gh` přes GraphQL nefunguje (`gh issue list`, `gh pr view` → 403); používej `gh api` (REST) nebo GitHub MCP.
+
+## Vercel
+- Nasazuje se **jen produkce z `main`**; náhledová nasazení pro PR a větve jsou vypnutá (`git.deploymentEnabled` ve `vercel.json`, nebo v nastavení projektu). Uživatel 28. 10. 2026: náhledy nejsou potřeba a agenti s několika PR denně zbytečně čerpají limity.
+- Produkční build běží **jen při změně frontendu** (Ignored Build Step, např. `git diff --quiet HEAD^ HEAD -- <složka frontendu>/`).
+- Změny frontendu ověřují CI testy a snímky obrazovky v PR, ne náhledy Vercelu.
+- Výjimka jen na výslovnou žádost uživatele u konkrétního projektu (zapsat do `AGENTS.md` projektu).

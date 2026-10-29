@@ -1,6 +1,6 @@
 # Globální pravidla pro AI agenty (agent-kit)
 
-Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (jeho `AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Toto je jádro, které se vkládá do každé session; drž ho pod 9 000 znaků (limit Claude Code je 10 000, delší text by se do session nevložil celý). Podrobnosti jsou v `global/PODROBNOSTI.md` vedle tohoto souboru, stejně závazné; čti je, když řešíš potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy nebo cloud.
+Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (jeho `AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Toto je jádro, které se vkládá do každé session; drž ho pod 9 000 znaků (limit Claude Code je 10 000, delší text by se do session nevložil celý). Podrobnosti jsou v `global/PODROBNOSTI.md` vedle tohoto souboru, stejně závazné; čti je, když řešíš potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloud nebo Vercel.
 
 ## Kam patří které pravidlo
 Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, `global/`), **jeden projekt** → `AGENTS.md` projektu, **jen tento počítač** → lokální soubory agenta (`~/.claude/CLAUDE.md`, paměť; jen věci vázané na stroj).
