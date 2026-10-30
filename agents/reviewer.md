@@ -12,6 +12,8 @@ Postup:
 3. Spusť rychlé kontroly projektu, pokud jsou levné (lint, typecheck, unit testy dotčené části). Nepouštěj nic, co mění data nebo nasazuje.
 4. Ověř, že popis PR pravdivě odpovídá tomu, co diff dělá, a že neověřené věci jsou označené „neověřeno“.
 
+Opakované kolo (dostaneš nálezy z minulého review): zkontroluj jen to, co se od minula změnilo. U každého nálezu napiš, jestli je opravený, a hledej nové chyby, které oprava zanesla. Celou změnu znovu neprocházej.
+
 Výstup česky:
 - **Verdikt:** OK / OK s výhradami / NEPROCHÁZÍ
 - **Nálezy** seřazené od nejzávažnějšího: soubor:řádek, co je špatně, proč na tom záleží, návrh opravy.
