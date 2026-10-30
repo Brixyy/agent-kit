@@ -3,6 +3,12 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
+
+# Testy běží v prázdném dočasném domově: nesmí číst ani spotřebovat skutečné ~/.agents/potvrzeno.txt
+# a stará značka potvrzeno.txt.pouzito s id „test“ by jinak pustila všechny zakázané akce.
+DOMOV = tempfile.mkdtemp()
+PROSTREDI = dict(os.environ, HOME=DOMOV, USERPROFILE=DOMOV)
 
 HOOK = os.path.join(os.path.dirname(__file__), "..", "hooks", "pojistka.py")
 PUSH = "git push origin " + "main"
@@ -65,14 +71,14 @@ PRIPADY = [
 
 def rozhodnuti(prikaz):
     vstup = json.dumps({"tool_name": "Bash", "tool_use_id": "test", "tool_input": {"command": prikaz}})
-    vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True, encoding="utf-8").stdout
+    vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True, encoding="utf-8", env=PROSTREDI).stdout
     return "deny" if '"deny"' in vystup else "PROJDE"
 
 
 def codex(prikaz):
     """Režim --exit-code (Codex): zákaz = kód 2, bez tool_name."""
     vstup = json.dumps({"tool_input": {"command": prikaz}})
-    vysledek = subprocess.run([sys.executable, "-I", HOOK, "--exit-code"], input=vstup, capture_output=True, text=True, encoding="utf-8")
+    vysledek = subprocess.run([sys.executable, "-I", HOOK, "--exit-code"], input=vstup, capture_output=True, text=True, encoding="utf-8", env=PROSTREDI)
     return "deny" if vysledek.returncode == 2 else "PROJDE"
 
 
@@ -84,7 +90,7 @@ for prikaz, ocekavano in PRIPADY:
     print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + prikaz.replace("\n", " ⏎ ")[:70])
 for nastroj, ocekavano in [("mcp__scheduled-tasks__delete_scheduled_task", "PROJDE"), ("mcp__x__delete_branch", "deny")]:
     vstup = json.dumps({"tool_name": nastroj, "tool_use_id": "test", "tool_input": {}})
-    vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True, encoding="utf-8").stdout
+    vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True, encoding="utf-8", env=PROSTREDI).stdout
     skutecne = "deny" if '"deny"' in vystup else "PROJDE"
     chyby += skutecne != ocekavano
     print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + nastroj)
@@ -100,7 +106,7 @@ for nastroj, cesta, text, ocekavano in [
     ("Edit", "/home/u/.claude/settings.json", '"agent-kit@agent-kit": false', "deny"),
 ]:
     vstup = json.dumps({"tool_name": nastroj, "tool_use_id": "test", "tool_input": {"file_path": cesta, "new_string": text}})
-    vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True, encoding="utf-8").stdout
+    vystup = subprocess.run([sys.executable, "-I", HOOK], input=vstup, capture_output=True, text=True, encoding="utf-8", env=PROSTREDI).stdout
     skutecne = "deny" if '"deny"' in vystup else "PROJDE"
     chyby += skutecne != ocekavano
     print(("OK    " if skutecne == ocekavano else "CHYBA ") + skutecne.ljust(7) + nastroj + " " + cesta)
