@@ -61,4 +61,4 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - **Subagenti** na hledání, čtení napříč soubory, review a ověřování.
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy) a hlášení nevydává za ověřené. Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
-- PR hlídá vlastník až do sloučení. Po sloučení uklidit worktree, větve a hotové sessions (podrobnosti).
+- PR hlídá vlastník až do sloučení. Po sloučení uklidit worktree, větve a hotové sessions (podrobnosti). **Hotovou session archivuj hned a bez ptaní** (uživatel 31. 10. 2026: „není potřeba se mě doptávat“).
