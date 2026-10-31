@@ -23,6 +23,8 @@ Opakované i jednorázové kontroly a úlohy zakládej jako cloudové rutiny Cla
 
 Úloha, která v cloudu opravdu nejde (potřebuje lokální soubory nebo stroj), je výjimka: řekni to uživateli a nech ho rozhodnout. Lokální výjimka se zakládá jako **lokální rutina v aplikaci Claude** (naplánované úlohy aplikace, „Only on this computer“), aby ji uživatel viděl v jednom seznamu s ostatními. Nikdy ne v Plánovači úloh Windows, cronu ani jiném systémovém plánovači (uživatel 23. 10. 2026: „od toho máme přece rutiny tady v lokální aplikaci“).
 
+**Kdo kontrolu hlídá:** agent, ne uživatel (uživatel 31. 10. 2026: „já ti nebudu nic připomínat, takže si tohle všechno musíš ohlídat sám“). Když slíbí budoucí kontrolu nebo navazující krok, hned ho naplánuje a neodkládá ho na „napiš mi ráno“. Agent sám rozhodne, kam patří: **pravidelná** kontrola (denně, týdně) je rutina podle pravidel výše; **jednorázová nebo krátkodobá** kontrola vázaná na práci, která právě běží (hlídání PR, nasazení, pod-sessions během dávky), stačí jako úloha v session (v Claude Code `CronCreate`; zanikne s koncem session, opakovaná po 7 dnech). Uživateli jednou větou řekne, co, kdy a kde poběží.
+
 Každou založenou, změněnou nebo smazanou rutinu zapiš do rejstříku `portfolio/RUTINY.md` v `Brixyy/asistent` (účel, čas, kde, proč); podle něj se kontroluje, jestli rutiny běží a jsou pořád potřeba. Rutina pracuje nad čerstvým stavem z GitHubu a selhání hlásí, nikdy tiše neopakuje stejnou chybu. Novou rutinu nejdřív jednou zkušebně spusť.
 
 ## Orchestrace: podrobnosti

@@ -53,7 +53,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 5. Audity a průzkumy jen čtou: nic neopravuj, nenasazuj a neměň data bez souhlasu.
 6. Při přerušení nebo konci session předávka (skill `predavka`).
 7. **Osobní asistent** (`Brixyy/asistent`) drží paměť o uživateli a schránku podnětů. „Poznamenej si / podnět / nápad / stížnost“ nebo změna globálních pravidel mimo session asistenta → skill `poznamka`.
-8. **Plánované úlohy vždy jako rutiny Claude** (cloudové; lokální jen výjimkou v aplikaci Claude, nikdy systémový plánovač). Zápis do `portfolio/RUTINY.md` (podrobnosti).
+8. **Plánované úlohy vždy jako rutiny Claude** (cloudové; lokální jen výjimkou v aplikaci Claude, nikdy systémový plánovač). Zápis do `portfolio/RUTINY.md` (podrobnosti). **Slíbenou kontrolu si naplánuj sám**, uživatel nic nepřipomíná: pravidelná = rutina, jednorázová k běžící práci = úloha v session.
 
 ## Orchestrace
 - Pracuj co nejrychleji: paralelní agenty a sessions tam, kde jsou užitečné, ne zbytečně.
