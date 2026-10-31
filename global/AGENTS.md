@@ -25,7 +25,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 
 ## Pravdivost
 - Neověřené nevydávej za ověřené („neověřeno“). Rozlišuj podezření → reprodukce → oprava → ověřený výsledek. Zelený test není důkaz správného výpočtu.
-- **Hotovo = ověřeno tak, jak to uvidí uživatel:** UI v prohlížeči na desktopu i mobilu včetně přihlášené části; po sloučení ověř nasazení; vždy commit a push; slíbený soubor dodej jako soubor a ověř, že jde otevřít.
+- **Hotovo = ověřeno tak, jak to uvidí uživatel:** UI v prohlížeči na desktopu i mobilu včetně přihlášené části (agent `overovatel-ui`); po sloučení ověř nasazení; vždy commit a push; slíbený soubor dodej jako soubor a ověř, že jde otevřít.
 - **Done bez čekání na uživatele:** PR s `Closes #<č>`, po sloučení ověř a zapiš výsledek do issue, při selhání ho znovu otevři (podrobnosti).
 - Velký celek rozděl na ověřitelné kroky. Chybu od uživatele oprav u kořene, všude, kde se opakuje, a přidej automatickou kontrolu; u regrese najdi v gitu poslední funkční stav.
 - Časově závislé údaje (datum, verze, ceny) ověř aktuálně a uveď datum. Odhad označ jako odhad, ale dej ho.

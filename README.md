@@ -9,6 +9,7 @@ Společná pravidla a nástroje pro AI agenty ve všech projektech Brixyy — ne
 | `global/PODROBNOSTI.md` | Podrobnosti k pravidlům (pojistka, `.env`, rutiny, orchestrace, úklid, cloud). Nevkládá se, hook předá cestu | prostý Markdown |
 | `skills/` | Vlastní pracovní postupy: `prace-workflow`, `predavka`, `rozhodnuti`, `nez-zacnes-stavet`, `prevod-projektu`, `poznamka` (zápis do osobního asistenta Brixyy/asistent) | otevřený standard Agent Skills (`SKILL.md`) |
 | `agents/reviewer.md` | Nezávislá kontrola PR před sloučením | subagent Claude Code |
+| `agents/overovatel-ui.md` | Ověření obrazovek v prohlížeči na desktopu i mobilu | subagent Claude Code |
 | `hooks/pojistka.py` | Zastaví nevratné a produkční akce i vypnutí vlastních kontrol, zakáže otevírání a vypisování `.env` (načíst do procesu se smí) | Claude Code (JSON) i Codex (`--exit-code`) |
 | `scripts/` | `install.py` (počítač, Codex), `napojit-projekt.py` (projekt), `cloud-bootstrap.sh` + `cloud-pojistka.sh` (cloudové sessions) | |
 
@@ -19,7 +20,7 @@ Kam patří které pravidlo: **celé portfolio** → tento repozitář · **jede
 ```
 /plugin install agent-kit --marketplace Brixyy/agent-kit
 ```
-nebo v terminálu `claude plugin marketplace add Brixyy/agent-kit` a `claude plugin install agent-kit@agent-kit`. Plugin vloží globální pravidla do každé session, přidá skills, agenta `reviewer` a pojistku.
+nebo v terminálu `claude plugin marketplace add Brixyy/agent-kit` a `claude plugin install agent-kit@agent-kit`. Plugin vloží globální pravidla do každé session, přidá skills, agenty `reviewer` a `overovatel-ui` a pojistku.
 
 **Codex a další agenti** na tomto počítači: `python -I scripts/install.py` — zkopíruje pravidla do `~/.agents/AGENTS.md` a `~/.codex/AGENTS.md`, skills do `~/.agents/skills/` a napojí pojistku do `~/.codex/hooks.json`.
 
