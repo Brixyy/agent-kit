@@ -100,6 +100,53 @@ beh = subprocess.run([sys.executable, "-I", os.path.join(KOREN, "scripts", "ukli
 over("celý kořen projektů jako složka session odmítne", os.name != "nt" or "nic neukončuji" in beh.stdout)
 over("cesta z Git Bash se normalizuje", uklid.normalizuj("/c/Users/Admin/Dev/") == r"c:\users\admin\dev")
 
+orchestr = dict(tabulka)
+orchestr.update({p["pid"]: p for p in [
+    proc(90, 999, "python.exe", f"python {W}\\run_agents.py"),   # osiřelý skript, který pustil session
+    proc(91, 90, "claude.exe", program=CLI),
+]})
+over("skript se session (claude.exe) mezi potomky se neukončí",
+     90 not in {p["pid"] for p, _ in uklid.vyber(orchestr, DEV, ziva=ziva)})
+
+# Živost složky podle přepisů v dočasném ~/.claude/projects.
+uklid.DEV = DEV
+projekty = tempfile.mkdtemp()
+uklid.PROJEKTY = projekty
+ted = time.time()
+
+
+def prepis(slozka, stari_s=0, jmeno="s.jsonl"):
+    adresar = os.path.join(projekty, uklid.kod_slozky(slozka))
+    os.makedirs(adresar, exist_ok=True)
+    cesta = os.path.join(adresar, jmeno)
+    open(cesta, "w").close()
+    os.utime(cesta, (ted - stari_s, ted - stari_s))
+    return cesta
+
+
+prepis(DEV + r"\trading\.claude\worktrees\x")
+prepis(DEV + r"\my folder")
+prepis(DEV + r"\stary", stari_s=uklid.ZIVA_S + 60)
+vlastni = prepis(DEV + r"\konci")
+prepis(DEV + r"\.claude\worktrees\kd")
+uklid._prepisy.clear()
+
+
+def zije(slozka, krome=None):
+    return uklid.ziva_slozka(DEV + slozka, krome, ted)
+
+
+over("živost: hlavní checkout, jehož worktree má čerstvý přepis", zije(r"\trading"))
+over("živost: podsložka worktree se session (štítek po cd backend)", zije(r"\trading\.claude\worktrees\x\backend"))
+over("živost: neúplná cesta se mezerou (dev\\my → my folder)", zije(r"\my"))
+over("živost: worktree přímo v ~/Dev (kořen dev\\.claude)", zije(r"\.claude"))
+over("živost: jiný projekt, starý přepis ani vlastní přepis končící session nic nedokazují",
+     not zije(r"\prove") and not zije(r"\stary") and not zije(r"\konci", vlastni))
+prepis(DEV)
+uklid._prepisy.clear()
+over("živost: session spuštěná přímo v ~/Dev chrání vše pod ~/Dev", zije(r"\prove"))
+shutil.rmtree(projekty, ignore_errors=True)
+
 kont = [{"id": "a", "stav": "running", "slozka": W.replace("\\", "/"), "jmeno": "pg"},
         {"id": "b", "stav": "running", "slozka": W + "b", "jmeno": "pg2"},
         {"id": "c", "stav": "exited", "slozka": W, "jmeno": "pg3"},
@@ -122,7 +169,7 @@ if os.name != "nt" or not uklid.normalizuj(KOREN).startswith(uklid.normalizuj(de
     print("PŘESKOČENO živý test (jen Windows a repozitář v ~/Dev)")
 else:
     slozka = os.path.join(dev, f".uklid-test-{os.getpid()}")
-    ziva_slozka = os.path.join(dev, f".uklid-test-{os.getpid()}-ziva")
+    ziva_slozka = os.path.join(dev, f".uklid-ziva-{os.getpid()}")  # jiný prefix: shoda prefixem by chránila i slozka
     venku = os.path.join(tempfile.gettempdir(), f"uklid-test-{os.getpid()}")
     domov = tempfile.mkdtemp()
     for d in (slozka, ziva_slozka):
