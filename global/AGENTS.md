@@ -62,3 +62,4 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy) a hlášení nevydává za ověřené. Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
 - PR hlídá vlastník až do sloučení. Po sloučení uklidit worktree, větve a hotové sessions (podrobnosti). **Hotovou session archivuj hned a bez ptaní** (uživatel 31. 10. 2026: „není potřeba se mě doptávat“).
+- **Servery a kontejnery po sobě zastav** (uživatel 31. 10. 2026): nový server jen, když už jeden neběží; kontejnery s `--rm` a štítkem `agent-kit.slozka=<pracovní složka>`; lokální pooly nejvýš 4 procesy. Na konci práce zastav, co jsi spustil; hook úklidu je jen pojistka (podrobnosti).

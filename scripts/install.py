@@ -4,6 +4,7 @@ Použití (z kořene agent-kitu): python -I scripts/install.py
 - globální pravidla  global/AGENTS.md a PODROBNOSTI.md → ~/.agents/ a ~/.codex/
 - skills             skills/*         → ~/.agents/skills/ (sdílené umístění pro Codex a další agenty)
 - pojistka           hooks/pojistka.py → ~/.agents/hooks/pojistka.py + PreToolUse v ~/.codex/hooks.json
+- úklid procesů      scripts/uklid.py  → ~/.agents/scripts/uklid.py (ruční úklid sirotků; hook úklidu má jen Claude Code)
 Claude Code dostává totéž přes plugin agent-kit@agent-kit (marketplace Brixyy/agent-kit).
 Existující soubory s jiným obsahem nejdřív zazálohuje jako *.bak. Opakované spuštění je bezpečné.
 """
@@ -59,6 +60,8 @@ def main():
                 json.dump(nastaveni, f, ensure_ascii=False, indent=2)
                 f.write("\n")
         print("  ", cesta, "(Codex se při dalším spuštění zeptá, jestli hooku důvěřuje)")
+    print("Úklid procesů:")
+    kopiruj(os.path.join(KIT, "scripts", "uklid.py"), os.path.join(AGENTS, "scripts", "uklid.py"))
     print("Hotovo. Claude Code: plugin agent-kit@agent-kit.")
 
 

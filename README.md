@@ -11,6 +11,7 @@ Společná pravidla a nástroje pro AI agenty ve všech projektech Brixyy — ne
 | `agents/reviewer.md` | Nezávislá kontrola PR před sloučením | subagent Claude Code |
 | `agents/overovatel-ui.md` | Ověření obrazovek v prohlížeči na desktopu i mobilu | subagent Claude Code |
 | `hooks/pojistka.py` | Zastaví nevratné a produkční akce i vypnutí vlastních kontrol, zakáže otevírání a vypisování `.env` (načíst do procesu se smí) | Claude Code (JSON) i Codex (`--exit-code`) |
+| `hooks/uklid_hook.py` + `scripts/uklid.py` | Úklid po sessions (Windows): na konci session ukončí její dev servery a zastaví kontejnery se štítkem `agent-kit.slozka`, na startu session ukončí osiřelé dev servery v `~/Dev`. Ručně: `python -I scripts/uklid.py --sirotci [--provest]` | Claude Code (SessionEnd, SessionStart) |
 | `scripts/` | `install.py` (počítač, Codex), `napojit-projekt.py` (projekt), `cloud-bootstrap.sh` + `cloud-pojistka.sh` (cloudové sessions) | |
 
 Kam patří které pravidlo: **celé portfolio** → tento repozitář · **jeden projekt** → `AGENTS.md` projektu · **jen tento počítač** → lokální soubory agenta.

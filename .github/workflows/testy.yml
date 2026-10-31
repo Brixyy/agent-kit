@@ -18,3 +18,4 @@ jobs:
       - run: python -I tests/test_kontext.py
       - run: python -I tests/test_pojistka.py
       - run: python -I tests/test_env_nastav.py
+      - run: python -I tests/test_uklid.py
