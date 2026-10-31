@@ -7,7 +7,7 @@ Uživatel 31. 10. 2026: „hrozně moc textu … potřebuji vidět, co mám já 
 1. **Nahoře rámeček „Pro tebe“** (citační blok `> 📌 **Pro tebe:** …`): jen to, co má uživatel udělat, rozhodnout nebo vědět, nejvýš 3 body. Když nic, napiš `> ✅ **Pro tebe:** nic, běží to samo.`
 2. **Stav obrázkem:** diagram jako vizuální widget (ne kód Mermaid), u průběžných hlášení stačí krátká tabulka.
 3. **Pod čarou `---` „Pro informaci“:** podrobnosti jen pro toho, kdo chce; krátce, tabulkou.
-Podrobnost je střední, ne holá věta (uživatel 31. 10. 2026: „malinko víc detailně, ale vizuálně“): i krátké hlášení má pod čarou tabulku „co se děje · stav · co dál“ (2–5 řádků) a jednu větu proč.
+Sekce jsou na první pohled oddělené vodorovnou čarou `---` a nadpisem s ikonou (📌 Pro tebe · 📊 Stav · ℹ️ Pro informaci); čára hned pod „Pro tebe“ ukazuje, kde končí čtení pro uživatele. Obrázek (widget) a text se v hlášení vždy kombinují, ne jen text (uživatel 31. 10. 2026). Podrobnost je střední, ne holá věta (uživatel 31. 10. 2026: „malinko víc detailně, ale vizuálně“): i krátké hlášení má pod čarou tabulku „co se děje · stav · co dál“ (2–5 řádků) a jednu větu proč.
 Zprávy od pod-sessions a automatické události (doběhla session, CI, probuzení) uživatele neruší: koordinátor je zpracuje potichu a ozve se jen tehdy, když se mění něco, co má uživatel vědět, a to jednou větou v témž tvaru. **Pravidelný přehled** (např. ranní kontrola a souhrn na konci dávky) má celý tvar včetně diagramu.
 
 ## Potvrzení nevratných akcí (pojistka)
