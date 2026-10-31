@@ -7,6 +7,11 @@
             "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spust.sh\" kontext.py",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spust.sh\" uklid_hook.py",
+            "timeout": 5
           }
         ]
       }
@@ -20,6 +25,17 @@
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spust.sh\" pojistka.py",
             "timeout": 10,
             "onFailure": "block"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spust.sh\" uklid_hook.py",
+            "timeout": 5
           }
         ]
       }
