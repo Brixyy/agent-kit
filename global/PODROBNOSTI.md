@@ -2,6 +2,13 @@
 
 Doplněk k `global/AGENTS.md`. Jádro pravidel se vkládá do každé session; tento soubor ne (limit Claude Code je 10 000 znaků na vložený text). Agent ho čte, když řeší téma níže: potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloudovou session, Vercel nebo vzhled frontendu. Platí stejně závazně jako jádro.
 
+## Formát hlášení v chatu
+Uživatel 31. 10. 2026: „hrozně moc textu … potřebuji vidět, co mám já číst … nějakou formu ohraničení, tohle si přečti, tohle musíš číst ty.“ Každé hlášení uživateli má pevný tvar:
+1. **Nahoře rámeček „Pro tebe“** (citační blok `> 📌 **Pro tebe:** …`): jen to, co má uživatel udělat, rozhodnout nebo vědět, nejvýš 3 body. Když nic, napiš `> ✅ **Pro tebe:** nic, běží to samo.`
+2. **Stav obrázkem:** diagram jako vizuální widget (ne kód Mermaid), u průběžných hlášení stačí krátká tabulka.
+3. **Pod čarou `---` „Pro informaci“:** podrobnosti jen pro toho, kdo chce; krátce, tabulkou.
+Zprávy od pod-sessions a automatické události (doběhla session, CI, probuzení) uživatele neruší: koordinátor je zpracuje potichu a ozve se jen tehdy, když se mění něco, co má uživatel vědět, a to jednou větou v témž tvaru. **Pravidelný přehled** (např. ranní kontrola a souhrn na konci dávky) má celý tvar včetně diagramu.
+
 ## Potvrzení nevratných akcí (pojistka)
 Nevratné akce hlídá pojistka z agent-kitu; potvrzovací soubor `~/.agents/potvrzeno.txt` vytvoř jen po výslovném „ano“ uživatele v chatu. Jednorázový souhlas platí na jednu akci.
 

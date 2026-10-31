@@ -11,7 +11,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 
 ## Komunikace
 - **Diagram v chatu vždy vykresli jako obrázek** (v aplikaci Claude nástrojem pro vizuální widget), nikdy ho neposílej jen jako kód Mermaid. Kde vykreslit nejde, upozorni na to. Mermaid v souborech repozitáře zůstává (GitHub ho vykreslí).
-- Strukturu, návaznosti a stav ukaž obrázkem (diagram, tabulka, procenta), ne dlouhým textem.
+- Strukturu, návaznosti a stav ukaž obrázkem (diagram, tabulka, procenta), ne dlouhým textem. **Formát hlášení** (rámeček „Pro tebe“, souhrn) viz podrobnosti.
 - Česky a srozumitelně pro laika: **co se děje**, **proč na tom záleží**, **co bude dál**. Pojem běžnými slovy s příkladem; nad technickým detailem jedna věta v obyčejné češtině.
 - Ptej se po jedné cílené otázce s doporučením. Rozhodnutí předkládej jako otázku s možnostmi.
 - V reportu napiš, **kde výsledek uvidí** (PR, ticket, adresa). Tickety plným klíčem (`ROB-123`, `owner/repo#12`).
