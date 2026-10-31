@@ -1,12 +1,13 @@
 """SessionEnd a SessionStart: úklid procesů a kontejnerů po sessions (jen Windows).
 
-- SessionEnd: ukončí dev servery z pracovní složky končící session (její worktree) a zastaví
-  kontejnery se štítkem agent-kit.slozka=<složka>.
+- SessionEnd (skutečný konec, ne /clear ani /resume): ukončí dev servery z pracovní složky končící
+  session (její worktree) a zastaví kontejnery se štítkem agent-kit.slozka=<složka>.
 - SessionStart: ukončí sirotky v celém ~/Dev (dev servery sessions, které skončily bez úklidu,
   např. po pádu nebo zavření aplikace).
-Claude Code dává SessionEnd hookům pluginu dohromady jen 1,5 s, proto hook jen zjistí složku
-a PID session (claude.exe nad tímto procesem) a samotný úklid (scripts/uklid.py) spustí na pozadí
-jako odpojený proces. Výsledek je v ~/.agents/logs/uklid.log. Hook nikdy neblokuje ani neselže.
+Claude Code dává SessionEnd hookům pluginu dohromady jen 1,5 s, proto hook jen zjistí složku,
+session (claude.exe CLI nad tímto procesem, PID a čas vzniku) a přepis a samotný úklid
+(scripts/uklid.py) spustí na pozadí bez okna. Výsledek je v ~/.agents/logs/uklid.log,
+výstup posledního běhu v uklid-vystup.txt. Hook nikdy neblokuje ani neselže.
 """
 import json
 import os
@@ -15,6 +16,7 @@ import sys
 
 KIT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UKLID = os.path.join(KIT, "scripts", "uklid.py")
+KONEC = {"prompt_input_exit", "logout", "other"}  # clear a resume: proces session běží dál
 
 
 def rodice():
@@ -43,16 +45,36 @@ def rodice():
     return vysledek
 
 
-def pid_session():
-    """PID nejbližšího claude.exe nad tímto hookem (CLI session, ne aplikace Claude nad ní)."""
+def program(pid):
+    """Plná cesta programu procesu (aplikace Claude i CLI se jmenují claude.exe)."""
+    import ctypes
+    from ctypes import wintypes
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    k32.OpenProcess.restype = wintypes.HANDLE
+    h = k32.OpenProcess(0x1000, False, pid)
+    if not h:
+        return ""
+    try:
+        buf, delka = ctypes.create_unicode_buffer(1024), wintypes.DWORD(1024)
+        return buf.value if k32.QueryFullProcessImageNameW(h, 0, buf, ctypes.byref(delka)) else ""
+    finally:
+        k32.CloseHandle(h)
+
+
+def session():
+    """„pid:čas vzniku“ nejbližšího claude.exe CLI nad hookem (ne aplikace Claude), jinak „“."""
+    sys.path.insert(0, os.path.dirname(UKLID))
+    from uklid import cas_vzniku
     tabulka = rodice()
     pid, videno = os.getpid(), set()
     while pid in tabulka and pid not in videno:
         videno.add(pid)
-        pid, jmeno = tabulka[pid]
+        pid = tabulka[pid][0]
         if tabulka.get(pid, (0, ""))[1] == "claude.exe":
-            return pid
-    return 0
+            if "\\anthropicclaude\\" in program(pid).lower():
+                return ""
+            return f"{pid}:{cas_vzniku(pid) or 0}"
+    return ""
 
 
 def pracovni_slozka(cwd):
@@ -61,7 +83,7 @@ def pracovni_slozka(cwd):
     dev = os.path.normcase(os.path.normpath(os.environ.get("AGENT_KIT_DEV") or os.path.join(os.path.expanduser("~"), "Dev")))
     try:
         r = subprocess.run(["git", "-C", cwd, "rev-parse", "--show-toplevel"],
-                           capture_output=True, text=True, timeout=0.8)
+                           capture_output=True, text=True, timeout=0.8, creationflags=0x08000000)
         koren = os.path.normpath(r.stdout.strip()) if r.returncode == 0 and r.stdout.strip() else ""
         if koren and os.path.normcase(koren) != dev:
             return koren
@@ -72,7 +94,7 @@ def pracovni_slozka(cwd):
 
 def spust_na_pozadi(argumenty, prostredi):
     prikaz = [sys.executable, "-I", UKLID, "--provest", *argumenty]
-    zaklad = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+    zaklad = 0x08000000 | 0x00000200  # CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP
     logy = os.path.join(os.path.expanduser("~"), ".agents", "logs")
     os.makedirs(logy, exist_ok=True)
     with open(os.path.join(logy, "uklid-vystup.txt"), "w", encoding="utf-8") as vystup:  # poslední běh
@@ -91,13 +113,15 @@ def main():
     try:
         vstup = json.load(sys.stdin)
     except ValueError:
-        vstup = {}
+        return
+    udalost = vstup.get("hook_event_name")
     prostredi = dict(os.environ)
-    if vstup.get("hook_event_name") == "SessionEnd":
+    if udalost == "SessionEnd" and vstup.get("reason", "other") in KONEC:
         prostredi["AGENT_KIT_UKLID_SLOZKA"] = pracovni_slozka(vstup.get("cwd") or os.getcwd())
-        prostredi["AGENT_KIT_UKLID_CLI_PID"] = str(pid_session())
+        prostredi["AGENT_KIT_UKLID_CLI"] = session()
+        prostredi["AGENT_KIT_UKLID_PREPIS"] = vstup.get("transcript_path") or ""
         spust_na_pozadi([], prostredi)
-    else:
+    elif udalost == "SessionStart":
         spust_na_pozadi(["--sirotci"], prostredi)
 
 

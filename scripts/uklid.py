@@ -2,18 +2,22 @@
 
 Použití (bez --provest jen vypíše, co by ukončil):
   python -I scripts/uklid.py --sirotci [--provest]
-      osiřelé dev servery: proces běží ze složky projektů (~/Dev), ale žádný jeho předek
-      už není živá session (claude.exe, codex.exe) ani okno uživatele (terminál, editor, Průzkumník);
-      kontejnery se štítkem agent-kit.slozka, jejichž složka už neexistuje.
-  python -I scripts/uklid.py --slozka <pracovní složka> [--cli-pid <PID session>] [--provest]
-      konec session: procesy, jejichž příkazová řádka nebo program je v dané složce a patří této
-      session nebo už nikomu; kontejnery se štítkem agent-kit.slozka=<složka>.
-Složku lze předat i proměnnou AGENT_KIT_UKLID_SLOZKA (hook ji tak předává, aby nebyla
-v příkazové řádce úklidu). Kořen projektů mění AGENT_KIT_DEV (výchozí ~/Dev).
+      osiřelé dev servery v ~/Dev: nad procesem už není živá session ani okno uživatele
+      a jeho pracovní složka nepatří živé session (viz ZIVA_S); kontejnery se štítkem
+      agent-kit.slozka, jejichž složka neexistuje nebo nepatří živé session.
+  python -I scripts/uklid.py --slozka <pracovní složka> [--provest]
+      konec session: dev servery z dané složky, které patří této session (AGENT_KIT_UKLID_CLI),
+      náhledu aplikace Claude nebo už nikomu; kontejnery se štítkem agent-kit.slozka=<složka>.
+Hook předává složku, session a přepis proměnnými AGENT_KIT_UKLID_SLOZKA, AGENT_KIT_UKLID_CLI
+(„pid:čas vzniku“) a AGENT_KIT_UKLID_PREPIS. Kořen projektů mění AGENT_KIT_DEV (výchozí ~/Dev).
 
-Pojistky: ukončuje jen programy dev serverů (SERVERY), nikdy nic mimo kořen projektů, nikdy proces,
-jehož předkem je jiná živá session nebo okno uživatele, nikdy sebe a své předky. Sirotky mladší
-než MIN_STARI_S nechá být (právě startující proces ještě může mít rodiče v pohybu).
+Živá session se pozná dvojím způsobem, protože ani jeden sám nestačí:
+- strom procesů: nad procesem je claude.exe (CLI) nebo codex.exe, okno uživatele (terminál, editor,
+  Průzkumník) nebo terminál v aplikaci Claude;
+- přepis: složka má v ~/.claude/projects přepis session změněný v posledních ZIVA_S sekundách.
+  Server spuštěný na pozadí totiž přijde o rodiče (shell skončí), i když session dál běží.
+Pojistky: jen programy dev serverů (SERVERY), nic mimo kořen projektů, nikdy sebe a své předky;
+ukončuje se přesné PID s ověřeným časem vzniku (ne strom podle PID, které mohl dostat jiný proces).
 Záznam o každém ukončení jde do ~/.agents/logs/uklid.log. Hlavní volání: hooks/uklid_hook.py.
 """
 import argparse
@@ -23,6 +27,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 SERVERY = {
     "node.exe", "bun.exe", "deno.exe", "esbuild.exe",
@@ -33,9 +38,14 @@ SERVERY = {
 SESSION = {"claude.exe", "codex.exe"}
 UZIVATEL = {"explorer.exe", "windowsterminal.exe", "code.exe", "cursor.exe",
             "services.exe", "wininit.exe", "svchost.exe"}
+TERMINAL = {"powershell.exe", "pwsh.exe"}  # terminál, který aplikace Claude otevírá uživateli
 MIN_STARI_S = 600
+ZIVA_S = 2 * 3600
 STITEK = "agent-kit.slozka"
 LOG = os.path.join(os.path.expanduser("~"), ".agents", "logs", "uklid.log")
+PROJEKTY = os.path.join(os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(os.path.expanduser("~"), ".claude"),
+                        "projects")
+BEZ_OKNA = 0x08000000 if os.name == "nt" else 0  # CREATE_NO_WINDOW: úklid na pozadí nesmí blikat konzolí
 
 # JSON jde na stdout přímo jako bajty UTF-8: v kódování konzole by se uvozovky „“ z příkazových
 # řádek změnily na " a rozbily JSON (Windows PowerShell 5.1 nastavení OutputEncoding ignoruje).
@@ -57,11 +67,36 @@ def normalizuj(cesta):
     return c
 
 
-def vzor_slozky(slozka, pokracovani=r"(?=$|[\\\"' ;:,])"):
-    """Regex na výskyt složky v textu (i v podobě /c/... z Git Bash), ne jako prefix jiného jména."""
+def _varianty(slozka):
     c = normalizuj(slozka)
-    varianty = [re.escape(c), re.escape("\\" + c[0] + c[2:])] if re.match(r"^[a-z]:", c) else [re.escape(c)]
-    return re.compile("(?:" + "|".join(varianty) + ")" + pokracovani)
+    return [re.escape(c), re.escape("\\" + c[0] + c[2:])] if re.match(r"^[a-z]:", c) else [re.escape(c)]
+
+
+def vzor_slozky(slozka):
+    """Regex na výskyt složky v textu (i v podobě /c/... z Git Bash), ne jako prefix jiného jména."""
+    return re.compile("(?:" + "|".join(_varianty(slozka)) + r")(?=$|[\\\"' ;:,])")
+
+
+def koreny(text, dev):
+    """Pracovní složky, na které text procesu odkazuje: ~/Dev/<projekt>[/.claude/worktrees/<jméno>]."""
+    jmeno = r"[^\\\"' ;:,]+"
+    vzor = re.compile("(?:" + "|".join(_varianty(dev)) + r")\\(" + jmeno + r")(\\\.claude\\worktrees\\" + jmeno + ")?")
+    return {normalizuj(dev) + "\\" + m.group(1) + (m.group(2) or "") for m in vzor.finditer(text)}
+
+
+def ziva_slozka(slozka, krome=None, ted=None):
+    """Složka existuje a má přepis session změněný v posledních ZIVA_S (mimo přepis `krome`)."""
+    if not os.path.isdir(slozka):
+        return False
+    adresar = os.path.join(PROJEKTY, re.sub(r"[^a-z0-9]", "-", normalizuj(slozka)))
+    hranice = (ted or time.time()) - ZIVA_S
+    try:
+        polozky = list(os.scandir(adresar))
+    except OSError:
+        return False
+    krome = normalizuj(krome) if krome else None
+    return any(e.name.endswith(".jsonl") and normalizuj(e.path) != krome and e.stat().st_mtime >= hranice
+               for e in polozky)
 
 
 def nacti_procesy(pokusu=3):
@@ -69,6 +104,7 @@ def nacti_procesy(pokusu=3):
         r = subprocess.run(
             ["powershell", "-NoProfile", "-NonInteractive", "-Command", PS_PROCESY],
             capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
+            creationflags=BEZ_OKNA,
         )
         try:
             data = json.loads(r.stdout) if r.returncode == 0 else None
@@ -95,17 +131,34 @@ def predkove(p, procesy):
         p = rodic
 
 
-def vlastnik(p, procesy, cli_pid):
-    """'nase' (předkem je tato session), 'aplikace' (náhledový server nebo terminál spuštěný přímo
-    aplikací Claude), 'ziva' (jiná session nebo okno uživatele), 'sirotek'."""
+def potomci(p, procesy):
+    """Všichni živí potomci (dítě musí vzniknout po rodiči, jinak má jen recyklované PPID)."""
+    deti = {}
+    for q in procesy.values():
+        deti.setdefault(q["ppid"], []).append(q)
+    vysledek, fronta = [], [p]
+    while fronta:
+        rodic = fronta.pop()
+        for q in deti.get(rodic["pid"], []):
+            if q is not rodic and q not in vysledek and (not q["vznik"] or q["vznik"] >= rodic["vznik"]):
+                vysledek.append(q)
+                fronta.append(q)
+    return vysledek
+
+
+def vlastnik(p, procesy, cli=None):
+    """'nase' (předkem je tato session), 'aplikace' (náhledový server spuštěný aplikací Claude),
+    'ziva' (jiná session, okno nebo terminál uživatele), 'sirotek'."""
+    pod = p
     for a in predkove(p, procesy):
-        if cli_pid and a["pid"] == cli_pid:
+        if cli and a["pid"] == cli[0] and (not cli[1] or abs(a["vznik"] - cli[1]) <= 20_000):  # WMI má µs
             return "nase"
         jmeno = (a["jmeno"] or "").lower()
         if jmeno == "claude.exe" and "\\anthropicclaude\\" in normalizuj(a["program"]):
-            return "aplikace"
+            return "ziva" if (pod["jmeno"] or "").lower() in TERMINAL else "aplikace"
         if jmeno in SESSION or jmeno in UZIVATEL:
             return "ziva"
+        pod = a
     return "sirotek"
 
 
@@ -118,20 +171,18 @@ def text_procesu(p):
     return (p["prikaz"] or "").replace("/", "\\").lower() + "\n" + normalizuj(p["program"])
 
 
-def stari_s(p):
+def stari_s(p, ted=None):
     if not p["vznik"]:
         return 0
-    return (datetime.datetime.now(datetime.timezone.utc).timestamp() - (p["vznik"] / 1e7 - 11644473600))
+    return (ted or time.time()) - (p["vznik"] / 1e7 - 11644473600)
 
 
-def vyber(procesy, dev, slozka=None, cli_pid=None, min_stari=MIN_STARI_S):
+def vyber(procesy, dev, slozka=None, cli=None, krome=None, ziva=ziva_slozka, min_stari=MIN_STARI_S):
     """Procesy k ukončení. Bez složky hledá sirotky v celém kořeni projektů."""
+    slozka = normalizuj(slozka) if slozka else None
     ja = os.getpid()
-    chranene = {ja} | {a["pid"] for a in predkove(procesy[ja], procesy)} if ja in procesy else {ja}
+    chranene = {ja} | ({a["pid"] for a in predkove(procesy[ja], procesy)} if ja in procesy else set())
     vzor_dev, vzor = vzor_slozky(dev), vzor_slozky(slozka or dev)
-    # Worktree jiné session uvnitř složky (hlavní checkout → .claude\worktrees\…) bez důkazu
-    # vlastnictví nepatří končící session.
-    vnoreny = vzor_slozky(slozka, r"\\\.claude\\worktrees\\") if slozka else None
     vysledek = []
     for p in procesy.values():
         if p["pid"] in chranene or not je_server(p):
@@ -139,16 +190,56 @@ def vyber(procesy, dev, slozka=None, cli_pid=None, min_stari=MIN_STARI_S):
         text = text_procesu(p)
         if not (vzor_dev.search(text) and vzor.search(text)):
             continue
-        kdo = vlastnik(p, procesy, cli_pid)
-        if vnoreny and kdo != "nase" and vnoreny.search(text):
+        kdo = vlastnik(p, procesy, cli)
+        if kdo == "ziva" or (kdo == "aplikace" and not slozka):
             continue
-        # Náhledové servery (preview_start) spouští aplikace Claude, ne session: u konce session
-        # se ukončí ty z její složky; mezi sirotky nepatří, živá aplikace je pořád jejich rodič.
-        if (kdo in ("nase", "aplikace") and slozka) or (kdo == "sirotek" and (slozka or stari_s(p) >= min_stari)):
-            vysledek.append((p, kdo))
-    # Ukončuje se celý strom (taskkill /T): potomka vybraného procesu není třeba ukončovat zvlášť.
+        if kdo != "nase":
+            slozky = koreny(text, dev)
+            # Worktree jiné session uvnitř složky (hlavní checkout → .claude\worktrees\…).
+            if slozka and any(k.startswith(slozka + "\\") for k in slozky):
+                continue
+            if any(ziva(k, krome) for k in slozky):
+                continue
+            if not slozka and stari_s(p) < min_stari:
+                continue
+        vysledek.append((p, kdo))
     vybrane = {p["pid"] for p, _ in vysledek}
     return [(p, kdo) for p, kdo in vysledek if not any(a["pid"] in vybrane for a in predkove(p, procesy))]
+
+
+def cas_vzniku(pid):
+    """Čas vzniku procesu (FILETIME) přímo z Windows, nebo None, když proces neběží."""
+    import ctypes
+    from ctypes import wintypes
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    k32.OpenProcess.restype = wintypes.HANDLE
+    h = k32.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+    if not h:
+        return None
+    try:
+        casy = [wintypes.FILETIME() for _ in range(4)]
+        if not k32.GetProcessTimes(h, *[ctypes.byref(c) for c in casy]):
+            return None
+        return (casy[0].dwHighDateTime << 32) | casy[0].dwLowDateTime
+    finally:
+        k32.CloseHandle(h)
+
+
+def ukonci(p):
+    """Ukončí proces jen tehdy, když PID pořád patří témuž procesu (stejný čas vzniku)."""
+    import ctypes
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    k32.OpenProcess.restype = ctypes.c_void_p
+    h = k32.OpenProcess(0x1001, False, p["pid"])  # PROCESS_TERMINATE | QUERY_LIMITED_INFORMATION
+    if not h:
+        return "už neběží"
+    try:
+        skutecny = cas_vzniku(p["pid"])
+        if skutecny is None or (p["vznik"] and abs(skutecny - p["vznik"]) > 20_000):  # tolerance 2 ms (WMI)
+            return "PID mezitím patří jinému procesu, nechávám"
+        return "ukončen" if k32.TerminateProcess(ctypes.c_void_p(h), 1) else f"selhalo ({ctypes.get_last_error()})"
+    finally:
+        k32.CloseHandle(ctypes.c_void_p(h))
 
 
 def docker_kontejnery():
@@ -157,6 +248,7 @@ def docker_kontejnery():
             ["docker", "ps", "-a", "--filter", f"label={STITEK}",
              "--format", '{{.ID}}\t{{.State}}\t{{.Label "' + STITEK + '"}}\t{{.Names}}'],
             capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
+            creationflags=BEZ_OKNA,
         )
     except (OSError, subprocess.TimeoutExpired):
         return []
@@ -170,16 +262,19 @@ def docker_kontejnery():
     return kontejnery
 
 
-def vyber_kontejnery(kontejnery, slozka=None, dev=None):
+def vyber_kontejnery(kontejnery, dev, slozka=None, krome=None, ziva=ziva_slozka):
+    """Běžící kontejnery se štítkem: při konci session přesně její složky (podsložky kromě
+    vnořených worktree), mezi sirotky ty, jejichž složka v ~/Dev neexistuje nebo nepatří živé session."""
+    slozka = normalizuj(slozka) if slozka else None
     vysledek = []
     for k in kontejnery:
-        if k["stav"] != "running":
-            continue
         cil = normalizuj(k["slozka"])
+        if k["stav"] != "running" or not cil.startswith(normalizuj(dev) + "\\"):
+            continue
         if slozka:
-            if cil == normalizuj(slozka) or cil.startswith(normalizuj(slozka) + "\\"):
+            if cil == slozka or (cil.startswith(slozka + "\\") and "\\.claude\\worktrees\\" not in cil[len(slozka):]):
                 vysledek.append(k)
-        elif cil and (not dev or cil.startswith(normalizuj(dev) + "\\")) and not os.path.isdir(cil):
+        elif not ziva(cil, krome):
             vysledek.append(k)
     return vysledek
 
@@ -195,7 +290,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--sirotci", action="store_true", help="osiřelé procesy v celém kořeni projektů")
     ap.add_argument("--slozka", default=os.environ.get("AGENT_KIT_UKLID_SLOZKA"), help="pracovní složka končící session")
-    ap.add_argument("--cli-pid", type=int, default=int(os.environ.get("AGENT_KIT_UKLID_CLI_PID") or 0))
+    ap.add_argument("--cli", default=os.environ.get("AGENT_KIT_UKLID_CLI", ""), help="session: pid[:čas vzniku]")
+    ap.add_argument("--prepis", default=os.environ.get("AGENT_KIT_UKLID_PREPIS"), help="přepis končící session")
     ap.add_argument("--provest", action="store_true", help="opravdu ukončit (jinak jen výpis)")
     ap.add_argument("--min-stari", type=int, default=MIN_STARI_S, help="sirotci mladší než N sekund se nechají")
     a = ap.parse_args(argv)
@@ -210,20 +306,24 @@ def main(argv=None):
     if slozka and not slozka.startswith(dev + "\\"):
         print(f"Složka {slozka} není uvnitř {dev} (celý kořen projektů je moc široký); nic neukončuji.")
         return 0
+    casti = [int(x) for x in a.cli.split(":") if x.strip().isdigit()]
+    cli = (casti[0], casti[1] if len(casti) > 1 else 0) if casti and casti[0] else None
 
     rezim = f"konec session {slozka}" if slozka else "sirotci"
     procesy = nacti_procesy()
-    k_ukonceni = vyber(procesy, dev, slozka, a.cli_pid or None, a.min_stari)
-    kontejnery = vyber_kontejnery(docker_kontejnery(), slozka, dev)
+    k_ukonceni = vyber(procesy, dev, slozka, cli, a.prepis, min_stari=a.min_stari)
+    kontejnery = vyber_kontejnery(docker_kontejnery(), dev, slozka, a.prepis)
     if not k_ukonceni and not kontejnery:
         print(f"Úklid ({rezim}): nic k ukončení.")
         return 0
     for p, kdo in k_ukonceni:
-        popis = f"proces {p['pid']} {p['jmeno']} ({kdo}): {(p['prikaz'] or p['program'] or '')[:300]}"
+        strom = potomci(p, procesy)
+        popis = (f"proces {p['pid']} {p['jmeno']} ({kdo}, potomků {len(strom)}): "
+                 f"{(p['prikaz'] or p['program'] or '')[:300]}")
         if a.provest:
-            r = subprocess.run(["taskkill", "/PID", str(p["pid"]), "/T", "/F"],
-                               capture_output=True, text=True, encoding="utf-8", errors="replace")
-            stav = "ukončen" if r.returncode == 0 else f"selhalo: {(r.stderr or r.stdout).strip()}"
+            stav = ukonci(p)
+            for q in strom:
+                ukonci(q)
             zapis(f"[{rezim}] {popis} → {stav}")
             print(f"{stav}: {popis}")
         else:
@@ -231,7 +331,8 @@ def main(argv=None):
     for k in kontejnery:
         popis = f"kontejner {k['jmeno']} ({k['id']}, {STITEK}={k['slozka']})"
         if a.provest:
-            r = subprocess.run(["docker", "stop", k["id"]], capture_output=True, text=True, timeout=60)
+            r = subprocess.run(["docker", "stop", k["id"]], capture_output=True, text=True, timeout=60,
+                               creationflags=BEZ_OKNA)
             stav = "zastaven" if r.returncode == 0 else f"selhalo: {r.stderr.strip()}"
             zapis(f"[{rezim}] {popis} → {stav}")
             print(f"{stav}: {popis}")
