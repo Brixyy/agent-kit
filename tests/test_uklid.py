@@ -155,12 +155,14 @@ kont = [{"id": "a", "stav": "running", "slozka": W.replace("\\", "/"), "jmeno": 
         {"id": "z", "stav": "running", "slozka": Z, "jmeno": "pg6"}]
 
 
-def kontejnery(slozka=None):
-    return [k["id"] for k in uklid.vyber_kontejnery(kont, DEV, slozka, ziva=ziva)]
+def kontejnery(slozka=None, ziva_v=lambda slozka, krome=None: False):
+    return [k["id"] for k in uklid.vyber_kontejnery(kont, DEV, slozka, ziva=ziva, ziva_v=ziva_v)]
 
 
 over("kontejnery: konec session jen běžící se štítkem této složky", kontejnery(W) == ["a"])
 over("kontejnery: hlavní checkout nezastaví kontejner vnořeného worktree", kontejnery(HLAVNI) == ["d"])
+over("kontejnery: konec session nezastaví kontejner, který ve složce používá jiná živá session",
+     kontejnery(W, ziva_v=lambda slozka, krome=None: True) == [])
 over("kontejnery sirotci: v ~/Dev a složka nepatří živé session", kontejnery() == ["a", "b", "d"])
 
 # --- 2. živý test (Windows, repozitář ve složce projektů) --------------------------------

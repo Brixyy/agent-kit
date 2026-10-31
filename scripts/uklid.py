@@ -130,6 +130,12 @@ def ziva_slozka(slozka, krome=None, ted=None):
     return any(d in predci or d.startswith(kod + "-") for d in cerstve_prepisy(krome, ted))
 
 
+def ziva_v_slozce(slozka, krome=None, ted=None):
+    """Čerstvý přepis jiné session přímo v té složce nebo v její podsložce (bez nadřazených)."""
+    kod = kod_slozky(slozka)
+    return any(d == kod or d.startswith(kod + "-") for d in cerstve_prepisy(krome, ted))
+
+
 def nacti_procesy(pokusu=3):
     for pokus in range(pokusu):  # WMI občas dotaz odmítne (přetížení), pak to zkusí znovu
         r = subprocess.run(
@@ -284,7 +290,7 @@ def ukonci(p):
         return "už neběží" if chyba == 87 else f"nelze otevřít (chyba {chyba})"  # 87 = neplatné PID
     try:
         skutecny = _vznik_handle(k32, h)
-        if skutecny is None or (p["vznik"] and abs(skutecny - p["vznik"]) > 20_000):  # tolerance 2 ms (WMI)
+        if skutecny is None or not p["vznik"] or abs(skutecny - p["vznik"]) > 20_000:  # tolerance 2 ms (WMI)
             return "PID mezitím patří jinému procesu, nechávám"
         return "ukončen" if k32.TerminateProcess(h, 1) else f"selhalo (chyba {ctypes.get_last_error()})"
     finally:
@@ -311,9 +317,11 @@ def docker_kontejnery():
     return kontejnery
 
 
-def vyber_kontejnery(kontejnery, dev, slozka=None, krome=None, ziva=ziva_slozka):
+def vyber_kontejnery(kontejnery, dev, slozka=None, krome=None, ziva=ziva_slozka, ziva_v=None):
     """Běžící kontejnery se štítkem: při konci session přesně její složky (podsložky kromě
-    vnořených worktree), mezi sirotky ty, jejichž složka v ~/Dev neexistuje nebo nepatří živé session."""
+    vnořených worktree), pokud je tam nepoužívá jiná živá session; mezi sirotky ty, jejichž
+    složka v ~/Dev nepatří živé session."""
+    ziva_v = ziva_v or ziva_v_slozce
     slozka = normalizuj(slozka) if slozka else None
     vysledek = []
     for k in kontejnery:
@@ -321,7 +329,8 @@ def vyber_kontejnery(kontejnery, dev, slozka=None, krome=None, ziva=ziva_slozka)
         if k["stav"] != "running" or not cil.startswith(normalizuj(dev) + "\\"):
             continue
         if slozka:
-            if cil == slozka or (cil.startswith(slozka + "\\") and "\\.claude\\worktrees\\" not in cil[len(slozka):]):
+            nalezi = cil == slozka or (cil.startswith(slozka + "\\") and "\\.claude\\worktrees\\" not in cil[len(slozka):])
+            if nalezi and not ziva_v(cil, krome):
                 vysledek.append(k)
         elif not ziva(cil, krome):
             vysledek.append(k)
