@@ -1,6 +1,6 @@
 # Globální pravidla pro AI agenty (agent-kit)
 
-Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (jeho `AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Toto je jádro, které se vkládá do každé session; drž ho pod 9 000 znaků (limit Claude Code je 10 000, delší text by se do session nevložil celý). Podrobnosti jsou v `global/PODROBNOSTI.md` vedle tohoto souboru, stejně závazné; čti je, když řešíš potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloud, Vercel nebo vzhled frontendu.
+Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (jeho `AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Toto je jádro, které se vkládá do každé session; drž ho pod 9 000 znaků (limit Claude Code je 10 000). Podrobnosti jsou v `global/PODROBNOSTI.md` vedle tohoto souboru, stejně závazné; čti je, když řešíš proaktivitu, potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloud, Vercel nebo vzhled frontendu.
 
 ## Kam patří které pravidlo
 Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, `global/`), **jeden projekt** → `AGENTS.md` projektu, **jen tento počítač** → lokální soubory agenta (`~/.claude/CLAUDE.md`, paměť; jen věci vázané na stroj).
@@ -20,7 +20,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Text ke zkopírování celý v jednom bloku kódu.
 - Příkaz pro uživatele piš pro **jeho** terminál: na Windows PowerShell (blok `powershell`, cesty `C:\...`), nikdy Bash, i když tvůj nástroj běží v Git Bash. Raději ho ale spusť sám.
 - Bez vycpávek: neomlouvej se, nekonči frázemi „dej vědět“.
-- Nepřitakávej za každou cenu; lepší cestu řekni i s důvodem. Buď proaktivní, přicházej s vlastními návrhy.
+- Nepřitakávej za každou cenu; lepší cestu řekni i s důvodem.
 - Uživatel diktuje hlasem. Repliku, která zjevně nepatří agentovi, neprováděj a jednou větou se ujisti.
 
 ## Pravdivost
@@ -33,6 +33,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Co uživatel potvrdil jako fakt, bez nového důkazu nezpochybňuj. Když nevíš, řekni to krátce.
 
 ## Autonomie
+- **Táhni projekt dopředu** (uživatel 1. 11. 2026). Neptej se „co dál?“: sám vyber další krok (opravy, nové funkce, redukce kódu, cokoli projekt posune) a v mezích autonomie ho začni; jednou větou řekni co a proč. Konzultuj jen to, co uznáš za vhodné, vždy s doporučením. Nečinnost bez důvodu je chyba (podrobnosti).
 - Pracuj **samostatně**: kde je rozumné doporučení, rozhodni a jednou větou uveď proč. U vratných kroků se neptej (kód, dokumentace, commity, push do vlastní větve, PR, issues, Koš, archiv).
 - **Co jde zjistit, zjisti sám** (kód, databáze, server, dokumentace, prohlížeč). Neposílej uživatele nic ověřovat ani opisovat příkazy. Problém v rozsahu úkolu vyřeš a oznam (mimo audity a „jen analýza“).
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti).
@@ -62,4 +63,4 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy) a hlášení nevydává za ověřené. Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
 - PR hlídá vlastník až do sloučení. Po sloučení uklidit worktree, větve a hotové sessions (podrobnosti). **Hotovou session archivuj hned a bez ptaní** (uživatel 31. 10. 2026: „není potřeba se mě doptávat“).
-- **Servery a kontejnery po sobě zastav** (uživatel 31. 10. 2026): nový server jen, když už jeden neběží; kontejnery s `--rm` a štítkem `agent-kit.slozka=<pracovní složka>`; lokální pooly nejvýš 4 procesy. Na konci práce zastav, co jsi spustil; hook úklidu je jen pojistka (podrobnosti).
+- **Servery a kontejnery po sobě zastav** (uživatel 31. 10. 2026): nový server jen, když už jeden neběží, kontejnery s `--rm` a štítkem složky, pooly nejvýš 4 procesy. Na konci práce zastav, co jsi spustil; hook úklidu je jen pojistka (podrobnosti).

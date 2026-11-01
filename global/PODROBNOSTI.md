@@ -1,6 +1,6 @@
 # Globální pravidla – podrobnosti (agent-kit)
 
-Doplněk k `global/AGENTS.md`. Jádro pravidel se vkládá do každé session; tento soubor ne (limit Claude Code je 10 000 znaků na vložený text). Agent ho čte, když řeší téma níže: potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloudovou session, Vercel nebo vzhled frontendu. Platí stejně závazně jako jádro.
+Doplněk k `global/AGENTS.md`. Jádro pravidel se vkládá do každé session; tento soubor ne (limit Claude Code je 10 000 znaků na vložený text). Agent ho čte, když řeší téma níže: proaktivitu, potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloudovou session, Vercel nebo vzhled frontendu. Platí stejně závazně jako jádro.
 
 ## Formát hlášení v chatu
 Uživatel 31. 10. 2026: „hrozně moc textu … potřebuji vidět, co mám já číst … nějakou formu ohraničení, tohle si přečti, tohle musíš číst ty.“ Každé hlášení uživateli má pevný tvar:
@@ -9,6 +9,14 @@ Uživatel 31. 10. 2026: „hrozně moc textu … potřebuji vidět, co mám já 
 3. **Pod čarou `---` „Pro informaci“:** podrobnosti jen pro toho, kdo chce; krátce, tabulkou.
 Sekce jsou na první pohled oddělené vodorovnou čarou `---` a nadpisem s ikonou (📌 Pro tebe · 📊 Stav · ℹ️ Pro informaci); čára hned pod „Pro tebe“ ukazuje, kde končí čtení pro uživatele. Obrázek (widget) a text se v hlášení vždy kombinují, ne jen text (uživatel 31. 10. 2026). Podrobnost je střední, ne holá věta (uživatel 31. 10. 2026: „malinko víc detailně, ale vizuálně“): i krátké hlášení má pod čarou tabulku „co se děje · stav · co dál“ (2–5 řádků) a jednu větu proč.
 Zprávy od pod-sessions a automatické události (doběhla session, CI, probuzení) uživatele neruší: koordinátor je zpracuje potichu a ozve se jen tehdy, když se mění něco, co má uživatel vědět, a to jednou větou v témž tvaru. **Pravidelný přehled** (např. ranní kontrola a souhrn na konci dávky) má celý tvar včetně diagramu.
+
+## Proaktivita: jak vybrat další krok
+Uživatel 1. 11. 2026: „Potřebuji, aby každý agent své repo tlačil dopředu … neřešil jen chyby, ale návrhy i na nové funkce, nebo na redukci kódu, prostě vše. Jen co uznáš za vhodné, konzultuj.“ Pravidlo se bude ladit podle zkušeností.
+- **Pořadí:** 1. rozbité a blokující (pád, červené CI, nefunkční nasazení, data nechodí); 2. rozpracované dotáhnout (otevřené PR, nenasazené, neověřené tak, jak to uvidí uživatel); 3. co brzy poběží naostro a ještě nikdy neprošlo (první průchod procesem, blížící se termín); 4. největší hodnota pro cíl projektu: nové funkce, plán vývoje, otevřené issues; 5. zjednodušení: redukce a sjednocení kódu, odstranění mrtvých částí; 6. pojistky a dluh (testy, kontroly, úklid).
+- **Sám udělej**, co je vratné a v duchu cíle projektu, včetně menších nových funkcí a redukce kódu (vlastní issue, malé PR).
+- **Konzultuj**, co uznáš za vhodné: produktové volby a větší nové funkce (měnící chování nebo rozsah produktu), vše ze seznamu „Vždy se zeptej před“. Jako jednu otázku s doporučením; mezitím pracuj na něčem jiném. Nápad, který teď nedává smysl stavět, zapiš jako issue.
+- **Zastav se** po dvou neúspěšných opravách, u rozporu se zadáním a když uživatel řekne „stop“.
+- **Hlášení:** na konci vždy „Dělám dál: …“ a „Čeká na tebe: …“ (nebo „nic“). Když opravdu není co dělat, řekni to a navrhni, co by projekt posunulo nejvíc.
 
 ## Potvrzení nevratných akcí (pojistka)
 Nevratné akce hlídá pojistka z agent-kitu; potvrzovací soubor `~/.agents/potvrzeno.txt` vytvoř jen po výslovném „ano“ uživatele v chatu. Jednorázový souhlas platí na jednu akci.
