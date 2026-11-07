@@ -1,6 +1,6 @@
 {
   "name": "agent-kit",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "description": "Globální pravidla, pracovní postupy (skills), review agent, ověřovatel UI, pojistka proti nevratným akcím a úklid procesů po sessions pro projekty Brixyy.",
   "author": { "name": "Brixyy" }
 }
