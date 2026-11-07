@@ -100,6 +100,15 @@ Každou založenou, změněnou nebo smazanou rutinu zapiš do rejstříku `portf
 ## Vzhled frontendu (`DESIGN.md`)
 - Každý projekt s obrazovkami má v kořeni **`DESIGN.md`**: závazná pravidla vzhledu (barvy a témata, písmo, mezery, sdílené komponenty, stavy, mobil). Je to konvence pro AI agenty vedle `README.md` a `AGENTS.md` (otevřený návrh Google Stitch, duben 2026). `AGENTS.md` projektu na něj odkazuje. Projekt bez obrazovek ho nemá. **Když chybí**, nevytvářej ho v rámci jiného úkolu: založ ticket na jeho doplnění (z existujícího CSS a komponent) a do té doby se drž zavedeného vzhledu.
 - **Jeden zdroj pravdy:** skutečné hodnoty žijí v kódu (CSS proměnné, Tailwind téma). `DESIGN.md` na ně odkazuje a popisuje pravidla, hodnoty neopisuje, aby nezastaral. Když už projekt pravidla vzhledu má jinde (skill, `docs/…`), je `DESIGN.md` jen krátký rozcestník na ně.
+- **Povinné oddíly `DESIGN.md`:** téma (tmavé / světlé, zvolené podle aplikace), barvy, písmo, mezery a hustota, sdílené komponenty, stavy (načítání, prázdno, chyba), překryvné prvky (menu, výběr, tooltip, dialog), animace, nápověda u pojmů, mobil.
+- **Výchozí zásady vkusu** (platí, když `DESIGN.md` projektu neříká jinak):
+  - téma se volí podle aplikace (tmavé, nebo světlé) a `DESIGN.md` ho uvádí,
+  - obsah je střídmý a vzdušný: nic zdvojeného, málo věcí najednou, detail až po kliknutí,
+  - vše z vlastního design systému projektu, žádné výchozí prvky prohlížeče ani barevné svislé čáry u bloků,
+  - menu, výběr, tooltip i dialog se zavře klikem mimo a klávesou Esc,
+  - animace jen jemné: krátký přechod, zpětná vazba na akci,
+  - odborné pojmy a nastavení mají tooltip s vysvětlením,
+  - návrh nového vzhledu: nejdřív maketa k výběru uživatelem, kód až potom.
 - **Změna vzhledu:** nejdřív přečti `DESIGN.md`. Novou barvu, písmo nebo komponentu nevymýšlej mimo něj. Pravidlo vzhledu měň jen na zadání uživatele (produktové rozhodnutí) a zapiš ho do `DESIGN.md` ve stejném PR. Ověř v prohlížeči na desktopu i mobilu a snímek přilož k PR.
 - **Plugin `frontend-design`** (Anthropic, marketplace `claude-plugins-official`) používej na **nové** obrazovky a stránky a na návrh vzhledu nového projektu: nejdřív plán (barvy, písmo, rozvržení), porovnání se zadáním, pak kód a kontrola na snímcích. V existujícím projektu má přednost jeho `DESIGN.md` a pravidlo „nejmenší zásah“; plugin nesmí měnit zavedený vzhled bez zadání.
 - Proč: bez vedení AI sklouzává k průměrnému vzhledu („distributional convergence“, Anthropic, 12. 11. 2025: https://claude.com/blog/improving-frontend-design-through-skills). Uživatel 29. 10. 2026, Brixyy/asistent#98.
