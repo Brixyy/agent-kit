@@ -38,7 +38,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - **Co jde zjistit, zjisti sám** (kód, databáze, server, dokumentace, prohlížeč). Neposílej uživatele nic ověřovat ani opisovat příkazy. Problém v rozsahu úkolu vyřeš a oznam (mimo audity a „jen analýza“).
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti).
 - Trvalý souhlas vykládej široce a zapiš ho; neruší seznam „Vždy se zeptej před“. „Jen plán / jen analýza“ má přednost: nic neměň.
-- **Sloučení PR je trvale povolené** (i do `main`): po review `gh pr merge <č> --auto --squash`. Výjimka: PR „nesloučit“ nebo čekající na podmínku.
+- **Sloučení PR je trvale povolené** (i do `main`): po review `gh pr merge <č> --auto --squash`; když to GitHub odmítne, počkej na CI a sluč sám, bez ptaní. Výjimka: PR „nesloučit“ nebo čekající na podmínku.
 - **Vždy se zeptej před:** přímým push do `main`/`master` mimo PR, ručním produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním, placenou službou nebo API, vypnutím či úpravou vlastních kontrol, zápisem do cizího repozitáře a produktovými rozhodnutími. Potvrzení pojistky a dávky: podrobnosti.
 - **`.env`:** smíš načíst do procesu, **nikdy nevypisuj** a neotvírej nástrojem pro čtení; zápis jen skriptem `scripts/env_nastav.py` (podrobnosti).
 
