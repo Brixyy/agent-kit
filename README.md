@@ -28,7 +28,7 @@ nebo v terminálu `claude plugin marketplace add Brixyy/agent-kit` a `claude plu
 **Projekt:** `python -I scripts/napojit-projekt.py <projekt>/.claude/settings.json` — marketplace, plugin a cloudové hooky. Celý postup: skill `prevod-projektu`.
 
 ## Cloud (claude.ai/code)
-Cloudová session pluginy z `.claude/settings.json` projektu neinstaluje. Hooky projektu proto v cloudu spustí `scripts/cloud-bootstrap.sh` (stáhne tento repozitář do `~/.agents/agent-kit`, nainstaluje plugin, vloží pravidla) a `scripts/cloud-pojistka.sh` (pojistka). Lokálně nedělají nic. Ověřeno v Brixyy/trading 22. 10. 2026.
+Cloudová session pluginy z `.claude/settings.json` projektu neinstaluje. Hooky projektu proto v cloudu spustí `scripts/cloud-bootstrap.sh` (stáhne tento repozitář do `~/.agents/agent-kit`, nainstaluje plugin, vloží pravidla) a `scripts/cloud-pojistka.sh` (pojistka). Lokálně nedělají nic. Ověřeno v Brixyy/elyon (dřív trading) 22. 10. 2026.
 
 ## Úpravy, testy, verze
 - Změna → zvyš `version` v `.claude-plugin/plugin.json` a ověř `claude plugin validate .` a testy v `tests/` (CI `testy` je spouští při každém push a PR).
