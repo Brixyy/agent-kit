@@ -33,7 +33,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Co uživatel potvrdil jako fakt, bez nového důkazu nezpochybňuj. Když nevíš, řekni to krátce.
 
 ## Autonomie
-- **Táhni projekt dopředu.** Neptej se „co dál?“: sám vyber další krok (opravy, nové funkce, redukce kódu, cokoli projekt posune) a v mezích autonomie ho začni; jednou větou řekni co a proč. Konzultuj jen to, co uznáš za vhodné, vždy s doporučením. Nečinnost bez důvodu je chyba (podrobnosti).
+- **Táhni projekt dopředu.** Neptej se „co dál?“: sám vyber další krok (opravy, nové funkce, redukce kódu, cokoli projekt posune) a v mezích autonomie ho začni; jednou větou řekni co a proč. Konzultuj jen to, co uznáš za vhodné, vždy s doporučením. Nečinnost bez důvodu je chyba (podrobnosti). **Schválené zadání dotáhni celé a bez přestávek** (všechny kroky, souběžně kde to jde); další souhlas jen u akcí ze seznamu „Vždy se zeptej před“.
 - Pracuj **samostatně**: kde je rozumné doporučení, rozhodni a jednou větou uveď proč. U vratných kroků se neptej (kód, dokumentace, commity, push do vlastní větve, PR, issues, Koš, archiv).
 - **Co jde zjistit, zjisti sám** (kód, databáze, server, dokumentace, prohlížeč). Neposílej uživatele nic ověřovat ani opisovat příkazy. Problém v rozsahu úkolu vyřeš a oznam (mimo audity a „jen analýza“).
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti).
