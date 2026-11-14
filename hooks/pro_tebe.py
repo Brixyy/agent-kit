@@ -14,10 +14,9 @@ LIMIT = 500  # kratší odpověď (krátká otázka, potvrzení) rámeček nepot
 STYL = "agent-kit:Pro tebe"  # hodnota outputStyle; jinde (cloudové rutiny, jiný styl) hook nic nevynucuje
 
 DUVOD = (
-    "Závěrečná zpráva nezačíná rámečkem „Pro tebe“. "
-    "Napiš teď jen krátký doplněk: první řádek `> <🟢|🟠|🔴|🔵> **Pro tebe:** …` (co má uživatel udělat, rozhodnout "
-    "nebo vědět, nejvýš 3 body; když nic: `> 🟢 **Pro tebe:** nic, běží to samo.`). Podrobnosti neopakuj, "
-    "jsou výše. Nic dalšího nedělej."
+    "Závěrečná zpráva nezačíná nadpisem „Pro tebe“. Napiš teď jen krátký doplněk: první řádek "
+    "`### <✅|👉|⛔|💡> Pro tebe: …` (co má uživatel udělat, rozhodnout nebo vědět; když nic: "
+    "`### ✅ Pro tebe: nic, běží to samo.`). Podrobnosti neopakuj, jsou výše. Nic dalšího nedělej."
 )
 
 

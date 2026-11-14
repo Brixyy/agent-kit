@@ -1,4 +1,7 @@
 {
+  "modules": [
+    "./vzhled.tsx"
+  ],
   "hooks": {
     "SessionStart": [
       {
