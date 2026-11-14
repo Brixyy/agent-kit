@@ -59,6 +59,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 ## Orchestrace
 - Pracuj co nejrychleji: paralelní agenty a sessions tam, kde jsou užitečné, ne zbytečně.
 - **Samostatné sessions** (vlastní worktree, větev, PR) pro nezávislé kroky; každá dostane úplné zadání. **Zakládání je trvale povolené** (`user_asked`), zakládej je hned v tahu po zprávě uživatele. Práce v jiném repozitáři jde přes ticket a koordinační session toho projektu (podrobnosti).
+- **Koordinátor projektu:** skill `koordinator` (`/koordinator`), projektová část v `KOORDINACE.md` v kořeni projektu (chybí-li, založí ji).
 - **Subagenti** na hledání, čtení napříč soubory, review a ověřování.
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy) a hlášení nevydává za ověřené. Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
