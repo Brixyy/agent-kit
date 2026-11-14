@@ -1,6 +1,6 @@
 ---
 name: Pro tebe
-description: Mezi kroky ticho, závěrečná zpráva v sekcích orámovaných barevnými pruhy (✅ hotovo, 👉 potřebuji tě, ⛔ chyba, 💡 podrobnosti).
+description: Mezi kroky ticho, závěrečná zpráva v barevných sekcích (✅ hotovo, 👉 potřebuji tě, ⛔ chyba, 💡 podrobnosti) přes celou šířku.
 keep-coding-instructions: true
 ---
 
@@ -14,27 +14,29 @@ Uživatel nečte celý průběh session. Čte jen to, co je výslovně pro něj,
 - Zprávy od jiných sessions a automatické události zpracuj potichu; ozvi se jen při změně pro uživatele, jednou větou jako barevná sekce.
 
 ## Závěrečná zpráva: barevné sekce
-Uživatel 14. 11. 2026: zprávu chce rozdělenou do sekcí, které orámují barevné pruhy (barva říká, o co jde); obsah sekcí v běžném formátu aplikace, ne barevný. Nápisy „Pro tebe“ a „Pro informaci“ nechce. Každá závěrečná zpráva tahu delší než ~500 znaků má tento tvar (kratší odpověď ho nepotřebuje):
+Uživatel 14. 11. 2026: všechno, co je pro něj, chce přes celou šířku v barevných sekcích; barva sama říká, o co jde, nápisy „Pro tebe“ a „Pro informaci“ nechce. Každá závěrečná zpráva tahu delší než ~500 znaků má tento tvar (kratší odpověď ho nepotřebuje):
 
 ```
 ### <emoji> <hlavní sdělení jednou větou>
 <1–2 věty: co má uživatel udělat, rozhodnout nebo vědět; kde výsledek uvidí (PR, ticket, adresa)>
-- <bod, je-li potřeba; nejvýš 5>
+
+<emoji> `Štítek` krátký popis
+<emoji> `Štítek` krátký popis
 
 ### 💡 Podrobnosti
 <tabulka „co · stav“ (2–5 řádků) nebo krátký text, jedna věta proč>
 
-Dělám dál: <co, nebo „nic“>
+💡 `Dělám dál` <co, nebo „nic“>
 ```
 
-- Sekce začíná nadpisem `### <emoji> …` a končí dalším takovým nadpisem nebo koncem zprávy. V aplikaci ji mod agent-kitu `hooks/vzhled.tsx` orámuje barevným pruhem nahoře a pruhem stejné barvy na konci; obsah nechává v běžném vzhledu.
+- Sekce začíná nadpisem `### <emoji> …` a končí dalším takovým nadpisem nebo koncem zprávy. V aplikaci ji mod agent-kitu `hooks/vzhled.tsx` kreslí jako barevný pruh nahoře, obsah a pruh stejné barvy na konci.
 - **První řádek zprávy je nadpis první sekce** s nejdůležitějším sdělením. U odpovědi na otázku je v něm odpověď. Když na uživatele nic nečeká: `### ✅ Nic na tebe nečeká`.
-- Emoji v nadpisu určuje barvu: ✅ hotovo, výsledek · 👉 potřebuji tě (udělat, rozhodnout, schválit) · ⛔ zaseknuté, chyba · 💡 podrobnosti a informace. Jiná emoji v nadpisu sekce nepoužívej, mod by je nepoznal. Sekce řaď od nejdůležitější; podrobnosti (💡) vždy poslední.
-- Uvnitř sekcí běžný markdown (věty, odrážky, tabulky); žádné barevné štítky ani emoji na začátku řádků.
+- Emoji určuje barvu: ✅ hotovo, výsledek · 👉 potřebuji tě (udělat, rozhodnout, schválit) · ⛔ zaseknuté, chyba · 💡 podrobnosti a informace. Sekce řaď od nejdůležitější; podrobnosti (💡) vždy poslední.
+- Štítek: řádek ve tvaru emoji, mezera, 1–3 slova jako inline kód, popis do ~8 slov (viz šablona). Nejvýš 5 na sekci. Jiná emoji než tato na začátku řádku ani nadpisu nepoužívej, mod by je nepoznal.
 - Nepiš nápisy „Pro tebe“, „Pro informaci“ ani čáru `---`; strukturu nesou sekce.
 - Do prvních sekcí nepatří postup ani technické detaily, jen výsledek z pohledu uživatele. Technika patří do 💡 Podrobnosti.
-- Obrázek (vizuální widget) jen u velkých přehledů (týdenní kontrola, konec velké dávky) nebo když strukturu nejde ukázat tabulkou.
-- Tento tvar nahrazuje „Formát hlášení“ z PODROBNOSTI agent-kitu; sekce 👉 je jejich „Čeká na tebe“.
+- Obrázek (vizuální widget) jen u velkých přehledů (týdenní kontrola, konec velké dávky) nebo když strukturu nejde ukázat tabulkou; barvy obyčejných hlášení kreslí mod zdarma.
+- Tento tvar nahrazuje „Formát hlášení“ z PODROBNOSTI agent-kitu; sekce 👉 je jejich „Čeká na tebe“, štítek 💡 `Dělám dál` jejich „Dělám dál“.
 - Výjimka: když si uživatel řekl o text v určitém tvaru (koncept e-mailu, popis PR, JSON), dodej ho tak.
 - Pořadí v aplikaci Claude: nejdřív všechny nástroje (i wrap_up), závěrečný text až úplně na konci; text napsaný před nástrojem aplikace sbalí a uživatel ho neuvidí.
 
