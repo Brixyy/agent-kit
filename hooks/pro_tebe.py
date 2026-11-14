@@ -15,8 +15,8 @@ STYL = "agent-kit:Pro tebe"  # hodnota outputStyle; jinde (cloudové rutiny, jin
 
 DUVOD = (
     "Závěrečná zpráva nezačíná rámečkem „Pro tebe“. "
-    "Napiš teď jen krátký doplněk: první řádek `> 📌 **Pro tebe:** …` (co má uživatel udělat, rozhodnout "
-    "nebo vědět, nejvýš 3 body; když nic: `> ✅ **Pro tebe:** nic, běží to samo.`). Podrobnosti neopakuj, "
+    "Napiš teď jen krátký doplněk: první řádek `> <🟢|🟠|🔴|🔵> **Pro tebe:** …` (co má uživatel udělat, rozhodnout "
+    "nebo vědět, nejvýš 3 body; když nic: `> 🟢 **Pro tebe:** nic, běží to samo.`). Podrobnosti neopakuj, "
     "jsou výše. Nic dalšího nedělej."
 )
 
