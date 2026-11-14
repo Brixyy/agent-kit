@@ -39,6 +39,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spust.sh\" pro_tebe.py",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }
