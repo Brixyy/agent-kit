@@ -1,4 +1,4 @@
-"""Stop: delší závěrečná zpráva musí začínat rámečkem „Pro tebe“ (output style `pro-tebe`).
+"""Stop: delší závěrečná zpráva musí začínat barevnou sekcí (nadpis s emoji stavu) (output style `pro-tebe`).
 
 Uživatel 14. 11. 2026 (Brixyy/agent-kit#31): v session je moc obsahu a část „pro mě“ zapadne.
 Jen když je zapnutý styl STYL: zprávu delší než LIMIT znaků bez rámečku vrátí jednou agentovi,
@@ -8,15 +8,17 @@ Test: python -I tests/test_pro_tebe.py
 """
 import json
 import os
+import re
 import sys
 
 LIMIT = 500  # kratší odpověď (krátká otázka, potvrzení) rámeček nepotřebuje
+SEKCE = re.compile(r"^#{1,3}\s*(✅|🟢|👉|🟠|✋|⛔|🔴|❌|💡|🔵)")  # nadpis sekce s barvou (hooks/vzhled.tsx)
 STYL = "agent-kit:Pro tebe"  # hodnota outputStyle; jinde (cloudové rutiny, jiný styl) hook nic nevynucuje
 
 DUVOD = (
-    "Závěrečná zpráva nezačíná nadpisem „Pro tebe“. Napiš teď jen krátký doplněk: první řádek "
-    "`### <✅|👉|⛔|💡> Pro tebe: …` (co má uživatel udělat, rozhodnout nebo vědět; když nic: "
-    "`### ✅ Pro tebe: nic, běží to samo.`). Podrobnosti neopakuj, jsou výše. Nic dalšího nedělej."
+    "Závěrečná zpráva nezačíná barevnou sekcí. Napiš teď jen krátký doplněk: první řádek "
+    "`### <✅|👉|⛔|💡> <hlavní sdělení pro uživatele>` (co má udělat, rozhodnout nebo vědět; když nic: "
+    "`### ✅ Nic na tebe nečeká`). Podrobnosti neopakuj, jsou výše. Nic dalšího nedělej."
 )
 
 
@@ -41,7 +43,7 @@ def ma_ramecek(text):
     for radek in text.splitlines():
         radek = radek.strip()
         if radek:
-            return "Pro tebe" in radek or radek.startswith(("```", "{", "["))
+            return bool(SEKCE.match(radek)) or "Pro tebe" in radek or radek.startswith(("```", "{", "["))
     return False
 
 
