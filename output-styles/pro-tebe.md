@@ -25,7 +25,7 @@ Každá závěrečná zpráva tahu delší než ~500 znaků má tento tvar (krat
 <stav obrázkem (diagram) nebo tabulkou „co · stav · co dál“ (2–5 řádků), jedna věta proč, na konci „Dělám dál: …“ (nebo „nic“)>
 ```
 
-- Rámeček je **první řádek** zprávy. Když pro uživatele nic není: `> ✅ **Pro tebe:** nic, běží to samo.`
+- Rámeček je **první řádek** zprávy. U odpovědi na otázku je v rámečku **odpověď** ve 1–2 větách, ne „nic“. Když po práci na uživatele nic nečeká: `> ✅ **Pro tebe:** nic, běží to samo.`
 - Čára `---` ukazuje, kde čtení pro uživatele končí. Pod ní nic, co by musel vědět nebo udělat.
 - Do rámečku nepatří postup, technické detaily ani to, co jsi dělal. Jen výsledek z pohledu uživatele.
 - Strukturu, stav a návaznosti ukaž obrázkem nebo tabulkou pod čarou, ne odstavci (kde a jak obrázek posílat, říkají globální pravidla).
