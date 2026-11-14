@@ -53,6 +53,8 @@ PRIPADY = [
     ("cat .github/workflows/ci.yml", "PROJDE"),
     ("rm hooks/" + "pojistka.py", "deny"),
     ("echo x > hooks/" + "pojistka.py", "deny"),
+    ("rm " + "pojistka.py", "deny"),
+    ("sed -i s/a/b/ src/prove_statika/" + "pojistka.py", "PROJDE"),
     ("sed -i s/deny/allow/ hooks/hooks.json", "deny"),
     ("python -I tests/test_pojistka.py", "PROJDE"),
     ('git commit -m "pojistka.py: úprava"', "PROJDE"),
@@ -102,6 +104,8 @@ for nastroj, cesta, text, ocekavano in [
     ("Edit", "/repo/.github/workflows/ci.yml", "timeout-minutes: 10", "PROJDE"),
     ("Read", "/repo/hooks/pojistka.py", "", "PROJDE"),
     ("Edit", "/repo/tests/test_pojistka.py", "x", "PROJDE"),
+    ("Edit", "C:\\Users\\Admin\\Dev\\prove-statika\\src\\prove_statika\\pojistka.py", "x", "PROJDE"),
+    ("Edit", "/home/u/.claude/plugins/cache/agent-kit/agent-kit/2.10.1/hooks/pojistka.py", "x", "deny"),
     ("Edit", "C:\\Dev\\agent-kit\\Hooks\\Hooks.json", "x", "deny"),
     ("Edit", "/home/u/.claude/settings.json", '"agent-kit@agent-kit": false', "deny"),
 ]:

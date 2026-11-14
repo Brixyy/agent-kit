@@ -25,7 +25,12 @@ EXIT_KOD = "--exit-code" in sys.argv
 PLATNOST_S = 15 * 60
 
 # Soubory, kterými agent vypíná vlastní kontroly: pojistka, hooky pluginu, nastavení s hooky.
-VLASTNI_KONTROLY = r"(?<![\w-])(pojistka\.py|cloud-pojistka\.sh|hooks[\\/]hooks\.json|\.codex[\\/]hooks\.json)"
+# Pojistka jen ve složce hooks/ nebo jako holý název bez cesty: stejnojmenný modul projektu
+# (prove-statika src/prove_statika/pojistka.py) vlastní kontrolou agenta není.
+VLASTNI_KONTROLY = (
+    r"(?<![\w-])(hooks[\\/]pojistka\.py|(?<![\\/])pojistka\.py|cloud-pojistka\.sh"
+    r"|hooks[\\/]hooks\.json|\.codex[\\/]hooks\.json)"
+)
 NASTAVENI = re.compile(r"/\.claude/settings(\.local)?\.json$", re.I)
 # Příkazy, které soubor mažou, přesouvají, přepisují nebo vrací do jiné verze.
 MENI_SOUBOR = r"(?<![\w-])(rm|rmdir|rd|del|Remove-Item|mv|move|Move-Item|tee|truncate|sed\s+-i|git\s+(rm|mv|checkout|restore))\b"
