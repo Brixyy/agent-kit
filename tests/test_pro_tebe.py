@@ -39,6 +39,8 @@ pripady = [
     ("dlouhá zpráva s rámečkem projde", pusti({"last_assistant_message": "> 📌 **Pro tebe:** schval PR.\n\n---\n\n" + DLOUHY})),
     ("rámeček „nic“ projde", pusti({"last_assistant_message": "\n> ✅ **Pro tebe:** nic, běží to samo.\n\n---\n" + DLOUHY})),
     ("nadpis s pruhem projde", pusti({"last_assistant_message": "### 👉 Pro tebe: schval PR\n\n👉 `Potřebuji tě` schval\n" + DLOUHY})),
+    ("sekce bez nápisu Pro tebe projde", pusti({"last_assistant_message": "### ✅ Hotovo, PR je sloučené" + chr(10) + DLOUHY})),
+    ("nadpis bez emoji se vrátí", blokuje({"last_assistant_message": "### Shrnutí" + chr(10) + DLOUHY})),
     ("rámeček až dole nestačí", blokuje({"last_assistant_message": DLOUHY + "\n> 📌 **Pro tebe:** x"})),
     ("krátká odpověď projde", pusti({"last_assistant_message": "Ano, je to v main."})),
     ("druhý pokus projde (žádná smyčka)", pusti({"last_assistant_message": DLOUHY, "stop_hook_active": True})),
