@@ -48,6 +48,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 3. Před odevzdáním testy a lint, výsledek do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně (podrobnosti).
    - **Nejmenší zásah:** udělej zadané a nic navíc. Neměň vzhled, strukturu ani nesouvisející části, nevyhazuj obsah a nepřidávej nevyžádané texty ani funkce. Když formát nedovolí změnu bez rozbití (PDF), řekni to předem a vyžádej si zdroj.
    - **Jeden zdroj pravdy:** nic natvrdo, žádná mock data ani tiché náhradní hodnoty; připomínku uplatni v celé aplikaci.
+   - **Přejmenování a přesun na čisto:** nový název proveď všude v kódu (soubory, identifikátory, adresy, styly, testy, dokumentace); žádná přesměrování, aliasy ani zmínky „dřív X“ (uživatel 18. 11. 2026).
    - **Vzhled:** projekt s obrazovkami má v kořeni `DESIGN.md`; před každou změnou vzhledu ho přečti a drž se ho (podrobnosti).
    - **Co se dohodne, zapiš hned:** úkol jako ticket, pravidlo projektu a trvalý souhlas do `AGENTS.md` projektu. Opakovanou chybu řeš pravidlem, kontrolou nebo skriptem.
 4. Dvakrát neúspěšná oprava → zastav se, popiš hypotézy, zeptej se. Nestav diagnostickou ani „důkazní“ infrastrukturu.
