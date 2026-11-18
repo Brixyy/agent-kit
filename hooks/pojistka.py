@@ -90,6 +90,11 @@ RIZIKOVE_PRIKAZY = [
     (r"(?<![\w-])find\b[^\n;&]*(" + VLASTNI_KONTROLY + r"|" + GLOB_KONTROLY + r"|" + HOOKS_AK + r"\b)[^\n;&]*"
      r"\|\s*xargs\b[^\n;&|]*\b" + FIND_MENI, "úprava pojistky nebo hooků"),
     (MENI_SOUBOR + r"[^\n;&|]*" + INSTALACE, "smazání pluginu agent-kit (pojistka)"),
+    # Stažení nebo rozbalení přes pojistku či do složky hooks (Brixyy/agent-kit#41).
+    (r"(?<![\w-])(curl|wget|Invoke-WebRequest|iwr|Invoke-RestMethod|irm)\b[^\n;&|]*\s(-o|--output|-OutFile)[\s=]*\S*"
+     + CIL_KONTROLY, "úprava pojistky nebo hooků"),
+    (r"(?<![\w-])(tar\b[^\n;&|]*\s(-C|--directory)|unzip\b[^\n;&|]*\s-d|Expand-Archive\b[^\n;&|]*\s-DestinationPath)"
+     r"[\s=]*\S*" + CIL_KONTROLY, "úprava pojistky nebo hooků"),
     (r"\bclaude\s+plugins?\s+(disable|uninstall|remove)\b[^\n;&|]*agent-kit", "vypnutí pluginu agent-kit (pojistka)"),
     (r"\bdisableAllHooks\W*[:=]\s*true", "vypnutí hooků"),
 ]
