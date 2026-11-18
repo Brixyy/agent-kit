@@ -95,7 +95,7 @@ Každou založenou, změněnou nebo smazanou rutinu zapiš do rejstříku `portf
 - Úloha, která potřebuje lokální Chrome nebo počítač (např. sledování účtů na X), cloud nezvládne: pouští se lokálně jako výjimka a řekne se to uživateli.
 
 ## Cloudová session (claude.ai/code a podobné)
-- Vidí jen svůj repozitář a veřejný agent-kit. Nemá `.env*`, složku `Dev`, prohlížeč ani lokální konektory; práce s Vercelem, Supabase nebo prohlížečem patří do lokální session.
+- Vidí repozitáře připojené k session nebo rutině (může jich být víc; GitHub API jen pro ně) a veřejný agent-kit. Konektory z claude.ai má. Nemá `.env*`, složku `Dev`, prohlížeč ani lokální MCP servery a CLI s přihlášením (Vercel, Supabase); taková práce patří do lokální session. Ověřeno v dokumentaci Claude Code 18. 11. 2026 (cloud-environments, routines).
 - `gh` přes GraphQL nefunguje (`gh issue list`, `gh pr view` → 403); používej `gh api` (REST) nebo GitHub MCP.
 
 ## Vercel
