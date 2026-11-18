@@ -1,4 +1,7 @@
 {
+  "modules": [
+    "./vzhled.tsx"
+  ],
   "hooks": {
     "SessionStart": [
       {
@@ -35,6 +38,17 @@
           {
             "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spust.sh\" uklid_hook.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spust.sh\" pro_tebe.py",
             "timeout": 5
           }
         ]

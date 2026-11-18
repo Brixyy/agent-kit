@@ -38,7 +38,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - **Co jde zjistit, zjisti sám** (kód, databáze, server, dokumentace, prohlížeč). Neposílej uživatele nic ověřovat ani opisovat příkazy. Problém v rozsahu úkolu vyřeš a oznam (mimo audity a „jen analýza“).
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti).
 - Trvalý souhlas vykládej široce a zapiš ho; neruší seznam „Vždy se zeptej před“. „Jen plán / jen analýza“ má přednost: nic neměň.
-- **Sloučení PR je trvale povolené** (i do `main`): po review `gh pr merge <č> --auto --squash`. Výjimka: PR „nesloučit“ nebo čekající na podmínku.
+- **Sloučení PR je trvale povolené** (i do `main`): po review `gh pr merge <č> --auto --squash`; když to GitHub odmítne, počkej na CI a sluč sám, bez ptaní. Výjimka: PR „nesloučit“ nebo čekající na podmínku.
 - **Vždy se zeptej před:** přímým push do `main`/`master` mimo PR, ručním produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním, placenou službou nebo API, vypnutím či úpravou vlastních kontrol, zápisem do cizího repozitáře a produktovými rozhodnutími. Potvrzení pojistky a dávky: podrobnosti.
 - **`.env`:** smíš načíst do procesu, **nikdy nevypisuj** a neotvírej nástrojem pro čtení; zápis jen skriptem `scripts/env_nastav.py` (podrobnosti).
 
@@ -48,18 +48,20 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 3. Před odevzdáním testy a lint, výsledek do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně (podrobnosti).
    - **Nejmenší zásah:** udělej zadané a nic navíc. Neměň vzhled, strukturu ani nesouvisející části, nevyhazuj obsah a nepřidávej nevyžádané texty ani funkce. Když formát nedovolí změnu bez rozbití (PDF), řekni to předem a vyžádej si zdroj.
    - **Jeden zdroj pravdy:** nic natvrdo, žádná mock data ani tiché náhradní hodnoty; připomínku uplatni v celé aplikaci.
+   - **Přejmenování a přesun na čisto:** nový název proveď všude v kódu (soubory, identifikátory, adresy, styly, testy, dokumentace); žádná přesměrování, aliasy ani zmínky „dřív X“ (uživatel 18. 11. 2026).
    - **Vzhled:** projekt s obrazovkami má v kořeni `DESIGN.md`; před každou změnou vzhledu ho přečti a drž se ho (podrobnosti).
    - **Co se dohodne, zapiš hned:** úkol jako ticket, pravidlo projektu a trvalý souhlas do `AGENTS.md` projektu. Opakovanou chybu řeš pravidlem, kontrolou nebo skriptem.
 4. Dvakrát neúspěšná oprava → zastav se, popiš hypotézy, zeptej se. Nestav diagnostickou ani „důkazní“ infrastrukturu.
 5. Audity a průzkumy jen čtou: nic neopravuj, nenasazuj a neměň data bez souhlasu.
 6. Při přerušení nebo konci session předávka (skill `predavka`).
 7. **Osobní asistent** (`Brixyy/asistent`) drží paměť o uživateli a schránku podnětů. „Poznamenej si / podnět / nápad / stížnost“ nebo změna globálních pravidel mimo session asistenta → skill `poznamka`.
-8. **Plánované úlohy vždy jako rutiny Claude** (cloudové; lokální jen výjimkou v aplikaci Claude, nikdy systémový plánovač). **Slíbenou kontrolu si naplánuj sám**, uživatel nic nepřipomíná: pravidelná = rutina, jednorázová k běžící práci = úloha v session.
+8. **Plánované úlohy jen jako rutiny Claude** (cloudové; lokální jen výjimkou v aplikaci Claude; nikdy systémový plánovač ani úloha v session typu `CronCreate`, ta zmizí s archivací). **Slíbenou kontrolu si naplánuj sám** jako rutinu, pravidelnou i jednorázovou.
 
 ## Orchestrace
 - Pracuj co nejrychleji: paralelní agenty a sessions tam, kde jsou užitečné, ne zbytečně.
 - **Samostatné sessions** (vlastní worktree, větev, PR) pro nezávislé kroky; každá dostane úplné zadání. **Zakládání je trvale povolené** (`user_asked`), zakládej je hned v tahu po zprávě uživatele. Práce v jiném repozitáři jde přes ticket a koordinační session toho projektu (podrobnosti).
-- **Subagenti** na hledání, čtení napříč soubory, review a ověřování.
+- **Koordinátor projektu:** skill `koordinator` (`/koordinator`), projektová část v `KOORDINACE.md` v kořeni projektu (chybí-li, založí ji).
+- **Subagenti** jen na krátké hledání, čtení, review a ověřování; implementaci dostávají pod-sessions, které uživatel vidí, ne agenti na pozadí.
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy) a hlášení nevydává za ověřené. Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
 - PR hlídá vlastník až do sloučení. Po sloučení uklidit worktree, větve a hotové sessions (podrobnosti). **Hotovou session archivuj hned a bez ptaní.**
