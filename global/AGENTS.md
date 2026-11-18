@@ -54,13 +54,13 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 5. Audity a průzkumy jen čtou: nic neopravuj, nenasazuj a neměň data bez souhlasu.
 6. Při přerušení nebo konci session předávka (skill `predavka`).
 7. **Osobní asistent** (`Brixyy/asistent`) drží paměť o uživateli a schránku podnětů. „Poznamenej si / podnět / nápad / stížnost“ nebo změna globálních pravidel mimo session asistenta → skill `poznamka`.
-8. **Plánované úlohy vždy jako rutiny Claude** (cloudové; lokální jen výjimkou v aplikaci Claude, nikdy systémový plánovač). **Slíbenou kontrolu si naplánuj sám**, uživatel nic nepřipomíná: pravidelná = rutina, jednorázová k běžící práci = úloha v session.
+8. **Plánované úlohy jen jako rutiny Claude** (cloudové; lokální jen výjimkou v aplikaci Claude; nikdy systémový plánovač ani úloha v session typu `CronCreate`, ta zmizí s archivací). **Slíbenou kontrolu si naplánuj sám** jako rutinu, pravidelnou i jednorázovou.
 
 ## Orchestrace
 - Pracuj co nejrychleji: paralelní agenty a sessions tam, kde jsou užitečné, ne zbytečně.
 - **Samostatné sessions** (vlastní worktree, větev, PR) pro nezávislé kroky; každá dostane úplné zadání. **Zakládání je trvale povolené** (`user_asked`), zakládej je hned v tahu po zprávě uživatele. Práce v jiném repozitáři jde přes ticket a koordinační session toho projektu (podrobnosti).
 - **Koordinátor projektu:** skill `koordinator` (`/koordinator`), projektová část v `KOORDINACE.md` v kořeni projektu (chybí-li, založí ji).
-- **Subagenti** na hledání, čtení napříč soubory, review a ověřování.
+- **Subagenti** jen na krátké hledání, čtení, review a ověřování; implementaci dostávají pod-sessions, které uživatel vidí, ne agenti na pozadí.
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy) a hlášení nevydává za ověřené. Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
 - PR hlídá vlastník až do sloučení. Po sloučení uklidit worktree, větve a hotové sessions (podrobnosti). **Hotovou session archivuj hned a bez ptaní.**
