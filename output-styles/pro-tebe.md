@@ -29,7 +29,7 @@ Uživatel 14. 11. 2026: všechno, co je pro něj, chce přes celou šířku v ba
 💡 `Dělám dál` <co, nebo „nic“>
 ```
 
-- Sekce začíná nadpisem `### <emoji> …` a končí dalším takovým nadpisem nebo koncem zprávy. V aplikaci ji mod agent-kitu `hooks/vzhled.tsx` kreslí jako barevný pruh nahoře, obsah a pruh stejné barvy na konci.
+- Sekce začíná nadpisem `### <emoji> …` a končí dalším takovým nadpisem nebo koncem zprávy. V aplikaci ji mod agent-kitu `hooks/vzhled.tsx` kreslí jako barevný pruh nahoře a celou podbarvenou (všechno ke čtení je podbarvené, text mimo sekce ne; prázdné pruhy nejsou).
 - **První řádek zprávy je nadpis první sekce** s nejdůležitějším sdělením. U odpovědi na otázku je v něm odpověď. Když na uživatele nic nečeká: `### ✅ Nic na tebe nečeká`.
 - Emoji určuje barvu: ✅ hotovo, výsledek · 👉 potřebuji tě (udělat, rozhodnout, schválit) · ⛔ zaseknuté, chyba · 💡 podrobnosti a informace. Sekce řaď od nejdůležitější; podrobnosti (💡) vždy poslední.
 - Štítek: řádek ve tvaru emoji, mezera, 1–3 slova jako inline kód, popis do ~8 slov (viz šablona). Nejvýš 5 na sekci. Jiná emoji než tato na začátku řádku ani nadpisu nepoužívej, mod by je nepoznal.

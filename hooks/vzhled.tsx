@@ -4,7 +4,7 @@ import type { Register } from 'claude-code'
 //   ### <emoji> nadpis          → začátek sekce: barevný pruh přes celou šířku
 //   <emoji> `Štítek` popis      → řádek sekce přes celou šířku se štítkem
 //   ostatní text                → obsah sekce
-// Sekce končí dalším nadpisem s emoji, čarou --- nebo koncem zprávy; uzavře ji pruh stejné barvy bez textu.
+// Sekce končí dalším nadpisem s emoji, čarou --- nebo koncem zprávy; celá je podbarvená (ke čtení), text mimo sekce ne.
 // Barvu určuje emoji. Text odpovědi se nemění (mobil a terminál ukazují obyčejný text).
 
 type Stav = 'hotovo' | 'potrebuji' | 'chyba' | 'info'
@@ -58,12 +58,13 @@ export const register: Register = on => {
     if (!maNeco) return next(e)
     const { Box, Text, Markdown } = $.ui.resolve(e)
 
-    const radky = (seznam: Radek[], klic: string) =>
+    // vSekci: řádek leží na podbarvené sekci, vlastní podklad nepotřebuje
+    const radky = (seznam: Radek[], klic: string, vSekci: boolean) =>
       seznam.map((r, i) => {
         if (r.druh === 'md') return <Box key={`${klic}m${i}`} paddingX={2}><Markdown text={r.text} /></Box>
         const barva = STAV[podle(r.emoji)]
         return (
-          <Box key={`${klic}s${i}`} flexDirection="row" gap={1} alignItems="center" backgroundColor={barva.svetle} paddingX={2} paddingY={1}>
+          <Box key={`${klic}s${i}`} flexDirection="row" gap={1} alignItems="center" backgroundColor={vSekci ? undefined : barva.svetle} paddingX={2} paddingY={vSekci ? 0 : 1}>
             <Box backgroundColor={barva.bg} paddingX={1}>
               <Text color={barva.text} weight="semibold">{`${r.emoji} ${r.stitek}`}</Text>
             </Box>
@@ -76,15 +77,17 @@ export const register: Register = on => {
       <Box flexDirection="column" gap={2}>
         {bloky.map((b, i) => {
           const klic = `b${i}`
-          if (b.druh === 'volny') return <Box key={klic} flexDirection="column" gap={1}>{radky(b.radky, klic)}</Box>
+          if (b.druh === 'volny') return <Box key={klic} flexDirection="column" gap={1}>{radky(b.radky, klic, false)}</Box>
           const barva = STAV[podle(b.emoji)]
+          // celá sekce je podbarvená: co je v ní, je ke čtení; text mimo sekce zůstává bez podkladu
           return (
-            <Box key={klic} flexDirection="column" gap={1}>
+            <Box key={klic} flexDirection="column" backgroundColor={barva.svetle}>
               <Box backgroundColor={barva.bg} paddingX={2} paddingY={1} justifyContent="center">
                 <Text color={barva.text} size="heading" weight="semibold">{`${b.emoji}  ${b.nadpis}`}</Text>
               </Box>
-              {radky(b.radky, klic)}
-              <Box backgroundColor={barva.bg} height={1} />
+              {b.radky.length > 0 && (
+                <Box flexDirection="column" gap={1} paddingY={1}>{radky(b.radky, klic, true)}</Box>
+              )}
             </Box>
           )
         })}
