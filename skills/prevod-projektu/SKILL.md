@@ -17,4 +17,4 @@ Nový projekt zakládej ze šablony `Brixyy/project-template` (už obsahuje body
 8. **Vercel** (jen projekt s Vercelem): z agent-kitu spusť `python -I scripts/vercel_kontrola.py <projekt>`; náhledy vypnuté, produkce jen z `main` (PODROBNOSTI → Vercel).
 9. **Úkoly:** GitHub Issues + Project „Brixyy – projekty“ (č. 13); robotika v Linearu.
 10. Zruš pozůstatky starých nástrojů (`_flow/`, zrcadla `.agents/skills` ↔ `.claude/skills`, lokální zákazy v `.claude/settings.local.json`, které blokují běžnou práci).
-10. PR s popisem přes `--body-file`, review, pak `gh pr merge --auto --squash`.
+11. PR s popisem přes `--body-file`, review, pak `gh pr merge --auto --squash`.
