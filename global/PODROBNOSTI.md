@@ -50,6 +50,7 @@ Uživatel 26. 10. 2026 (mění pravidlo „Done uzavírá jen uživatel“). PR,
 
 ## Kontroly a testy
 Kontroly úměrné změně: během práce rychlé a cílené, plná sada jednou před PR, velké běhy (celý repozitář, bezpečnostní sken) denně nebo týdně.
+- **Samostatný hodnotitel** u větších PR (nová funkce, změna výpočtu nebo dat, víc souborů): review dělá agent `reviewer`, který neviděl průběh práce. Dostane jen zadání (ticket), číslo PR a jak výsledek spustit nebo ověřit; ne autorův souhrn ani závěry. Ověřuje výsledek proti zadání (spustí testy; UI ověřuje `overovatel-ui`), ne jen diff. U malých PR (dokumentace, drobná oprava) stačí běžné review. Žádné kolo navíc: hodnotitel nahrazuje běžné review, opakovaná kola podle skillu `prace-workflow` (uživatel 18. 11. 2026, Brixyy/asistent#224; tým Claude Code: samostatný hodnotitel podle zadání zvedl úspěšnost agentů až o 10 bodů).
 
 ## Plánované úlohy (rutiny)
 Opakované i jednorázové kontroly a úlohy zakládej jako cloudové rutiny Claude Code (skill `schedule`, správa na https://claude.ai/code/routines), nikdy jako lokální úlohy vázané na zapnutý počítač. Zakládání, úpravy i mazání rutin a úloh dělej sám bez ptaní (uživatel 22. 10. 2026: „aby se nestalo, že se mi vypne počítač a pak se něco nekontroluje“).
