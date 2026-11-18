@@ -7,9 +7,10 @@ Společná pravidla a nástroje pro AI agenty ve všech projektech Brixyy — ne
 |---|---|---|
 | `global/AGENTS.md` | Globální pravidla: kdo je uživatel, komunikace, pravdivost, autonomie, způsob práce, orchestrace | prostý Markdown (čte každý agent) |
 | `global/PODROBNOSTI.md` | Podrobnosti k pravidlům (pojistka, `.env`, rutiny, orchestrace, úklid, cloud). Nevkládá se, hook předá cestu | prostý Markdown |
-| `skills/` | Vlastní pracovní postupy: `prace-workflow`, `predavka`, `rozhodnuti`, `nez-zacnes-stavet`, `prevod-projektu`, `poznamka` (zápis do osobního asistenta Brixyy/asistent) | otevřený standard Agent Skills (`SKILL.md`) |
+| `skills/` | Vlastní pracovní postupy: `prace-workflow`, `predavka`, `rozhodnuti`, `nez-zacnes-stavet`, `prevod-projektu`, `poznamka` (zápis do osobního asistenta Brixyy/asistent), `koordinator` (koordinační session projektu; projektová část v `KOORDINACE.md` projektu) | otevřený standard Agent Skills (`SKILL.md`) |
 | `agents/reviewer.md` | Nezávislá kontrola PR před sloučením | subagent Claude Code |
 | `agents/overovatel-ui.md` | Ověření obrazovek v prohlížeči na desktopu i mobilu | subagent Claude Code |
+| `output-styles/pro-tebe.md` + `hooks/pro_tebe.py` + `hooks/vzhled.tsx` | Styl odpovědí „Pro tebe“: mezi kroky ticho, závěrečná zpráva začíná rámečkem 📌 pro uživatele, podrobnosti pod čarou. Mod `vzhled.tsx` (Desktop) kreslí odpověď jako barevné sekce (✅ 👉 ⛔ 💡): pruh nahoře, celá sekce podbarvená, řádky se štítky. Stop hook při zapnutém stylu vrátí delší zprávu bez rámečku jednou k doplnění rámečku. Zapnutí: `"outputStyle": "agent-kit:Pro tebe"` v `~/.claude/settings.json`; bez něj hook nic nevynucuje | Claude Code (output style, Stop) |
 | `hooks/pojistka.py` | Zastaví nevratné a produkční akce i vypnutí vlastních kontrol, zakáže otevírání a vypisování `.env` (načíst do procesu se smí) | Claude Code (JSON) i Codex (`--exit-code`) |
 | `hooks/uklid_hook.py` + `scripts/uklid.py` | Úklid po sessions (Windows): na konci session ukončí její dev servery a zastaví kontejnery se štítkem `agent-kit.slozka`, na startu session ukončí osiřelé dev servery v `~/Dev`. Ručně: `python -I scripts/uklid.py --sirotci [--provest]` | Claude Code (SessionEnd, SessionStart) |
 | `scripts/` | `install.py` (počítač, Codex), `napojit-projekt.py` (projekt), `cloud-bootstrap.sh` + `cloud-pojistka.sh` (cloudové sessions) | |
@@ -28,7 +29,7 @@ nebo v terminálu `claude plugin marketplace add Brixyy/agent-kit` a `claude plu
 **Projekt:** `python -I scripts/napojit-projekt.py <projekt>/.claude/settings.json` — marketplace, plugin a cloudové hooky. Celý postup: skill `prevod-projektu`.
 
 ## Cloud (claude.ai/code)
-Cloudová session pluginy z `.claude/settings.json` projektu neinstaluje. Hooky projektu proto v cloudu spustí `scripts/cloud-bootstrap.sh` (stáhne tento repozitář do `~/.agents/agent-kit`, nainstaluje plugin, vloží pravidla) a `scripts/cloud-pojistka.sh` (pojistka). Lokálně nedělají nic. Ověřeno v Brixyy/trading 22. 10. 2026.
+Cloudová session pluginy z `.claude/settings.json` projektu neinstaluje. Hooky projektu proto v cloudu spustí `scripts/cloud-bootstrap.sh` (stáhne tento repozitář do `~/.agents/agent-kit`, nainstaluje plugin, vloží pravidla) a `scripts/cloud-pojistka.sh` (pojistka). Lokálně nedělají nic. Ověřeno v Brixyy/elyon (dřív trading) 22. 10. 2026.
 
 ## Úpravy, testy, verze
 - Změna → zvyš `version` v `.claude-plugin/plugin.json` a ověř `claude plugin validate .` a testy v `tests/` (CI `testy` je spouští při každém push a PR).
