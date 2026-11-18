@@ -14,6 +14,7 @@ Načíst je do procesu (source, --env-file) se smí; zápis jen skriptem scripts
 Výstup: Claude Code dostane JSON s permissionDecision. S argumentem --exit-code
 (Codex a další agenti) se zákaz hlásí kódem 2 a důvodem na stderr.
 """
+import bisect
 import json
 import os
 import re
@@ -27,13 +28,38 @@ PLATNOST_S = 15 * 60
 # Soubory, kterými agent vypíná vlastní kontroly: pojistka, hooky pluginu, nastavení s hooky.
 # Výjimka jen pro stejnojmenný modul výpočtu prove-statika (src/prove_statika/pojistka.py),
 # který vlastní kontrolou agenta není; při pochybnosti pojistka blokuje dál.
+# Spouštěč spust.sh se hlídá v hooks/ nebo bez cesty (jiné projekty můžou mít vlastní scripts/spust.sh).
 VLASTNI_KONTROLY = (
-    r"(?<![\w-])((?<!prove_statika[\\/])pojistka\.py|cloud-pojistka\.sh"
-    r"|hooks[\\/]hooks\.json|\.codex[\\/]hooks\.json)"
+    r"(?<![\w-])((?<!prove_statika[\\/])pojistka\.py|pojist~\d+\.py|cloud-pojistka\.sh"
+    r"|hooks[\\/]spust\.sh|(?<![\w-][\\/])spust\.sh|hooks[\\/]hooks\.json|\.codex[\\/]hooks\.json)"
 )
 NASTAVENI = re.compile(r"/\.claude/settings(\.local)?\.json$", re.I)
 # Příkazy, které soubor mažou, přesouvají, přepisují nebo vrací do jiné verze.
-MENI_SOUBOR = r"(?<![\w-])(rm|rmdir|rd|del|Remove-Item|mv|move|Move-Item|tee|truncate|sed\s+-i|git\s+(rm|mv|checkout|restore))\b"
+MENI_SOUBOR = (
+    r"(?<![\w-])(rm|rmdir|rd|del|erase|Remove-Item|mv|move|Move-Item|ren|rni|Rename-Item|tee|truncate|sed\s+-i"
+    r"|git\s+(rm|mv|checkout|restore))\b"
+)
+# Zápis obsahu v PowerShellu (i zkratky); hlídá se jen u vlastních kontrol, nové workflow v PR projdou.
+ZAPISUJE = r"(?<![\w-])(Set-Content|Add-Content|Clear-Content|Out-File|New-Item|sc|ac|clc|ni)\b"
+# Kopírování a odkazy: soubor přepíše jen cíl (každý argument kromě zdroje), čtení zdroje je v pořádku.
+# „install“ jen jako samostatný příkaz, ne „npm install“.
+KOPIRUJE = r"((?<![\w-])(cp|copy|cpi|Copy-Item|rsync|ln)\b|(^|(?<=[;&|(\n]))\s*install\b)"
+# Složka hooks agent-kitu: bez cesty, ./hooks, agent-kit/hooks nebo nainstalovaná verze …/2.15.4/hooks.
+# Ne .git/hooks ani src/hooks jiných projektů.
+HOOKS_AK = (
+    r"(^|(?<=[\s='\"])|(?<=\./)|(?<=\.\\)|(?<=agent-kit[\\/])|(?<=\.\d[\\/])|(?<=\.\d\d[\\/])"
+    r"|(?<=CLAUDE_PLUGIN_ROOT[\\/])|(?<=CLAUDE_PLUGIN_ROOT}[\\/]))hooks"
+)
+CIL_KONTROLY = r"(" + VLASTNI_KONTROLY + r"|" + HOOKS_AK + r"([\\/]|\s|$))"
+# Zástupné znaky, které zasáhnou pojistku nebo hooky (rm hooks/*, rm pojist*.py).
+GLOB_KONTROLY = r"(" + HOOKS_AK + r"[\\/]\S*[*?\[]|(?<![\w-])(pojist|spust)\S*[*?\[])"
+# Instalace pluginu: smazáním cache zmizí pojistka i hooky (lokálně i v cloudu).
+INSTALACE = (
+    r"(\.claude([\\/](plugins([\\/](cache|marketplaces))?))?[\\/]?(\*|\s|$)|\.claude[\\/]plugins[\\/]\S*agent-kit"
+    r"|\.agents([\\/]agent-kit)?[\\/]?(\*|\s|$)|(?<![\w./\\-])agent-kit[\\/]?(\*|\s|$))"
+)
+# Příkazy, které find spustí nad nalezenými soubory a které soubor mění.
+FIND_MENI = r"(rm|mv|cp|tee|truncate|sed\s+-i|ln|shred|dd|Remove-Item)\b"
 
 RIZIKOVE_PRIKAZY = [
     (r"\bgit\s+push\b[^\n;&|]*\b(main|master)\b", "push do main/master"),
@@ -52,8 +78,18 @@ RIZIKOVE_PRIKAZY = [
     (r"\bgh\s+workflow\s+disable\b", "vypnutí kontroly (GitHub workflow)"),
     (MENI_SOUBOR + r"[^\n;&|]*(?<![\w-])\.github([\\/]workflows)?([\\/]?\s|[\\/]?$)", "smazání kontroly (GitHub workflow)"),
     (MENI_SOUBOR + r"[^\n;&|]*\.github[\\/]workflows[\\/]", "smazání kontroly (GitHub workflow)"),
-    (MENI_SOUBOR + r"[^\n;&|]*(" + VLASTNI_KONTROLY + r"|(?<![\w-])hooks[\\/]?(\s|$))|>\s*\S*" + VLASTNI_KONTROLY,
+    (MENI_SOUBOR + r"[^\n;&|]*(" + VLASTNI_KONTROLY + r"|" + HOOKS_AK + r"[\\/]?(\s|$)|" + GLOB_KONTROLY + r")"
+     r"|" + ZAPISUJE + r"[^\n;&|]*" + VLASTNI_KONTROLY + r"|>\s*\S*" + VLASTNI_KONTROLY,
      "úprava pojistky nebo hooků"),
+    (KOPIRUJE + r"(\s+-\S+)*\s+[^\s-]\S*[^\n;&|]*?[\s=]\S*?" + CIL_KONTROLY
+     + r"|" + KOPIRUJE + r"[^\n;&|]*-(Destination|-?target-directory)[\s=]+\S*" + CIL_KONTROLY,
+     "úprava pojistky nebo hooků"),
+    (r"(?<![\w-])dd\b[^\n;&|]*\bof=\S*" + CIL_KONTROLY, "úprava pojistky nebo hooků"),
+    (r"(?<![\w-])find\b[^\n;&|]*(" + VLASTNI_KONTROLY + r"|" + GLOB_KONTROLY + r"|" + HOOKS_AK + r"\b)[^\n;&|]*"
+     r"\s(-delete\b|-(exec|execdir|ok)\s+" + FIND_MENI + r")", "úprava pojistky nebo hooků"),
+    (r"(?<![\w-])find\b[^\n;&]*(" + VLASTNI_KONTROLY + r"|" + GLOB_KONTROLY + r"|" + HOOKS_AK + r"\b)[^\n;&]*"
+     r"\|\s*xargs\b[^\n;&|]*\b" + FIND_MENI, "úprava pojistky nebo hooků"),
+    (MENI_SOUBOR + r"[^\n;&|]*" + INSTALACE, "smazání pluginu agent-kit (pojistka)"),
     (r"\bclaude\s+plugins?\s+(disable|uninstall|remove)\b[^\n;&|]*agent-kit", "vypnutí pluginu agent-kit (pojistka)"),
     (r"\bdisableAllHooks\W*[:=]\s*true", "vypnutí hooků"),
 ]
@@ -75,11 +111,51 @@ ENV_CTENI = re.compile(
 )
 
 
+def _uvozovky(m):
+    """Text v uvozovkách zahodí; cestu (jedno slovo nebo cesta k vlastní kontrole) ponechá bez uvozovek."""
+    obsah = m.group(0)[1:-1].strip()
+    if re.search(r"\||\.\*", obsah):  # regulární výraz (grep), ne cesta, glob ani $PROMENNA
+        return "''"
+    if not re.search(r"\s", obsah):
+        return obsah
+    if re.search(VLASTNI_KONTROLY + r"$", obsah, re.I):
+        # Cesta s mezerou (C:\Program Files\…): spojit bez mezer, aby se z věty nestaly příkazy.
+        return re.sub(r"\s+", "", obsah)
+    return "''"
+
+
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1")
+
+
+def bez_heredocu(prikaz):
+    """Vynechá těla heredoců (po řádek začínající ukončovacím slovem). Zbytek prvního řádku
+    (cat <<EOF > soubor) zůstává ke kontrole. Po řádcích a přes rejstřík, aby dlouhý text
+    s „<<“ (C++, bitový posun) nebyl pomalý a nepřekročil časový limit hooku."""
+    radky = prikaz.split("\n")
+    zacatky = {}
+    for i, radek in enumerate(radky):
+        m = re.match(r"\s*(\w+)", radek)
+        if m:
+            zacatky.setdefault(m.group(1), []).append(i)
+    vysledek, i = [], 0
+    while i < len(radky):
+        m = HEREDOC.search(radky[i])
+        indexy = zacatky.get(m.group(2), []) if m else []
+        k = bisect.bisect_right(indexy, i)
+        if k < len(indexy):
+            vysledek.append(radky[i][:m.start()] + "<<HEREDOC" + radky[i][m.end():])
+            i = indexy[k] + 1
+            continue
+        vysledek.append(radky[i])
+        i += 1
+    return "\n".join(vysledek)
+
+
 def bez_textu(prikaz):
     """Odstraní obsah heredoců a řetězců v uvozovkách, aby pojistka nereagovala na text (popis PR, echo)."""
-    prikaz = re.sub(r"<<-?\s*['\"]?(\w+)['\"]?.*?\n.*?\n\s*\1\b", "<<HEREDOC", prikaz, flags=re.S)
-    prikaz = re.sub(r"'[^']*'", "''", prikaz)
-    return re.sub(r'"(\\.|[^"\\])*"', '""', prikaz)
+    prikaz = bez_heredocu(prikaz)
+    prikaz = re.sub(r"'[^']*'", _uvozovky, prikaz)
+    return re.sub(r'"(\\.|[^"\\])*"', _uvozovky, prikaz)
 
 
 def vystup(rozhodnuti, duvod):
@@ -168,12 +244,14 @@ def main():
         sys.exit(0)
 
     elif nastroj in ("Read", "Edit", "Write"):
-        cesta = os.path.basename(str(vstup.get("file_path", "")))
+        # Windows zahodí mezery a tečky na konci názvu i proud ::$DATA, „pojistka.py “ je tentýž soubor.
+        cela = re.sub(r"::\$DATA$", "", str(vstup.get("file_path", "")).rstrip(" .\t"), flags=re.I).rstrip(" .\t")
+        cesta = os.path.basename(cela)
         if re.fullmatch(ENV_SOUBOR, cesta):
             vystup("deny", "Pojistka: soubory .env se neotevírají (hodnoty by byly v kontextu). Načti je do procesu (`set -a; . ./.env; set +a`, `--env-file`) a zapisuj skriptem scripts/env_nastav.py z agent-kitu (dělá zálohu).")
         if nastroj == "Read":
             sys.exit(0)
-        cela = str(vstup.get("file_path", "")).replace("\\", "/")
+        cela = cela.replace("\\", "/")
         text = " ".join(str(vstup.get(k, "")) for k in ("old_string", "new_string", "content"))
         if re.search(VLASTNI_KONTROLY + "$", cela, re.I) or (
                 NASTAVENI.search(cela) and re.search(r"\bhooks\b|disableAllHooks|PreToolUse|pojistka|agent-kit@", text)):
