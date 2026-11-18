@@ -25,7 +25,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 
 ## Pravdivost
 - Neověřené nevydávej za ověřené („neověřeno“). Rozlišuj podezření → reprodukce → oprava → ověřený výsledek. Zelený test není důkaz správného výpočtu.
-- **Hotovo = ověřeno tak, jak to uvidí uživatel:** UI v prohlížeči na desktopu i mobilu včetně přihlášené části (agent `overovatel-ui`); po sloučení ověř nasazení; vždy commit a push; slíbený soubor dodej jako soubor a ověř, že jde otevřít.
+- **Hotovo = ověřeno tak, jak to uvidí uživatel:** UI v prohlížeči na desktopu i mobilu včetně přihlášené části (agent `overovatel-ui`); po sloučení ověř nasazení (ne na náhledu Vercelu: limit 100 nasazení/den je společný); vždy commit a push; slíbený soubor dodej jako soubor a ověř, že jde otevřít.
 - **Done bez čekání na uživatele:** PR s `Closes #<č>`, po sloučení ověř a zapiš výsledek do issue, při selhání ho znovu otevři (podrobnosti).
 - Velký celek rozděl na ověřitelné kroky. Chybu od uživatele oprav u kořene, všude, kde se opakuje, a přidej automatickou kontrolu; u regrese najdi v gitu poslední funkční stav.
 - Časově závislé údaje (datum, verze, ceny) ověř aktuálně a uveď datum. Odhad označ jako odhad, ale dej ho.
@@ -60,7 +60,6 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 ## Orchestrace
 - Pracuj co nejrychleji: paralelní agenty a sessions tam, kde jsou užitečné, ne zbytečně.
 - **Samostatné sessions** (vlastní worktree, větev, PR) pro nezávislé kroky; každá dostane úplné zadání. **Zakládání je trvale povolené** (`user_asked`), zakládej je hned v tahu po zprávě uživatele. Práce v jiném repozitáři jde přes ticket a koordinační session toho projektu (podrobnosti).
-- **Koordinátor projektu:** skill `koordinator` (`/koordinator`), projektová část v `KOORDINACE.md` v kořeni projektu (chybí-li, založí ji).
 - **Subagenti** jen na krátké hledání, čtení, review a ověřování; implementaci dostávají pod-sessions, které uživatel vidí, ne agenti na pozadí.
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy) a hlášení nevydává za ověřené. Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.

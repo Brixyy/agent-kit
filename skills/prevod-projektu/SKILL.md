@@ -14,6 +14,7 @@ Nový projekt zakládej ze šablony `Brixyy/project-template` (už obsahuje body
 5. **`.gitattributes`**: u existujícího repa **nepřidávej** `* text=auto eol=lf` (přepsalo by konce řádků všech souborů); stačí `*.sh text eol=lf`.
 6. **CI** při PR: lint + typecheck + testy (+ build, pokud nesahá do produkční DB). Pravidelné (cron) běhy jen pro věci, které se mění bez změny kódu. Lint vynechává `.claude/worktrees/`.
 7. **GitHub:** ruleset s **povinnými kontrolami** na výchozí větvi + zapnuté **automatické sloučení** a mazání větví po sloučení (`gh api -X PATCH repos/Brixyy/<repo> -F allow_auto_merge=true -F delete_branch_on_merge=true`). Bez povinných kontrol by automatické sloučení proběhlo hned, před testy.
-8. **Úkoly:** GitHub Issues + Project „Brixyy – projekty“ (č. 13); robotika v Linearu.
-9. Zruš pozůstatky starých nástrojů (`_flow/`, zrcadla `.agents/skills` ↔ `.claude/skills`, lokální zákazy v `.claude/settings.local.json`, které blokují běžnou práci).
+8. **Vercel** (jen projekt s Vercelem): z agent-kitu spusť `python -I scripts/vercel_kontrola.py <projekt>`; náhledy vypnuté, produkce jen z `main` (PODROBNOSTI → Vercel).
+9. **Úkoly:** GitHub Issues + Project „Brixyy – projekty“ (č. 13); robotika v Linearu.
+10. Zruš pozůstatky starých nástrojů (`_flow/`, zrcadla `.agents/skills` ↔ `.claude/skills`, lokální zákazy v `.claude/settings.local.json`, které blokují běžnou práci).
 10. PR s popisem přes `--body-file`, review, pak `gh pr merge --auto --squash`.

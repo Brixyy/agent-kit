@@ -13,7 +13,7 @@ Společná pravidla a nástroje pro AI agenty ve všech projektech Brixyy — ne
 | `output-styles/pro-tebe.md` + `hooks/pro_tebe.py` + `hooks/vzhled.tsx` | Styl odpovědí „Pro tebe“: mezi kroky ticho, závěrečná zpráva začíná rámečkem 📌 pro uživatele, podrobnosti pod čarou. Mod `vzhled.tsx` (Desktop) kreslí odpověď jako barevné sekce (✅ 👉 ⛔ 💡): pruh nahoře, celá sekce podbarvená, řádky se štítky. Stop hook při zapnutém stylu vrátí delší zprávu bez rámečku jednou k doplnění rámečku. Zapnutí: `"outputStyle": "agent-kit:Pro tebe"` v `~/.claude/settings.json`; bez něj hook nic nevynucuje | Claude Code (output style, Stop) |
 | `hooks/pojistka.py` | Zastaví nevratné a produkční akce i vypnutí vlastních kontrol, zakáže otevírání a vypisování `.env` (načíst do procesu se smí) | Claude Code (JSON) i Codex (`--exit-code`) |
 | `hooks/uklid_hook.py` + `scripts/uklid.py` | Úklid po sessions (Windows): na konci session ukončí její dev servery a zastaví kontejnery se štítkem `agent-kit.slozka`, na startu session ukončí osiřelé dev servery v `~/Dev`. Ručně: `python -I scripts/uklid.py --sirotci [--provest]` | Claude Code (SessionEnd, SessionStart) |
-| `scripts/` | `install.py` (počítač, Codex), `napojit-projekt.py` (projekt), `cloud-bootstrap.sh` + `cloud-pojistka.sh` (cloudové sessions) | |
+| `scripts/` | `install.py` (počítač, Codex), `napojit-projekt.py` (projekt), `cloud-bootstrap.sh` + `cloud-pojistka.sh` (cloudové sessions), `vercel_kontrola.py` (projekty s Vercelem: vypnuté náhledy) | |
 
 Kam patří které pravidlo: **celé portfolio** → tento repozitář · **jeden projekt** → `AGENTS.md` projektu · **jen tento počítač** → lokální soubory agenta.
 
