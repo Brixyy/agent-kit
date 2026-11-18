@@ -58,6 +58,8 @@ INSTALACE = (
     r"(\.claude([\\/](plugins([\\/](cache|marketplaces))?))?[\\/]?(\*|\s|$)|\.claude[\\/]plugins[\\/]\S*agent-kit"
     r"|\.agents([\\/]agent-kit)?[\\/]?(\*|\s|$)|(?<![\w./\\-])agent-kit[\\/]?(\*|\s|$))"
 )
+# Začátek příkazu: začátek řádku nebo za ; & | ( (volitelně sudo).
+ZACATEK_PRIKAZU = r"(^|(?<=[;&|(\n]))\s*(sudo\s+)?"
 # Příkazy, které find spustí nad nalezenými soubory a které soubor mění.
 FIND_MENI = r"(rm|mv|cp|tee|truncate|sed\s+-i|ln|shred|dd|Remove-Item)\b"
 
@@ -91,10 +93,13 @@ RIZIKOVE_PRIKAZY = [
      r"\|\s*xargs\b[^\n;&|]*\b" + FIND_MENI, "úprava pojistky nebo hooků"),
     (MENI_SOUBOR + r"[^\n;&|]*" + INSTALACE, "smazání pluginu agent-kit (pojistka)"),
     # Stažení nebo rozbalení přes pojistku či do složky hooks (Brixyy/agent-kit#41).
-    (r"(?<![\w-])(curl|wget|Invoke-WebRequest|iwr|Invoke-RestMethod|irm)\b[^\n;&|]*\s(-o|--output|-OutFile)[\s=]*\S*"
-     + CIL_KONTROLY, "úprava pojistky nebo hooků"),
-    (r"(?<![\w-])(tar\b[^\n;&|]*\s(-C|--directory)|unzip\b[^\n;&|]*\s-d|Expand-Archive\b[^\n;&|]*\s-DestinationPath)"
-     r"[\s=]*\S*" + CIL_KONTROLY, "úprava pojistky nebo hooků"),
+    # Jen jako příkaz (ne „rg curl -o …“); velikost písmen přepínačů rozhoduje (curl -O, tar -c jen čtou).
+    (ZACATEK_PRIKAZU + r"(curl\b[^\n;&|]*\s((?-i:-[a-zA-Z]*o)|--output|--output-dir)"
+     r"|wget\b[^\n;&|]*\s((?-i:-O|-P)|--output-document|--directory-prefix)"
+     r"|(Invoke-WebRequest|iwr|Invoke-RestMethod|irm)\b[^\n;&|]*\s-Out(File)?)[\s=]*\S*" + CIL_KONTROLY,
+     "úprava pojistky nebo hooků"),
+    (ZACATEK_PRIKAZU + r"(tar\b(?=\s+-?(?-i:[a-zA-Z]*x[a-zA-Z]*)\b|[^\n;&|]*\s(--extract|--get)\b)[^\n;&|]*\s((?-i:-C)|--directory)|unzip\b[^\n;&|]*\s(?-i:-d)"
+     r"|Expand-Archive\b[^\n;&|]*\s-Dest\w*)[\s=]*\S*" + CIL_KONTROLY, "úprava pojistky nebo hooků"),
     (r"\bclaude\s+plugins?\s+(disable|uninstall|remove)\b[^\n;&|]*agent-kit", "vypnutí pluginu agent-kit (pojistka)"),
     (r"\bdisableAllHooks\W*[:=]\s*true", "vypnutí hooků"),
 ]
