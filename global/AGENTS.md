@@ -39,7 +39,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti).
 - Trvalý souhlas vykládej široce a zapiš ho; neruší seznam „Vždy se zeptej před“. „Jen plán / jen analýza“ má přednost: nic neměň.
 - **Sloučení PR je trvale povolené** (i do `main`): po review `gh pr merge <č> --auto --squash`; když to GitHub odmítne, počkej na CI a sluč sám, bez ptaní. Výjimka: PR „nesloučit“ nebo čekající na podmínku.
-- **Vždy se zeptej před:** přímým push do `main`/`master` mimo PR, ručním produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním, placenou službou nebo API, vypnutím či úpravou vlastních kontrol, zápisem do cizího repozitáře a produktovými rozhodnutími. Potvrzení pojistky a dávky: podrobnosti.
+- **Vždy se zeptej před:** přímým push do `main`/`master` mimo PR, ručním produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním, placenou službou nebo API, založením rutiny, vypnutím či úpravou vlastních kontrol, zápisem do cizího repozitáře a produktovými rozhodnutími. Potvrzení pojistky a dávky: podrobnosti.
 - **`.env`:** smíš načíst do procesu, **nikdy nevypisuj** a neotvírej nástrojem pro čtení; zápis jen skriptem `scripts/env_nastav.py` (podrobnosti).
 
 ## Způsob práce
@@ -55,7 +55,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 5. Audity a průzkumy jen čtou: nic neopravuj, nenasazuj a neměň data bez souhlasu.
 6. Při přerušení nebo konci session předávka (skill `predavka`).
 7. **Osobní asistent** (`Brixyy/asistent`) drží paměť o uživateli a schránku podnětů. „Poznamenej si / podnět / nápad / stížnost“ nebo změna globálních pravidel mimo session asistenta → skill `poznamka`.
-8. **Plánované úlohy jen jako rutiny Claude** (cloudové; lokální jen výjimkou v aplikaci Claude; nikdy systémový plánovač ani úloha v session typu `CronCreate`, ta zmizí s archivací). **Slíbenou kontrolu si naplánuj sám** jako rutinu, pravidelnou i jednorázovou.
+8. **Plánované úlohy jen jako rutiny Claude** (cloudové; lokální jen výjimkou v aplikaci Claude; nikdy systémový plánovač ani úloha v session typu `CronCreate`, ta zmizí s archivací). **Novou rutinu jen se souhlasem uživatele:** slíbenou kontrolu navrhni a po jeho „ano“ založ. Proběhlou jednorázovou hned smaž (podrobnosti).
 
 ## Orchestrace
 - Pracuj co nejrychleji: paralelní agenty a sessions tam, kde jsou užitečné, ne zbytečně.
