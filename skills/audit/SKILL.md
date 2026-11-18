@@ -5,7 +5,7 @@ description: Kompletní nezávislý audit celé aplikace „z gruntu“, jako by
 
 # Kompletní audit aplikace
 
-Obecný postup pro všechny projekty. **Projektová část je v `AUDIT.md` v kořeni projektu** (kam ukládat zprávu, přístup k produkci, otázky a měřítka projektu); má přednost před tímto skillem, stejně jako `AGENTS.md` projektu a globální pravidla. Když `AUDIT.md` chybí, založ ho podle šablony níže v malém PR a pak teprve auditu.
+Obecný postup pro všechny projekty. **Projektová část je v `AUDIT.md` v kořeni projektu** (kam ukládat zprávu, přístup k produkci, otázky a měřítka projektu); má přednost před tímto skillem, stejně jako `AGENTS.md` projektu a globální pravidla. Když `AUDIT.md` chybí: s uživatelem ho založ podle šablony níže v malém PR; při běhu rutinou bez uživatele ho nezakládej, audituj podle tohoto skillu a návrh `AUDIT.md` dej do zprávy.
 
 Audit odpovídá na tři otázky: **Míří aplikace tam, kam má? Funguje opravdu, nebo jen vypadá, že funguje? Kde je nejvíc rizika a co s tím?** Obsahová kontrola sama nestačí: audit vždy zahrne i kód, testy, bezpečnost a provoz.
 
@@ -15,6 +15,9 @@ Audit odpovídá na tři otázky: **Míří aplikace tam, kam má? Funguje oprav
 - **Důkaz u každého nálezu:** `soubor:řádek`, dotaz a jeho výsledek, příkaz a výstup nebo snímek. Bez důkazu je nález „neověřeno“ a nesmí mezi kritické.
 - **Pevný bod:** na začátku zapiš commit (`git rev-parse origin/<hlavní větev>`), datum a čas měření. Všechno se vztahuje k němu.
 - Snímek a čísla z produkce ber aktuálně, ne z paměti ani starších zpráv.
+- **Kontroly kódu** (instalace, lint, testy) pouštěj ve vlastním dočasném worktree na pevném commitu, ne v pracovním checkoutu; po auditu ho smaž.
+- **Produkční UI jen procházej:** nemačkej nic, co odesílá, spouští nebo mění (formuláře, spuštění AI, exporty, nastavení). Stejný zákaz dej do zadání každého agenta, který UI ověřuje.
+- **Tajemství:** `.env` ani podobné soubory neotvírej a negrepuj; stav přepínačů zjišťuj jen způsobem z `AUDIT.md`.
 
 ## Postup
 1. **Příprava.** Přečti `AGENTS.md`, `AUDIT.md` a **předchozí audit** (místo určuje `AUDIT.md`). Vypiš si jeho nálezy a doporučení: u každého v tomto auditu zjistíš, jestli se vyřešil, zhoršil nebo trvá.
@@ -30,7 +33,7 @@ Audit odpovídá na tři otázky: **Míří aplikace tam, kam má? Funguje oprav
 | 2. Výsledky | Plní aplikace svůj účel měřitelně? Které metriky z produkce to ukazují a jaký mají trend proti minulému auditu? Co je jen postavené, ale nic nedává? |
 | 3. Architektura a kód | Odpovídá struktura diagramům? Duplicity, mrtvý kód, příliš velké soubory a funkce, místa s nejvíc změnami (`git log` za období), skryté závislosti, natvrdo zadané hodnoty, tiché náhradní hodnoty, polykání chyb. Co by zkušený vývojář přepsal jako první? |
 | 4. Testy a CI | Pokrývají testy kritické cesty (peníze, výpočty, data, přihlášení)? Co testy neověří, i když jsou zelené? Nestabilní testy, doba běhu CI, přeskočené kontroly, lint a typy. |
-| 5. Bezpečnost | Tajemství v repozitáři a historii, přihlášení a oprávnění, vstupy z internetu, otevřené porty, závislosti se známými zranitelnostmi (`npm audit`, `pip-audit` apod.), zálohy a obnova, kdo může co spustit. |
+| 5. Bezpečnost a závislosti | Tajemství v repozitáři a historii, přihlášení a oprávnění, vstupy z internetu, otevřené porty, závislosti se známými zranitelnostmi (`npm audit`, `pip-audit` apod.) i zastaralé závislosti, zálohy a obnova, kdo může co spustit. |
 | 6. Provoz | Chyby a výpadky v logu za období, hlídání a upozornění (hlídá se skutečná práce, nebo jen že proces běží?), disk, paměť, výkon, plánované úlohy a rutiny, náklady služeb a AI. |
 | 7. Data | Správnost klíčových výpočtů (kontrolní vzorek přepočtem), úplnost a čerstvost zdrojů dat, konzistence mezi tabulkami, migrace. |
 | 8. UI | Vidí uživatel všechno důležité, co systém ví a dělá, a srozumitelně? Desktop i telefon, přihlášená část, soulad s `DESIGN.md`. Kde UI ukazuje něco, co neplatí? |
@@ -53,9 +56,9 @@ Závažnost: **kritická** (ohrožuje data, peníze, bezpečnost nebo cíl teď)
 ## Výstup
 - **Zpráva** do místa z `AUDIT.md`: nahoře „kde jsme jednou větou“, semafor oblastí 🟢🟡🔴 s trendem ↑↓→, velké otázky s odpověďmi, nálezy podle závažnosti, srovnání s minulým auditem, co nešlo ověřit.
 - **Obrázek:** přehled semaforu a trendů jako artefakt nebo obrázek (uživatel je vizuální typ); na telefonu jako soubor PNG.
-- **Souhrnné issue** „Audit <rok-měsíc>“ se štítkem `audit`: semafor, tři doporučené kroky, odkazy na zprávu a issues nálezů. Je to místo, kde příští audit najde předchozí.
+- **Souhrnné issue** „Audit <rok-měsíc>“ s vlastním štítkem z `AUDIT.md` (např. `audit-mesicni`; obecný štítek `audit` mívají i jiné audity): semafor, tři doporučené kroky, odkazy na zprávu a issues nálezů. Je to místo, kde příští audit najde předchozí.
 - **Issues nálezů** jen pro kritické a vysoké, které nejsou už v otevřeném issue (zkontroluj duplicity; trvající nález doplň komentářem ke stávajícímu issue).
-- **Spuštěno rutinou bez uživatele:** udělej body 1–5 až po výstup, uživateli pošli krátké upozornění a velké otázky nech na probrání v příští konverzaci. Nic nerozhoduj za něj.
+- **Spuštěno rutinou bez uživatele:** udělej body 1–4 a výstup bez probrání s uživatelem, pošli mu krátké upozornění a velké otázky nech na probrání v příští konverzaci. Nic nerozhoduj za něj.
 
 ## Šablona `AUDIT.md`
 ```markdown
@@ -64,11 +67,12 @@ Projektová část skillu `audit` (agent-kit). Pravidla projektu jsou v `AGENTS.
 
 ## Kdy a kam
 - Kdy: <např. měsíčně 1. den, rutina „<název>“; mimořádně na požádání>
-- Zpráva: <složka nebo místo>; souhrnné issue se štítkem `audit` v <repo>
+- Zpráva: <složka nebo místo, mimo git>; souhrnné issue se štítkem `audit-mesicni` v <repo>
 - Předchozí audit: <jak ho najít>
+- Upozornění uživateli při běhu rutinou: <kanál a příkaz>
 
 ## Přístupy (jen čtení)
-- Kód: <hlavní větev>; produkce: <jak se dostat, s jakým omezením>; databáze: <jen SELECT, jak>
+- Kód: <hlavní větev>, kontroly v dočasném worktree; produkce: <jak se dostat, s jakým omezením>; přepínače: <bezpečný způsob bez čtení .env>; databáze: <projekt, jen SELECT, jak>
 
 ## Měřítka projektu
 - <metriky, které říkají, jestli projekt plní účel, a odkud je vzít>
