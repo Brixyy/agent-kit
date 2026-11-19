@@ -15,8 +15,13 @@ Odpověz rovnou z toho, co uživatel řekl:
 - Typické: jednorázové vs. bude se opakovat · pár řádků vs. pořádný modul · co nejhoršího to může rozbít (data zákazníků, výpočet, produkce) · kdo to bude používat.
 - Drobnosti vynech. Pak se zastav a počkej na odpovědi.
 
-## 2. Specifikace
-Po odpovědích se doptávej **po jedné otázce** (s doporučením), dokud není jasné:
+## 2. Vizuální pilot (produkt nebo funkce s obrazovkami)
+Hned po odpovědích na 1–3 zásadní volby ukaž **pilot**: jen vzhled s vymyšlenými daty, žádná backend logika. Další otázky klaď až nad ním („tady chybí X?“), ne v dlouhém kole otázek naslepo. Kontext už máš, doplň rozumné výchozí volby (uživatel 18. 11. 2026 po pátém kole otázek: chce pilotní návrh, ne zadávat odpovědi).
+- Varianty jen **opravdu odlišné formy** (např. plocha s dlaždicemi vs. volné plátno vs. seznam), ne skoro stejné návrhy s jinou barvou. Radši jedna varianta než tři podobné.
+- Navrhuj do skutečné aplikace, ne do odděleného dema. Vybraný návrh je závazný cíl.
+
+## 3. Specifikace
+Pak se doptávej **po jedné otázce** (s doporučením), dokud není jasné:
 - co přesně má funkce dělat a pro koho, krok po kroku z pohledu uživatele,
 - co dělat nemá (hranice),
 - okrajové případy a chyby,
@@ -25,7 +30,6 @@ Po odpovědích se doptávej **po jedné otázce** (s doporučením), dokud nen�
 
 Navíc:
 - Před stavbou vlastního nástroje najdi hotové (open-source) řešení a porovnej (uživatel: „neříkej mi, že na GitHubu není žádná hotová aplikace“).
-- U UI nejdřív klikací maketa s vymyšlenými daty nebo 2–3 opravdu odlišné obrázky k výběru. Navrhuj do skutečné aplikace, ne do odděleného dema. Vybraný obrázek je závazný cíl.
 - Když produkt sbírá osobní údaje, cizí data (scraping) nebo zprostředkovává práci, patří do specifikace i právní rámec (GDPR, licence).
 
 Specifikaci zapiš do ticketu nebo do `docs/` projektu (podle jeho `AGENTS.md`) a nech ji uživatele schválit. **Kód až po schválení.**
