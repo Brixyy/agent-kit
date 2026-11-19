@@ -84,7 +84,10 @@ def gh_soubor(vlastnik, repozitar, cesta, vetev):
     if kod == 0:
         return vystup
     if "HTTP 404" in chyba:
-        return None
+        # 404 vrací GitHub i u repozitáře bez přístupu nebo chybějící větve: soubor chybí, jen když větev vidíme.
+        if spust(["gh", "api", f"repos/{vlastnik}/{repozitar}/branches/{vetev}", "--jq", ".name"])[0] == 0:
+            return None
+        raise Neovereno(f"gh api {vlastnik}/{repozitar}: repozitář nebo větev {vetev} nedostupná")
     raise Neovereno(f"gh api {vlastnik}/{repozitar}: {posledni_radek(chyba)}")
 
 
@@ -212,9 +215,12 @@ def nasazeni_za_den(ted):
         odpoved = vercel_api(f"/v6/deployments?since={od}&limit=100" + (f"&until={do}" if do else ""))
         stranka = odpoved.get("deployments") or []
         nasazeni += [n for n in stranka if cas(n) >= od]
-        do = (odpoved.get("pagination") or {}).get("next")
-        if not do or not stranka or min(cas(n) for n in stranka) < od:
+        dalsi = (odpoved.get("pagination") or {}).get("next")
+        if not dalsi or not stranka or min(cas(n) for n in stranka) < od:
             return nasazeni
+        if do is not None and dalsi >= do:
+            raise Neovereno("vercel api /v6/deployments: stránkování se nehýbe")
+        do = dalsi
 
 
 def dnes(ted=None):
@@ -254,6 +260,11 @@ def vypis(nazev, vysledek):
 def main(argv):
     if argv == ["--dnes"]:
         return dnes()
+    spatne = [a for a in argv if a.startswith("-") or not os.path.isdir(a)]
+    if spatne:
+        print("Neznámý přepínač nebo neexistující složka: " + " ".join(spatne))
+        print("\n".join(__doc__.splitlines()[2:4]))
+        return 2
     if argv:
         projekty = argv
     else:

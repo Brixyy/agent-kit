@@ -32,7 +32,8 @@ def projekt(nazev, repo=None, root=None, ignore=None, vetev="main"):
 class Falesny:
     """Nahradí spust(): odpovědi vercel api a gh api podle cesty, bez sítě."""
 
-    def __init__(self, vercel=None, soubory=None, vercel_chyba=None, gh_chyba=None):
+    def __init__(self, vercel=None, soubory=None, vercel_chyba=None, gh_chyba=None, nedostupne=()):
+        self.nedostupne = nedostupne
         self.vercel = vercel or {}
         self.soubory = soubory or {}
         self.vercel_chyba = vercel_chyba
@@ -44,8 +45,13 @@ class Falesny:
         if prikaz[0] == "gh":
             if self.gh_chyba:
                 return 1, "", self.gh_chyba
-            cesta = prikaz[-1].split("/contents/")[1].split("?")[0]
-            repo = prikaz[-1].split("/")[2]
+            adresa = next(a for a in prikaz if a.startswith("repos/"))
+            repo = adresa.split("/")[2]
+            if repo in self.nedostupne:
+                return 1, "", "gh: Not Found (HTTP 404)"
+            if "/branches/" in adresa:
+                return 0, "main", ""
+            cesta = adresa.split("/contents/")[1].split("?")[0]
             obsah = self.soubory.get(f"{repo}:{cesta}")
             if obsah is None:
                 return 1, "", "gh: Not Found (HTTP 404)"
@@ -116,6 +122,10 @@ class Ucet(unittest.TestCase):
         v = self.ucet([projekt("x", "x")], gh_chyba="gh: Bad credentials (HTTP 401)")
         self.assertEqual(urovne(v), ["NEOVĚŘENO"])
 
+    def test_nedostupny_repozitar_neni_chybejici_soubor(self):
+        v = self.ucet([projekt("x", "x")], nedostupne=("x",))
+        self.assertEqual(urovne(v), ["NEOVĚŘENO"])
+
     def test_vercel_neprihlaseny_je_neovereno(self):
         v = self.ucet([], vercel_chyba="Error: No existing credentials found.")
         self.assertEqual(urovne(v), ["NEOVĚŘENO"])
@@ -173,6 +183,20 @@ class Dnes(unittest.TestCase):
 
     def test_bez_prihlaseni_neovereno(self):
         kod, vystup = self.dnes([], chyba="Error: No existing credentials found.")
+        self.assertEqual(kod, 1)
+        self.assertIn("NEOVĚŘENO", vystup)
+
+
+class Argumenty(unittest.TestCase):
+    def test_neznamy_prepinac_a_slozka(self):
+        for argv in (["--dnse"], ["--dnes", "elyon"], [os.path.join(tempfile.gettempdir(), "neexistuje-xyz")]):
+            kod, vystup = spust_s(Falesny(), vk.main, argv)
+            self.assertEqual(kod, 2, argv)
+            self.assertNotIn("VŠE OK", vystup)
+
+    def test_strankovani_ktere_se_nehybe(self):
+        stranka = {"deployments": nasazeni(100), "pagination": {"next": int(TED * 1000) - 3600_000}}
+        kod, vystup = spust_s(Falesny(vercel={"/v6/deployments": stranka}), vk.dnes, TED)
         self.assertEqual(kod, 1)
         self.assertIn("NEOVĚŘENO", vystup)
 
