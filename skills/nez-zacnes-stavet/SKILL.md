@@ -16,7 +16,7 @@ Odpověz rovnou z toho, co uživatel řekl:
 - Drobnosti vynech. Pak se zastav a počkej na odpovědi.
 
 ## 2. Vizuální pilot (produkt nebo funkce s obrazovkami)
-Hned po odpovědích na 1–3 zásadní volby ukaž **pilot**: jen vzhled s vymyšlenými daty, žádná backend logika. Další otázky klaď až nad ním („tady chybí X?“), ne v dlouhém kole otázek naslepo. Kontext už máš, doplň rozumné výchozí volby (uživatel 18. 11. 2026 po pátém kole otázek: chce pilotní návrh, ne zadávat odpovědi).
+Hned po odpovědích na 1–3 zásadní volby ukaž **klikací pilot**: jen vzhled s vymyšlenými daty, žádná backend logika. Je to výjimka z „kód až po schválení“ a „žádná mock data“: jen frontend ve vlastní větvi, neslučuje se bez schválení a vymyšlená data se při stavbě nahradí skutečnými. Další otázky klaď až nad ním („tady chybí X?“), ne v dlouhém kole otázek naslepo. Kontext už máš, doplň rozumné výchozí volby (uživatel 18. 11. 2026 po pátém kole otázek: chce pilotní návrh, ne zadávat odpovědi).
 - Varianty jen **opravdu odlišné formy** (např. plocha s dlaždicemi vs. volné plátno vs. seznam), ne skoro stejné návrhy s jinou barvou. Radši jedna varianta než tři podobné.
 - Navrhuj do skutečné aplikace, ne do odděleného dema. Vybraný návrh je závazný cíl.
 
