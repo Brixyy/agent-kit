@@ -23,8 +23,8 @@ Obecný postup pro všechny projekty. **Projektová část je v `KOORDINACE.md` 
 - Zadání česky a úplné: ticket, soubory, hranice (co nesmí měnit, nenasazovat), testy, review agentem `reviewer`, `Closes #<č>`.
 - U rizikových změn session PR **neslučuje**, jen nahlásí číslo PR a co ověřila; sloučíš ty po kontrole diffu a dopadu.
 - Dva zapisující agenti nikdy nemění tytéž soubory; při souběhu session upozorni, co mění jiná.
-- Do zadání patří: testy do ~10 minut v popředí a tah nekončit „čekám“, pokud nevzbudí úloha na pozadí (PODROBNOSTI, „Žádné čekám bez budíku“).
-- Pod-session skončí tah slovy „čekám“: hned ověř, že jí opravdu něco běží (správa sessions: probíhající práce nebo úloha na pozadí). Když ne, postrč ji. Když hlásí „čekám“ podruhé bez nového commitu, PR nebo výsledku, přečti její průběh a zjisti proč.
+- Do zadání patří: testy do ~8 minut v popředí, tah nekončit „čekám“, pokud nevzbudí úloha na pozadí, a u „čekám“ uvést odhad doběhnutí (PODROBNOSTI, „Žádné čekám bez budíku“).
+- Pod-session skončí tah slovy „čekám“: hned ověř, že jí opravdu něco běží (správa sessions: probíhající práce nebo úloha na pozadí). Když ne, postrč ji. Když hlásí „čekám“ podruhé bez nového commitu, PR nebo výsledku, nebo když ohlášený čas doběhnutí vypršel o víc než 15 minut, přečti její průběh a zjisti proč.
 
 ## Sloučení, nasazení, ověření
 - Před sloučením zelené kontroly (`gh pr checks <č> --watch`); když repozitář nevynucuje kontroly, slučuj jen bez neúspěšného jobu.
