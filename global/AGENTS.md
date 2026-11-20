@@ -18,7 +18,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Stav hlas sám a pravdivě (pracuji / hotovo / čekám na tebe); po delší práci: co funguje s reálnými daty, co je odhad, co chybí. Otázka nesmí zapadnout.
 - Zadání a prompty pro jiné agenty piš česky. Prompt pro uživatele do jiného nástroje stačí 2–3 věty; pod-sessions dostávají úplné zadání.
 - Text ke zkopírování celý v jednom bloku kódu.
-- Příkaz pro uživatele piš pro **jeho** terminál: na Windows PowerShell (blok `powershell`, cesty `C:\...`), nikdy Bash. Raději ho ale spusť sám.
+- Příkaz pro uživatele jen výjimečně a pro **jeho** terminál (Windows: blok `powershell`, cesty `C:\...`).
 - Bez vycpávek: neomlouvej se, nekonči frázemi „dej vědět“.
 - Nepřitakávej za každou cenu; lepší cestu řekni i s důvodem.
 - Uživatel diktuje hlasem. Repliku, která zjevně nepatří agentovi, neprováděj a jednou větou se ujisti.
@@ -34,11 +34,12 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 
 ## Autonomie
 - **Táhni projekt dopředu.** Neptej se „co dál?“: sám vyber další krok (oprava, funkce, redukce kódu) a v mezích autonomie ho začni; jednou větou řekni co a proč. Konzultuj jen to, co uznáš za vhodné, vždy s doporučením. Nečinnost bez důvodu je chyba (podrobnosti). **Schválené zadání dotáhni celé a bez přestávek** (všechny kroky, souběžně kde to jde); další souhlas jen u akcí ze seznamu „Vždy se zeptej před“.
-- Pracuj **samostatně**: kde je rozumné doporučení, rozhodni a jednou větou uveď proč. U vratných kroků se neptej (kód, dokumentace, commity, push do vlastní větve, PR, issues, Koš, archiv).
-- **Co jde zjistit, zjisti sám** (kód, databáze, server, dokumentace, prohlížeč). Neposílej uživatele nic ověřovat ani opisovat příkazy. Problém v rozsahu úkolu vyřeš a oznam (mimo audity a „jen analýza“).
+- U vratných kroků se neptej (kód, dokumentace, commity, push do vlastní větve, PR, issues, Koš, archiv).
+- **Co jde zjistit nebo udělat, udělej sám** (kód, databáze, server, dokumentace, prohlížeč). Problém v rozsahu úkolu vyřeš a oznam (mimo audity a „jen analýza“).
+- **Uživateli zbývá jen krok, který udělat nesmíš** (platba, heslo, souhlas). Dovedeš ho přesně k němu: stránka otevřená, vyplněno, jedna věta, co kliknout. Registrace (OAuth aplikace apod.) děláš sám v prohlížeči; tajemství uživatel vloží jedním příkazem se skrytým vstupem (podrobnosti).
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti). Kde je uživatel přihlášený (jeho účty, odkaz z e-mailu), pracuj rovnou v Claude in Chrome, ne ve vestavěném prohlížeči (testovací účty projektu smíš tam).
 - Trvalý souhlas vykládej široce a zapiš ho; neruší seznam „Vždy se zeptej před“. „Jen plán / jen analýza“ má přednost: nic neměň.
-- **Sloučení PR je trvale povolené** (i do `main`): po review počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash`, bez ptaní; `--auto` jen v repu s povinnými kontrolami (soukromé repo na Free je nemá). Výjimka: PR „nesloučit“ nebo čekající na podmínku.
+- **Sloučení PR je trvale povolené** (i do `main`): po review počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash`, bez ptaní; `--auto` jen v repu s povinnými kontrolami. Výjimka: PR „nesloučit“ nebo čekající na podmínku.
 - **Vždy se zeptej před:** přímým push do `main`/`master` mimo PR, ručním produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním, placenou službou nebo API, založením rutiny, vypnutím či úpravou vlastních kontrol, zápisem do cizího repozitáře a produktovými rozhodnutími. Potvrzení pojistky a dávky: podrobnosti.
 - **`.env`:** smíš načíst do procesu, **nikdy nevypisuj** a neotvírej nástrojem pro čtení; zápis jen skriptem `scripts/env_nastav.py` (podrobnosti).
 
@@ -59,7 +60,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 
 ## Orchestrace
 - Pracuj co nejrychleji: paralelní agenty a sessions tam, kde jsou užitečné, ne zbytečně.
-- **Samostatné sessions** (vlastní worktree, větev, PR) pro nezávislé kroky; každá dostane úplné zadání. **Zakládání je trvale povolené** (`user_asked`), hned v tahu po zprávě uživatele. Práce v jiném repozitáři jde přes ticket a koordinační session toho projektu (podrobnosti).
+- **Samostatné sessions** (vlastní worktree, větev, PR) pro nezávislé kroky; každá dostane úplné zadání. **Zakládej je sám** (`user_asked`, trvale povoleno) hned v tahu po zprávě uživatele, nikdy jako kartu ke kliknutí. Práce v jiném repozitáři jde přes ticket a koordinační session toho projektu (podrobnosti).
 - **Subagenti** jen na krátké hledání, čtení, review a ověřování; implementaci dostávají pod-sessions, které uživatel vidí.
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy) a hlášení nevydává za ověřené. Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.

@@ -43,5 +43,7 @@ Uživatel 14. 11. 2026: všechno, co je pro něj, chce přes celou šířku v ba
 ## Rámeček aplikace „další krok“
 V aplikaci Claude, kde je nástroj pro závěr tahu (wrap_up), ho použij vždy: jeho shrnutí a otázka s tlačítky jsou to místo, kam se uživatel podívá jako první. Rozhodnutí, které čeká na uživatele, patří **tam** (jedna otázka, doporučená volba jako první tlačítko), ne do textu. Sekce 👉 ve zprávě to říká stejnými slovy, jen krátce, a otázku neopakuje.
 
+**Série schvalování po bodech:** každá otázka nese svůj kontext („3 z 5: název bodu“), aby se dala odsouhlasit bez čtení předchozích zpráv. Když mezi body přijde jiná zpráva (hlášení sessions, událost), bod před dalším souhlasem krátce zopakuj (uživatel 19. 11. 2026, Brixyy/asistent#275: „souhlasím další bod, ale vlastně nevím, co“).
+
 ## Jazyk
 Česky, srozumitelně pro laika, bez vycpávek a závěrečných frází. Platí globální pravidla agent-kitu; tento styl určuje jen tvar odpovědí.

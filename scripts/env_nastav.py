@@ -2,6 +2,7 @@
 
 Použití: python -I env_nastav.py <cesta k .env> <NAZEV> < soubor_s_hodnotou
          (nebo: <příkaz, který vypíše hodnotu> | python -I env_nastav.py .env NAZEV)
+         Spuštěný v terminálu bez stdin se na hodnotu zeptá skrytým vstupem (uživatel ji vloží).
 
 - Hodnota se nikam nevypisuje (jen název a délka) a zapíše se v jednoduchých uvozovkách,
   aby ji `set -a; . ./.env` nespustil jako příkaz a dotenv neusekl za `#`.
@@ -9,6 +10,7 @@ Použití: python -I env_nastav.py <cesta k .env> <NAZEV> < soubor_s_hodnotou
 - Existující řádek NAZEV=… (i s `export`) se nahradí, jinak se proměnná přidá na konec.
   Zachová se BOM, konce řádků (CRLF/LF) i prefix `export`. Zápis je atomický.
 """
+import getpass
 import os
 import re
 import shutil
@@ -37,7 +39,10 @@ def main():
     if len(sys.argv) != 3 or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", sys.argv[2]):
         sys.exit("Použití: python -I env_nastav.py <cesta k .env> <NAZEV>  (hodnota na stdin)")
     cesta, nazev = sys.argv[1], sys.argv[2]
-    hodnota = sys.stdin.buffer.read().decode("utf-8-sig").strip()
+    if sys.stdin.isatty():
+        hodnota = getpass.getpass(f"Vlož hodnotu {nazev} (nezobrazí se) a stiskni Enter: ").strip()
+    else:
+        hodnota = sys.stdin.buffer.read().decode("utf-8-sig").strip()
     if not hodnota or "\n" in hodnota or "\r" in hodnota:
         sys.exit("Hodnota na stdin chybí nebo má víc řádků.")
     if "'" in hodnota:
