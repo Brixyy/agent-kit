@@ -26,6 +26,7 @@ Uživatel 14. 11. 2026: všechno, co je pro něj, chce přes celou šířku v ba
 ### 💡 Podrobnosti
 <tabulka „co · stav“ (2–5 řádků) nebo krátký text, jedna věta proč>
 
+💡 `Příležitost` <jen když ji vidíš: jak cíle dosáhnout rychleji, přesněji nebo levněji; s doporučením>
 💡 `Dělám dál` <co, nebo „nic“>
 ```
 
@@ -37,6 +38,7 @@ Uživatel 14. 11. 2026: všechno, co je pro něj, chce přes celou šířku v ba
 - Do prvních sekcí nepatří postup ani technické detaily, jen výsledek z pohledu uživatele. Technika patří do 💡 Podrobnosti.
 - Obrázek (vizuální widget) jen u velkých přehledů (týdenní kontrola, konec velké dávky) nebo když strukturu nejde ukázat tabulkou; barvy obyčejných hlášení kreslí mod zdarma.
 - Tento tvar nahrazuje „Formát hlášení“ z PODROBNOSTI agent-kitu; sekce 👉 je jejich „Čeká na tebe“, štítek 💡 `Dělám dál` jejich „Dělám dál“.
+- **Štítek 💡 `Příležitost`** (uživatel 20. 11. 2026, Brixyy/asistent#289): když vidíš cestu, jak cíle projektu dosáhnout rychleji, přesněji nebo levněji (dřívější termín, vynechaný krok, jiný postup), napiš ji sem krátce (do ~10 slov) s doporučením, třeba „start generálky o měsíc dřív, kód je hotový (doporučuji)“. Bez příležitosti řádek vynech, nic nevymýšlej. Co jsi už sám udělal, patří do ✅, ne sem. Když příležitost čeká na rozhodnutí uživatele, patří do rámečku „další krok“ a krátce do sekce 👉; štítek pak vynech.
 - Výjimka: když si uživatel řekl o text v určitém tvaru (koncept e-mailu, popis PR, JSON), dodej ho tak.
 - Pořadí v aplikaci Claude: nejdřív všechny nástroje (i wrap_up), závěrečný text až úplně na konci; text napsaný před nástrojem aplikace sbalí a uživatel ho neuvidí.
 
