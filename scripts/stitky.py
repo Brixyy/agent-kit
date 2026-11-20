@@ -1,7 +1,8 @@
 """Jednotné štítky issues napříč repozitáři Brixyy: python -I scripts/stitky.py [repo ...]
 
-Bez argumentu srovná všechny nearchivované repozitáře účtu s Issues. Štítky jen zakládá
-a přebarvuje (jméno se nemění, nic se nemaže), takže je to vratné. `--nanecisto` jen vypíše plán.
+Bez argumentu srovná všechny nearchivované repozitáře účtu s Issues (kromě VYNECHAT).
+Štítky jen zakládá a upravuje barvu a popis (jméno se nemění, nic se nemaže); u úpravy
+vypíše původní hodnoty, aby šla vrátit. `--nanecisto` jen vypíše plán.
 Pravidlo a význam štítků: global/PODROBNOSTI.md, oddíl „Štítky issues“.
 """
 import json
@@ -9,6 +10,8 @@ import subprocess
 import sys
 
 UCET = "Brixyy"
+# Úkoly mají jinde (robotika → Linear), štítky issues se tam nesrovnávají.
+VYNECHAT = {"robotika"}
 
 # Stav: každé otevřené issue má právě jeden.
 STAVY = {
@@ -31,21 +34,30 @@ STANDARD = {**STAVY, **OSTATNI}
 # Oblast: názvy si určuje projekt („oblast: …“), barva je společná.
 PREDPONA_OBLASTI = "oblast:"
 BARVA_OBLASTI = "0E8A16"
+VYHRAZENE_BARVY = {b for b, _p in STAVY.values()} | {BARVA_OBLASTI}
 
 
 def plan(existujici):
-    """Seznam (akce, jméno, barva, popis) pro štítky repozitáře; akce = založit / přebarvit."""
+    """Kroky (akce, jméno, barva, popis, původní) pro štítky repozitáře.
+
+    akce = založit / upravit / varování; „původní“ je (barva, popis) před úpravou, u varování
+    vlastní štítek projektu v barvě vyhrazené stavu nebo oblasti (nic se s ním nedělá)."""
     podle_jmena = {s["name"]: s for s in existujici}
     kroky = []
     for jmeno, (barva, popis) in STANDARD.items():
         stary = podle_jmena.get(jmeno)
         if stary is None:
-            kroky.append(("založit", jmeno, barva, popis))
+            kroky.append(("založit", jmeno, barva, popis, None))
         elif stary["color"].upper() != barva or (stary.get("description") or "") != popis:
-            kroky.append(("přebarvit", jmeno, barva, popis))
+            kroky.append(("upravit", jmeno, barva, popis, (stary["color"], stary.get("description") or "")))
     for jmeno, stary in podle_jmena.items():
-        if jmeno.startswith(PREDPONA_OBLASTI) and stary["color"].upper() != BARVA_OBLASTI:
-            kroky.append(("přebarvit", jmeno, BARVA_OBLASTI, stary.get("description") or ""))
+        barva = stary["color"].upper()
+        if jmeno.startswith(PREDPONA_OBLASTI):
+            if barva != BARVA_OBLASTI:
+                popis = stary.get("description") or ""
+                kroky.append(("upravit", jmeno, BARVA_OBLASTI, popis, (stary["color"], popis)))
+        elif jmeno not in STANDARD and barva in VYHRAZENE_BARVY:
+            kroky.append(("varování", jmeno, barva, stary.get("description") or "", None))
     return kroky
 
 
@@ -55,15 +67,22 @@ def _gh(*args):
 
 def repozitare():
     data = json.loads(_gh("repo", "list", UCET, "--limit", "200", "--json", "name,isArchived,hasIssuesEnabled"))
-    return sorted(r["name"] for r in data if r["hasIssuesEnabled"] and not r["isArchived"])
+    return sorted(r["name"] for r in data
+                  if r["hasIssuesEnabled"] and not r["isArchived"] and r["name"] not in VYNECHAT)
 
 
 def srovnej(repo, nanecisto):
     existujici = json.loads(_gh("label", "list", "-R", f"{UCET}/{repo}", "--limit", "200",
                                 "--json", "name,color,description"))
     kroky = plan(existujici)
-    for akce, jmeno, barva, popis in kroky:
-        print(f"{repo}: {akce} „{jmeno}“ #{barva}")
+    for akce, jmeno, barva, popis, puvodni in kroky:
+        if akce == "varování":
+            print(f"{repo}: varování „{jmeno}“ #{barva} má barvu vyhrazenou stavu nebo oblasti, přebarvi ho v projektu")
+            continue
+        if akce == "upravit":
+            print(f"{repo}: upravit „{jmeno}“ #{puvodni[0]} „{puvodni[1]}“ → #{barva} „{popis}“")
+        else:
+            print(f"{repo}: založit „{jmeno}“ #{barva}")
         if not nanecisto:
             _gh("label", "create", jmeno, "--color", barva, "--description", popis, "--force",
                 "-R", f"{UCET}/{repo}")
@@ -75,9 +94,15 @@ def main(argv):
     sys.stdout.reconfigure(encoding="utf-8")
     nanecisto = "--nanecisto" in argv
     repa = [a for a in argv if not a.startswith("--")] or repozitare()
+    chyby = 0
     for repo in repa:
-        srovnej(repo, nanecisto)
+        try:
+            srovnej(repo, nanecisto)
+        except subprocess.CalledProcessError as e:
+            chyby += 1
+            print(f"{repo}: CHYBA gh: {(e.stderr or '').strip()}")
+    return 1 if chyby else 0
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))
