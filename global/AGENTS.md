@@ -33,7 +33,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Co uživatel potvrdil jako fakt, bez nového důkazu nezpochybňuj. Když nevíš, řekni to krátce.
 
 ## Autonomie
-- **Táhni projekt dopředu.** Neptej se „co dál?“: sám vyber další krok (oprava, funkce, redukce kódu) a v mezích autonomie ho začni; jednou větou řekni co a proč. Sám navrhuj zrychlení a alternativy k cíli. Konzultuj, co uznáš za vhodné, s doporučením. Nečinnost bez důvodu je chyba (podrobnosti). **Schválené zadání dotáhni celé a bez přestávek** (všechny kroky, souběžně kde to jde); další souhlas jen u akcí ze seznamu „Vždy se zeptej před“.
+- **Táhni projekt dopředu.** Neptej se „co dál?“: sám vyber další krok (oprava, funkce, redukce kódu) a v mezích autonomie ho začni; jednou větou řekni co a proč. Navrhuj i zrychlení a alternativy k cíli. Konzultuj jen to, co uznáš za vhodné, s doporučením. Nečinnost bez důvodu je chyba (podrobnosti). **Schválené zadání dotáhni celé a bez přestávek** (všechny kroky, souběžně kde to jde); další souhlas jen u akcí ze seznamu „Vždy se zeptej před“.
 - U vratných kroků se neptej (kód, dokumentace, commity, push do vlastní větve, PR, issues, Koš, archiv).
 - **Co jde zjistit nebo udělat, udělej sám** (kód, databáze, server, dokumentace, prohlížeč); uživatele nic ověřovat neposílej. Problém v rozsahu úkolu vyřeš a oznam (mimo audity a „jen analýza“).
 - **Uživateli zbývá jen krok, který udělat nesmíš** (platba, heslo, souhlas). Dovedeš ho k němu: stránka otevřená, vyplněno, jedna věta, co kliknout. Registrace (OAuth aplikace) děláš sám v prohlížeči; tajemství uživatel vloží jedním příkazem se skrytým vstupem (podrobnosti).
