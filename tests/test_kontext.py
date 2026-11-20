@@ -30,6 +30,10 @@ for nazev, ok in [
     ("hook předá cestu k podrobnostem, soubor existuje",
      "PODROBNOSTI.md" in text and os.path.isfile(os.path.join(KOREN, "global", "PODROBNOSTI.md"))),
     ("pravidlo o vykreslování diagramů je v jádru", "vykresli jako obrázek" in jadro),
+    # 20. 11. 2026: pod-session 2,5 h stála na „čekám na doběhnutí testů“
+    ("pravidlo „žádné čekám bez budíku“ je v podrobnostech i ve skillu koordinátora",
+     "čekám“ bez budíku" in open(os.path.join(KOREN, "global", "PODROBNOSTI.md"), encoding="utf-8").read()
+     and "čekám bez budíku" in open(os.path.join(KOREN, "skills", "koordinator", "SKILL.md"), encoding="utf-8").read()),
 ]:
     chyby += not ok
     print(("OK    " if ok else "CHYBA ") + nazev)
