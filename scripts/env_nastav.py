@@ -44,7 +44,7 @@ def main():
     else:
         hodnota = sys.stdin.buffer.read().decode("utf-8-sig").strip()
     if not hodnota or "\n" in hodnota or "\r" in hodnota:
-        sys.exit("Hodnota na stdin chybí nebo má víc řádků.")
+        sys.exit("Hodnota chybí nebo má víc řádků.")
     if "'" in hodnota:
         sys.exit("Hodnota obsahuje apostrof ('), ten skript neumí bezpečně zapsat. Zapiš ji ručně se zálohou.")
 
