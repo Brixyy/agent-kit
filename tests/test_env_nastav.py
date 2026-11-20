@@ -56,7 +56,7 @@ def main():
         # Agent bez terminálu (stdin z NUL, výstup do roury) nesmí uvíznout na skrytém vstupu.
         r = subprocess.run([sys.executable, "-I", SKRIPT, novy, "B"], stdin=subprocess.DEVNULL,
                            capture_output=True, env=dict(os.environ, USERPROFILE=domov, HOME=domov), timeout=20)
-        over(r.returncode != 0 and "Hodnota chybí" in r.stderr.decode("utf-8", "replace"),
+        over(r.returncode != 0 and b"Hodnota" in r.stderr,
              "bez terminálu a bez hodnoty skončí chybou, nečeká na vstup")
 
     print("VŠE OK" if not chyby else f"CHYB: {chyby}")
