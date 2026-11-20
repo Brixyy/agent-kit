@@ -39,7 +39,8 @@ def main():
     if len(sys.argv) != 3 or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", sys.argv[2]):
         sys.exit("Použití: python -I env_nastav.py <cesta k .env> <NAZEV>  (hodnota na stdin)")
     cesta, nazev = sys.argv[1], sys.argv[2]
-    if sys.stdin.isatty():
+    # Jen ve skutečném terminálu; na Windows hlásí isatty() True i pro NUL, proto i stdout.
+    if sys.stdin.isatty() and sys.stdout.isatty():
         hodnota = getpass.getpass(f"Vlož hodnotu {nazev} (nezobrazí se) a stiskni Enter: ").strip()
     else:
         hodnota = sys.stdin.buffer.read().decode("utf-8-sig").strip()

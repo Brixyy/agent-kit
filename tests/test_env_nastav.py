@@ -53,6 +53,12 @@ def main():
         r = spust(domov, novy, "A", "1")
         over(r.returncode == 0 and open(novy, encoding="utf-8").read() == "A='1'\n", "nový soubor vytvořen")
 
+        # Agent bez terminálu (stdin z NUL, výstup do roury) nesmí uvíznout na skrytém vstupu.
+        r = subprocess.run([sys.executable, "-I", SKRIPT, novy, "B"], stdin=subprocess.DEVNULL,
+                           capture_output=True, env=dict(os.environ, USERPROFILE=domov, HOME=domov), timeout=20)
+        over(r.returncode != 0 and "Hodnota chybí" in r.stderr.decode("utf-8", "replace"),
+             "bez terminálu a bez hodnoty skončí chybou, nečeká na vstup")
+
     print("VŠE OK" if not chyby else f"CHYB: {chyby}")
     sys.exit(1 if chyby else 0)
 
