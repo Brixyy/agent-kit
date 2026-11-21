@@ -62,7 +62,7 @@ Kontroly úměrné změně: během práce rychlé a cílené, plná sada jednou 
   - **Test hlídá riziko:** peníze, výpočty, data, přihlášení a oprávnění, kritické cesty uživatele, nebo opravenou chybu (ke každé opravě regresní test, který bez opravy padá). Nepíše se na trivialitu, kopii implementace, obsah dokumentace ani na detaily, které se mění s každou úpravou.
   - **Chování přes veřejné rozhraní**, ne vnitřní detaily (test přežije přepsání vnitřku, když se chování nezmění). Jeden test = jedno tvrzení o chování a název říká co (`test_sleva_nad_limit_se_neuplatni`), ne číslo úkolu: soubory typu `test_r209.py` nebo `test_m1a.py` ne.
   - **Úklid ve stejném PR:** při změně chování zastaralé a zdvojené testy smaž nebo slouč v tomtéž PR, ne „někdy později“.
-  - **Vrstvy:** rychlé jednotkové testy běží v PR (celá sada PR cílí do ~5 minut); pomalé a e2e jen na kritické cesty. Nestabilní test se opraví, nebo smaže s důvodem v PR, nikdy se neopakuje (viz Levné CI, bod 5).
+  - **Vrstvy:** rychlé jednotkové testy běží v PR (celá sada PR cílí do ~5 minut); pomalé a e2e jen na kritické cesty. Nestabilní test se opraví, nikdy se neopakuje (viz Levné CI, bod 5).
   - **Zbytečný test poznáš tak,** že nikdy nepadl a totéž hlídá jiný test, testuje mock místo kódu, nebo jen zdvojuje kontrolu typů či lintu. Takový test smaž (s důvodem v PR).
 
 ## Levné CI
@@ -76,7 +76,7 @@ Uživatel 21. 11. 2026 (Brixyy/asistent#300): placené runnery stály v listopad
    - drobné kontroly do jednoho jobu: každý job se účtuje zaokrouhleně na celou minutu.
    Pokrytí stejné: rušené a koncepty jsou běhy, jejichž výsledek by stejně nikdo nepoužil.
 4. **Po sloučení netestuj znovu stejný kód.** Běh PR na konci (jen když vše prošlo; selhání nahrání kontrolu neshodí) uloží artefakt `otestovano-<strom>`, kde strom je `git rev-parse HEAD^{tree}` slučovacího commitu, který PR testuje; retence pár dní. Běh na `push` do `main` spočítá strom svého commitu, vyhledá artefakt přes API (`gh api "repos/<repo>/actions/artifacts?name=otestovano-<strom>"`, nevypršený; workflow s `permissions: actions: read`, a když `permissions` zavádíš nově, vyjmenuj i ostatní oprávnění, která workflow potřebuje) a když existuje, těžké kroky přeskočí. Když API selže, poběží všechno. Artefakt, ne cache: cache z PR větve není z `main` čitelná. Pokrytí stejné: přeskočí se jen strom bit po bitu shodný s tím, který prošel; když mezitím přišlo jiné PR, strom se liší a poběží všechno, takže se chytí i rozbití po sloučení. Značka dokazuje jen to, že prošel workflow z PR, proto review hlídá i změny CI v PR.
-5. **Nestabilní test** (prošel až po opakování nebo padá ve více nesouvisejících PR) oprav u zdroje, nebo ho smaž s důvodem v PR, když nic důležitého nehlídá; nikdy ne opakováním běhu. Pokrytí stejné nebo lepší: test, který náhodně padá, nic nehlídá a jen pálí minuty.
+5. **Nestabilní test** (prošel až po opakování nebo padá ve více nesouvisejících PR) oprav u zdroje, nikdy ne opakováním běhu. Když nic důležitého nehlídá, smaž ho s důvodem v PR; když hlídá něco důležitého a hned opravit nejde, založ ticket s vysokou prioritou a do opravy ho nech běžet (pád pak ověř ručně, ne opakováním). Pokrytí stejné nebo lepší: test, který náhodně padá, nic nehlídá a jen pálí minuty.
 
 ## Plánované úlohy (rutiny)
 Opakované i jednorázové kontroly a úlohy zakládej jako cloudové rutiny Claude Code (skill `schedule`, správa na https://claude.ai/code/routines), nikdy jako lokální úlohy vázané na zapnutý počítač. **Novou rutinu (cloudovou i lokální, opakovanou i jednorázovou) zakládej jen se souhlasem uživatele** (uživatel 18. 11. 2026: „nikdo nemůže přidávat rutinu bez mého svolení… musí být můj souhlas, že se rutina může vytvořit“, jinak „v tom bude hrozný bordel“). Souhlas je jeho „ano“ v chatu k návrhu, který říká, co rutina dělá, kdy poběží a kde; nejlépe otázkou s tlačítky. Souhlas platí jen pro tu jednu rutinu. Rutina ani agent bez uživatele (noční běh, pod-session) novou rutinu nezakládá; potřebu zapíše jako návrh do hlášení. Úpravy existujících rutin dělej sám.
@@ -116,7 +116,7 @@ Uživatel 20. 11. 2026: štítky mají „barevně hrát“ napříč projekty a
   - `myšlenka`: nápad pro kontext, bez zadání se nedělá;
   - `pozastaveno`.
 - **Oblast, jedna:** `oblast: <název>`. Názvy si určuje projekt v `AGENTS.md`, barva je společná (zelená). Projekt se starším vlastním členěním (např. pilíře) ho smí ponechat.
-- **Zvláštní štítky:** `nesloučit`, `riziko: nízké / střední / vysoké`.
+- **Zvláštní štítky:** `nesloučit`, `riziko: nízké / střední / vysoké`, `audit-projektu` (souhrnné issue auditu).
 - **Barvy a popisy drží jediný zdroj:** `scripts/stitky.py`. Nový nebo upravený projekt srovná příkazem `python -I scripts/stitky.py <repo>` (bez argumentu všechny repozitáře, `--nanecisto` jen vypíše plán). Skript štítky jen zakládá a upravuje barvu a popis (původní hodnoty vypíše), nic nemaže. Vlastní štítky projektu nepoužívají barvy stavů ani oblastí, skript na ně upozorní. Nový štítek stavu nebo zvláštní štítek přidej jen po dohodě s uživatelem, a to do skriptu, ne ručně v jednom repozitáři.
 
 ## Úklid

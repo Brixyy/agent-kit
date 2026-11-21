@@ -10,7 +10,7 @@ Obecný postup pro všechny projekty. **Projektová část je v `AUDIT.md` v ko�
 Audit odpovídá na tři otázky: **Míří aplikace tam, kam má? Funguje opravdu, nebo jen vypadá, že funguje? Kde je nejvíc rizika a co s tím?** Obsahová kontrola sama nestačí: audit vždy zahrne i kód, testy, bezpečnost a provoz.
 
 ## Kdy a v jakém rozsahu
-- **Kadence pro všechny projekty stejná:** 1. a 15. den v měsíci, mimořádně na požádání. Spouští ho jedna společná rutina „Portfolio – audit projektů“, která projde všechna repa po sobě; zakládá a spravuje ji hlavní session asistenta (`Brixyy/asistent`). Projekt si vlastní rutinu auditu nezakládá.
+- **Kadence pro všechny projekty stejná:** 1. a 15. den v měsíci, mimořádně na požádání. Spouští ho jedna společná rutina „Portfolio – audit projektů“, která projde všechna repa po sobě; zakládá a spravuje ji hlavní session asistenta (`Brixyy/asistent`). Projekt si vlastní rutinu auditu nezakládá. Rutina je dlouhý běh: drží si stav (které repo je hotové, „hotovo X z Y“) a po pádu pokračuje dalším repem (podrobnosti, Noční a dlouhé běhy); oblasti, na které její prostředí nestačí (prohlížeč, přihlášení do produkce), dá do zprávy jako „neověřeno“.
 - **Rozsah úměrný projektu:** malé repo bez produkce dostane lehký audit (oblasti 1, 3, 4, 5, 9, 10), ostatní plný. Rozsah může určit `AUDIT.md`.
 
 ## Pravidla

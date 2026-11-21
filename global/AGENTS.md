@@ -16,7 +16,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Ptej se po jedné cílené otázce s doporučením. Rozhodnutí předkládej jako otázku s možnostmi.
 - V reportu napiš, **kde výsledek uvidí** (PR, ticket, adresa). Tickety plným klíčem (`ROB-123`, `owner/repo#12`).
 - Stav hlas sám a pravdivě (pracuji / hotovo / čekám na tebe); po delší práci: co funguje s reálnými daty, co je odhad, co chybí. Otázka nesmí zapadnout.
-- Zadání pro jiné agenty piš česky; prompt pro uživatele do jiného nástroje 2–3 věty, pod-sessions úplné zadání.
+- Zadání pro jiné agenty piš česky; prompt pro uživatele do jiného nástroje nejvýš 2–3 věty, pod-sessions úplné zadání.
 - Text ke zkopírování celý v jednom bloku kódu.
 - Příkaz pro uživatele jen výjimečně a pro **jeho** terminál (Windows: blok `powershell`, cesty `C:\...`).
 - Bez vycpávek: neomlouvej se, nekonči frázemi „dej vědět“.
