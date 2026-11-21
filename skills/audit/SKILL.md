@@ -63,7 +63,7 @@ Závažnost: **kritická** (ohrožuje data, peníze, bezpečnost nebo cíl teď)
 ## Výstup
 - **Zpráva** do místa z `AUDIT.md`: nahoře „kde jsme jednou větou“, semafor oblastí 🟢🟡🔴 s trendem ↑↓→, velké otázky s odpověďmi, nálezy podle závažnosti, srovnání s minulým auditem, co nešlo ověřit.
 - **Obrázek:** přehled semaforu a trendů jako artefakt nebo obrázek (uživatel je vizuální typ); na telefonu jako soubor PNG.
-- **Souhrnné issue** „Audit projektu RRRR-MM-DD“ se štítkem `audit-projektu` (stejný ve všech repech; obecný štítek `audit` mívají i jiné audity): semafor, tři doporučené kroky, odkazy na zprávu a issues nálezů. Je to místo, kde příští audit najde předchozí.
+- **Souhrnné issue** „Audit projektu RRRR-MM-DD“ se štítkem `audit-projektu` (stejný ve všech repech): semafor, tři doporučené kroky, odkazy na zprávu a issues nálezů. Je to místo, kde příští audit najde předchozí.
 - **Issues nálezů** jen pro kritické a vysoké, které nejsou už v otevřeném issue (zkontroluj duplicity; trvající nález doplň komentářem ke stávajícímu issue).
 - **Spuštěno rutinou bez uživatele:** udělej body 1–4 a výstup bez probrání s uživatelem, pošli mu krátké upozornění a velké otázky nech na probrání v příští konverzaci. Nic nerozhoduj za něj.
 - **Rutina přes víc projektů:** souhrnné issue založ v projektu hned po dokončení jeho auditu, ne až na konci, aby se výsledek neztratil, když běh později spadne. Společný přehled všech projektů dělá rutina na konci.
