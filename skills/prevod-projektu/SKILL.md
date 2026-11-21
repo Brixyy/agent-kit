@@ -5,7 +5,7 @@ description: Převod existujícího projektu nebo založení nového na společn
 
 # Převod projektu na agent-kit
 
-Nový projekt zakládej ze šablony `Brixyy/project-template` (už obsahuje body 1–6). U existujícího projektu projdi seznam; vše jedním PR do výchozí větve. Ověřeno na prove-webu, prove-aplikaci, statice, robotice, tradingu a cloudroomu (10/2026).
+Nový projekt zakládej ze šablony `Brixyy/project-template` (už obsahuje body 1–6). U existujícího projektu projdi seznam; vše jedním PR do výchozí větve. Ověřeno na prove-webu, prove-aplikaci, statice, robotice, Elyonu a cloudroomu (10/2026).
 
 1. **`AGENTS.md`** přepiš podle šablony: do ~200 řádků, pravdivě, bez historických nástrojů. `CLAUDE.md` je jediný řádek `@AGENTS.md` (Claude Code tak načte stejná pravidla jako Codex; obsah patří jen do `AGENTS.md`). Globální pravidla sem nekopíruj.
 2. **`.claude/settings.json`** (vytvoří a doplní i `scripts/napojit-projekt.py` z bodu 3): `extraKnownMarketplaces` `agent-kit` (`github`, `Brixyy/agent-kit`) + `enabledPlugins` `agent-kit@agent-kit` + deny čtení `.env`, `.env.local`, `.env.production`, `.env.development`, `.env.*.local`.
@@ -17,4 +17,4 @@ Nový projekt zakládej ze šablony `Brixyy/project-template` (už obsahuje body
 8. **Vercel** (jen projekt s Vercelem): z agent-kitu spusť `python -I scripts/vercel_kontrola.py <projekt>`; náhledy vypnuté, produkce jen z `main` (PODROBNOSTI → Vercel).
 9. **Úkoly:** GitHub Issues (na uživatele čeká štítek `čeká na uživatele`), ve všech projektech včetně robotiky.
 10. Zruš pozůstatky starých nástrojů (`_flow/`, zrcadla `.agents/skills` ↔ `.claude/skills`, lokální zákazy v `.claude/settings.local.json`, které blokují běžnou práci).
-11. PR s popisem přes `--body-file`, review, pak počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash` (v soukromém repu na Free `--auto` na CI nečeká).
+11. PR s popisem přes `--body-file`, review a sloučení podle skillu `prace-workflow` (oddíl 3: koncept označ za hotové, počkej na běh CI po označení, v soukromém repu na Free bez `--auto`).
