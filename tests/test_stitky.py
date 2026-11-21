@@ -83,7 +83,7 @@ over("ostrý běh jen zakládá s --force, nic nemaže ani nepřejmenuje",
      len(zapisy) == len(stitky.STANDARD)
      and all(v[:2] == ("label", "create") and "--force" in v and "--name" not in v for v in zapisy)
      and not any("delete" in v for v in volani))
-over("výčet repozitářů vynechá robotiku a archivované", stitky.repozitare() == ["a"])
+over("výčet repozitářů zahrne robotiku, vynechá archivované", stitky.repozitare() == ["a", "robotika"])
 
 
 def padajici_gh(*args):

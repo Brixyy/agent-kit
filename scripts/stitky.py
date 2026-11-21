@@ -1,6 +1,6 @@
 """Jednotné štítky issues napříč repozitáři Brixyy: python -I scripts/stitky.py [repo ...]
 
-Bez argumentu srovná všechny nearchivované repozitáře účtu s Issues (kromě VYNECHAT).
+Bez argumentu srovná všechny nearchivované repozitáře účtu s Issues.
 Štítky jen zakládá a upravuje barvu a popis (jméno se nemění, nic se nemaže); u úpravy
 vypíše původní hodnoty, aby šla vrátit. `--nanecisto` jen vypíše plán.
 Pravidlo a význam štítků: global/PODROBNOSTI.md, oddíl „Štítky issues“.
@@ -10,8 +10,6 @@ import subprocess
 import sys
 
 UCET = "Brixyy"
-# Úkoly mají jinde (robotika → Linear), štítky issues se tam nesrovnávají.
-VYNECHAT = {"robotika"}
 
 # Stav: každé otevřené issue má právě jeden.
 STAVY = {
@@ -69,7 +67,7 @@ def _gh(*args):
 def repozitare():
     data = json.loads(_gh("repo", "list", UCET, "--limit", "200", "--json", "name,isArchived,hasIssuesEnabled"))
     return sorted(r["name"] for r in data
-                  if r["hasIssuesEnabled"] and not r["isArchived"] and r["name"] not in VYNECHAT)
+                  if r["hasIssuesEnabled"] and not r["isArchived"])
 
 
 def srovnej(repo, nanecisto):
