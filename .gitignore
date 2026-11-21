@@ -3,3 +3,4 @@ __pycache__/
 
 # Místní zprávy auditu (AUDIT.md)
 /_local/
+.claude/worktrees/

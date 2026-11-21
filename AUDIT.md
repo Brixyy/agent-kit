@@ -2,12 +2,12 @@
 Projektová část skillu `audit` (`skills/audit/SKILL.md`). Repo je veřejné: do zprávy ani issues nepatří hesla, klíče, ID projektů ani údaje o zákaznících. Audit jen čte: nic neopravuje ani nevydává.
 
 ## Kdy a kam
-- **Kdy:** 1. a 15. den v měsíci, společná lokální rutina aplikace Claude „Portfolio – audit projektů“ (projde všechna repa portfolia po sobě, zakládá ji asistent). Mimořádně na požádání uživatele.
+- **Kdy:** 1. a 15. den v měsíci v 9:00, společná lokální rutina aplikace Claude „Portfolio – audit projektů“ (projde všechna repa portfolia po sobě, zakládá ji asistent). Mimořádně na požádání uživatele.
 - **Rozsah:** lehký (nástroj bez produkce): oblasti 1, 3, 4, 5, 9 a 10 skillu.
 - **Zpráva:** `_local/audit-<RRRR-MM-DD>/` v hlavní pracovní kopii (`/_local/` je v `.gitignore`), souhrn `ZPRAVA.md`.
 - **Souhrnné issue** „Audit projektu <RRRR-MM-DD>“ se štítkem **`audit-projektu`** v `Brixyy/agent-kit`; text issue je veřejný. Issues nálezů jen pro kritické a vysoké.
 - **Předchozí audit:** `gh issue list --repo Brixyy/agent-kit --label audit-projektu --state all --limit 1`. První audit podle tohoto souboru předchozí nemá.
-- **Upozornění uživateli:** souhrn za celé portfolio posílá společná rutina.
+- **Upozornění uživateli:** krátkou zprávu za celé portfolio posílá společná rutina do Telegramu (bot asistenta).
 
 ## Přístupy (jen čtení)
 - **Kód a kontroly:** dočasný worktree na pevném commitu (`git worktree add --detach .claude/worktrees/audit-<datum> origin/main`), po auditu `git worktree remove`.
@@ -15,7 +15,7 @@ Projektová část skillu `audit` (`skills/audit/SKILL.md`). Repo je veřejné: 
 - **Tajemství:** `.env*` neotvírat ani negrepovat. Úniky hledat přes upozornění GitHubu: `gh api repos/Brixyy/agent-kit/secret-scanning/alerts`.
 
 ## Měřítka projektu
-- Jádro `global/AGENTS.md` pod 9 000 znaků (hlídá `tests/test_kontext.py`); kolik místa zbývá.
+- Kontext vkládaný hookem pod 9 000 znaků (hlídá `tests/test_kontext.py`, jádro je `global/AGENTS.md`); kolik místa zbývá.
 - Opakované chyby agentů: kolik podnětů za období vedlo ke změně pravidla, kontroly nebo skriptu a zda se chyba přestala opakovat (odkud brát: doplnit s uživatelem).
 - Používají všechny počítače a cloud aktuální verzi pluginu?
 
