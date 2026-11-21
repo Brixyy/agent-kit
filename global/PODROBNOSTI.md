@@ -106,18 +106,21 @@ Každou založenou, změněnou nebo smazanou rutinu zapiš do rejstříku `portf
 - **Volba modelů:** model a úsilí hlavní session volí uživatel v aplikaci. Rizikovou práci (výpočty, data, bezpečnost, review, změny s vlivem na výsledky) dělá nejsilnější dostupný model. Pomocní agenti, kteří jen čtou a hledají (průzkum, sběr podkladů), smějí běžet na levnějším modelu.
 
 ## Štítky issues
-Uživatel 20. 11. 2026: štítky mají „barevně hrát“ napříč projekty a stav issue musí být vidět na první pohled. Platí ve všech repozitářích s GitHub Issues (robotika má úkoly v Linearu).
+Uživatel 20. 11. 2026: štítky mají „barevně hrát“ napříč projekty a stav issue musí být vidět na první pohled; 21. 11. 2026 sjednocení základu (Brixyy/asistent#310). Platí ve všech repozitářích s GitHub Issues (robotika má úkoly v Linearu). Jeden společný základ, nad ním jen oblasti a vlastní štítky projektu.
 - **Stav, vždy právě jeden** u otevřeného issue. Agent ho nastaví při založení a mění ho s každou změnou stavu:
+  - `k práci`: zadáno a připraveno, čeká ve frontě (při startu práce → `rozpracováno`);
   - `rozpracováno`: agent na tom právě pracuje;
   - `čeká na uživatele`: rozhodnutí nebo krok uživatele, otázka je v komentáři;
   - `čeká na zákazníka`: podklad od zákazníka nebo jiné třetí strany;
   - `čeká na termín`: pokračuje až k datu;
   - `stálé`: otevřené záměrně (předávky, přehledy);
   - `myšlenka`: nápad pro kontext, bez zadání se nedělá;
-  - `pozastaveno`.
-- **Oblast, jedna:** `oblast: <název>`. Názvy si určuje projekt v `AGENTS.md`, barva je společná (zelená). Projekt se starším vlastním členěním (např. pilíře) ho smí ponechat.
-- **Zvláštní štítky:** `nesloučit`, `riziko: nízké / střední / vysoké`, `audit-projektu` (souhrnné issue auditu).
-- **Barvy a popisy drží jediný zdroj:** `scripts/stitky.py`. Nový nebo upravený projekt srovná příkazem `python -I scripts/stitky.py <repo>` (bez argumentu všechny repozitáře, `--nanecisto` jen vypíše plán). Skript štítky jen zakládá a upravuje barvu a popis (původní hodnoty vypíše), nic nemaže. Vlastní štítky projektu nepoužívají barvy stavů ani oblastí, skript na ně upozorní. Nový štítek stavu nebo zvláštní štítek přidej jen po dohodě s uživatelem, a to do skriptu, ne ručně v jednom repozitáři.
+  - `pozastaveno`: nepracuje se, čeká na podmínku (vlastní štítky typu „odloženo“ se nezakládají).
+- **Pořadí práce:** `priorita` (další na řadě), `naléhavé` (má přednost před prioritou). Koordinátor a rutiny práce berou úkoly v tomto pořadí.
+- **Oblast, jedna:** `oblast: <název>`. Názvy si určuje projekt v `AGENTS.md`, barva je společná (zelená). Projekt se starším vlastním členěním navázaným na nástroje (Elyon: `pilíř: …` v roadmapě a CI) ho smí ponechat.
+- **Zvláštní štítky:** `nesloučit`, `riziko: nízké / střední / vysoké` (PR i issue), `audit-projektu` (souhrnné issue auditu).
+- **Vlastní štítky projektu** jen tam, kde je základ nepokryje (např. typy podnětů ve schránce asistenta); popsané v `AGENTS.md` projektu, česky, bez barev stavů a oblastí. Výchozí anglické štítky GitHubu (`bug`, `enhancement` …) se nepoužívají a skript je maže.
+- **Barvy a popisy drží jediný zdroj:** `scripts/stitky.py`. Nový nebo upravený projekt srovná příkazem `python -I scripts/stitky.py <repo>` (bez argumentu všechny repozitáře, `--nanecisto` jen vypíše plán). Skript standardní štítky zakládá a upravuje barvu a popis (původní hodnoty vypíše), maže jen výchozí anglické štítky GitHubu; vlastní štítky projektu nemaže, na kolizi barvy upozorní. `--kontrola` vypíše otevřená issues bez právě jednoho stavu; spouští ji týdenní přehled asistenta. Nový štítek základu přidej jen po dohodě s uživatelem, a to do skriptu, ne ručně v jednom repozitáři.
 
 ## Úklid
 - **Pracovní složky a větve** (uživatel 29. 10. 2026: „abychom po sobě uklízeli… je špatný, když to necháváme“). Kdo PR sloučí a ověří, hned smaže svou pracovní složku (`git worktree remove`) a lokální větev; větev na GitHubu maže sloučení PR. Platí trvalý souhlas bez ptaní, protože práce je celá ve výchozí větvi. Podmínky: složka nemá neuložené změny a obsah větve je ve výchozí větvi (sloučené PR nebo `git merge-tree` beze změny). Větev, jejíž práce ve výchozí větvi není, se před smazáním uloží jako značka `archiv/<větev>` (obnovitelná). Koordinátor na konci dávky zkontroluje `git worktree list` a `git branch` a uklidí, co po sessions zbylo; nikdy nemaže složku ani větev session, která ještě běží. Pracovní složky mimo projekt (dočasné kopie v Temp) patří do úklidu taky.

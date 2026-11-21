@@ -48,9 +48,24 @@ cizi = hotovo + [
     {"name": "bug", "color": "d73a4a", "description": "Something isn't working"},
 ]
 kroky = stitky.plan(cizi)
-over("oblast se upraví s popisem, cizí štítek v barvě stavu je jen varování",
-     akce(kroky) == [("upravit", "oblast: Blitz"), ("varování", "podnět")]
+over("oblast se upraví s popisem, cizí štítek v barvě stavu je jen varování, anglický se smaže",
+     akce(kroky) == [("upravit", "oblast: Blitz"), ("varování", "podnět"), ("smazat", "bug")]
      and kroky[0][2:4] == (stitky.BARVA_OBLASTI, "Fasády"))
+
+# mazat se smí jen výchozí anglické štítky GitHubu, nikdy standardní ani vlastní štítek projektu
+over("SMAZAT neobsahuje standardní štítky", not (stitky.SMAZAT & set(stitky.STANDARD)))
+over("vlastní štítky projektu se nemažou",
+     not [k for k in stitky.plan(hotovo + [{"name": "odloženo", "color": "C5A06A", "description": ""}])
+          if k[0] == "smazat"])
+
+# kontrola stavu: právě jeden štítek stavu
+issues = [
+    {"number": 1, "title": "ok", "labels": [{"name": "k práci"}, {"name": "oblast: CAD"}]},
+    {"number": 2, "title": "bez", "labels": [{"name": "riziko: nízké"}]},
+    {"number": 3, "title": "dva", "labels": [{"name": "rozpracováno"}, {"name": "čeká na zákazníka"}]},
+]
+over("kontrola najde issue bez stavu a s víc stavy",
+     [(c, s) for c, _n, s in stitky.chybny_stav(issues)] == [(2, []), (3, ["rozpracováno", "čeká na zákazníka"])])
 
 # stavy mají navzájem různé barvy (barva sama říká stav)
 barvy = [b for b, _p in stitky.STAVY.values()]
@@ -70,6 +85,8 @@ def falesne_gh(*args):
             {"name": "robotika", "isArchived": False, "hasIssuesEnabled": True},
             {"name": "stare", "isArchived": True, "hasIssuesEnabled": True},
         ])
+    if args[:2] == ("issue", "list"):
+        return json.dumps([{"number": 7, "title": "x", "labels": []}])
     return ""
 
 
@@ -79,11 +96,30 @@ over("nanečisto jen čte", all(v[:2] == ("label", "list") for v in volani))
 volani.clear()
 stitky.srovnej("a", nanecisto=False)
 zapisy = [v for v in volani if v[:2] != ("label", "list")]
-over("ostrý běh jen zakládá s --force, nic nemaže ani nepřejmenuje",
+over("ostrý běh zakládá s --force, vlastní štítek nemaže ani nepřejmenuje",
      len(zapisy) == len(stitky.STANDARD)
      and all(v[:2] == ("label", "create") and "--force" in v and "--name" not in v for v in zapisy)
      and not any("delete" in v for v in volani))
 over("výčet repozitářů vynechá robotiku a archivované", stitky.repozitare() == ["a"])
+volani.clear()
+over("--kontrola jen čte a s nálezem vrátí 1",
+     stitky.main(["a", "--kontrola"]) == 1 and all(v[:2] == ("issue", "list") for v in volani))
+
+
+def gh_s_anglickym(*args):
+    volani.append(args)
+    if args[:2] == ("label", "list"):
+        return json.dumps(hotovo + [{"name": "wontfix", "color": "ffffff", "description": ""}])
+    return ""
+
+
+stitky._gh = gh_s_anglickym
+volani.clear()
+stitky.srovnej("a", nanecisto=True)
+over("nanečisto anglický štítek nesmaže", not any(v[:2] == ("label", "delete") for v in volani))
+stitky.srovnej("a", nanecisto=False)
+over("ostrý běh smaže anglický štítek s --yes",
+     [v for v in volani if v[:2] == ("label", "delete")] == [("label", "delete", "wontfix", "--yes", "-R", "Brixyy/a")])
 
 
 def padajici_gh(*args):
