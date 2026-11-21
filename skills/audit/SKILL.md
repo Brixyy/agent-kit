@@ -40,7 +40,7 @@ Audit odpovídá na tři otázky: **Míří aplikace tam, kam má? Funguje oprav
 | 5. Bezpečnost a závislosti | Tajemství v repozitáři a historii, přihlášení a oprávnění, vstupy z internetu, otevřené porty, závislosti se známými zranitelnostmi (`npm audit`, `pip-audit` apod.) i zastaralé závislosti, zálohy a obnova, kdo může co spustit. |
 | 6. Provoz | Chyby a výpadky v logu za období, hlídání a upozornění (hlídá se skutečná práce, nebo jen že proces běží?), disk, paměť, výkon, plánované úlohy a rutiny. |
 | 7. Data | Správnost klíčových výpočtů (kontrolní vzorek přepočtem), úplnost a čerstvost zdrojů dat, konzistence mezi tabulkami, migrace. |
-| 8. UI | Vidí uživatel všechno důležité, co systém ví a dělá, a srozumitelně? Desktop i telefon, přihlášená část, soulad s `DESIGN.md` (napojený projekt: komponenty a barvy jen z Brixyy/design, nic vlastního mimo něj). Kde UI ukazuje něco, co neplatí? |
+| 8. UI | Vidí uživatel všechno důležité, co systém ví a dělá, a srozumitelně? Desktop i telefon, přihlášená část, soulad s `DESIGN.md` (napojený projekt: komponenty a barvy jen z Brixyy/design a odchylek zapsaných v `DESIGN.md`). Kde UI ukazuje něco, co neplatí? |
 | 9. Dokumentace a znalosti | Je dokumentace pravdivá k pevnému commitu? Jeden zdroj pravdy, zastaralé stavy, otevřené otázky bez majitele. |
 | 10. Proces | Rychlost a velikost PR, reverty a opakované opravy téhož, stáří a štítky issues, zaseknuté úkoly, opakované chyby agentů, co čeká na uživatele a jak dlouho. |
 | 11. Náklady | Kolik projekt stojí a jaký je trend proti minulému auditu: CI runnery (minuty, zrušené a opakované běhy), hosting, databáze, AI a další placené služby. Co platíme a nic to nedává? |
