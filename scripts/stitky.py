@@ -34,6 +34,7 @@ OSTATNI = {
     "riziko: střední": ("FEF2C0", "Změna se středním rizikem"),
     "riziko: vysoké": ("F9D0C4", "Změna s vysokým rizikem"),
     "audit-projektu": ("5D6B7A", "Souhrnné issue auditu projektu (skill audit, 1. a 15. v měsíci)"),
+    "závislosti": ("0366D6", "Aktualizace závislostí (PR od Dependabota)"),
 }
 # Typ úkolu: nepovinný, vznikl přejmenováním výchozích anglických štítků.
 TYPY = {
@@ -50,6 +51,8 @@ VYHRAZENE_BARVY = {b for b, _p in STAVY.values()} | {BARVA_OBLASTI}
 # Přejmenováním zůstane štítek na všech issues a PR, které ho nesou.
 PREJMENOVAT = {"bug": "chyba", "enhancement": "vylepšení", "documentation": "dokumentace"}
 SMAZAT = {"duplicate", "good first issue", "help wanted", "invalid", "question", "wontfix", "accessibility"}
+# Výchozí štítky Dependabota (nahrazuje je „závislosti“ v dependabot.yml; Brixyy/asistent#317).
+SMAZAT |= {"dependencies", "github_actions", "javascript", "python", "python:uv", "docker", "npm"}
 
 
 def plan(existujici):
