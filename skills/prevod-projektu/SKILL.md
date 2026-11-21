@@ -15,6 +15,6 @@ Nový projekt zakládej ze šablony `Brixyy/project-template` (už obsahuje body
 6. **CI** při PR: lint + typecheck + testy (+ build, pokud nesahá do produkční DB). Pravidelné (cron) běhy jen pro věci, které se mění bez změny kódu. Lint vynechává `.claude/worktrees/`.
 7. **GitHub:** ruleset s **povinnými kontrolami** na výchozí větvi + zapnuté **automatické sloučení** a mazání větví po sloučení (`gh api -X PATCH repos/Brixyy/<repo> -F allow_auto_merge=true -F delete_branch_on_merge=true`). Bez povinných kontrol by automatické sloučení proběhlo hned, před testy.
 8. **Vercel** (jen projekt s Vercelem): z agent-kitu spusť `python -I scripts/vercel_kontrola.py <projekt>`; náhledy vypnuté, produkce jen z `main` (PODROBNOSTI → Vercel).
-9. **Úkoly:** GitHub Issues (na uživatele čeká štítek `čeká na uživatele`); robotika v Linearu.
+9. **Úkoly:** GitHub Issues (na uživatele čeká štítek `čeká na uživatele`), ve všech projektech včetně robotiky.
 10. Zruš pozůstatky starých nástrojů (`_flow/`, zrcadla `.agents/skills` ↔ `.claude/skills`, lokální zákazy v `.claude/settings.local.json`, které blokují běžnou práci).
 11. PR s popisem přes `--body-file`, review, pak počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash` (v soukromém repu na Free `--auto` na CI nečeká).
