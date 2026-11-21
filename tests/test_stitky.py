@@ -48,12 +48,18 @@ cizi = hotovo + [
     {"name": "bug", "color": "d73a4a", "description": "Something isn't working"},
 ]
 kroky = stitky.plan(cizi)
-over("oblast se upraví s popisem, cizí štítek v barvě stavu je jen varování, anglický se smaže",
-     akce(kroky) == [("upravit", "oblast: Blitz"), ("varování", "podnět"), ("smazat", "bug")]
+over("oblast se upraví s popisem, cizí štítek v barvě stavu je jen varování, bug vedle chyby jen varuje",
+     akce(kroky) == [("upravit", "oblast: Blitz"), ("varování", "podnět"), ("varování", "bug")]
      and kroky[0][2:4] == (stitky.BARVA_OBLASTI, "Fasády"))
 
 # mazat se smí jen výchozí anglické štítky GitHubu, nikdy standardní ani vlastní štítek projektu
-over("SMAZAT neobsahuje standardní štítky", not (stitky.SMAZAT & set(stitky.STANDARD)))
+over("SMAZAT neobsahuje standardní ani přejmenovávané štítky",
+     not (stitky.SMAZAT & (set(stitky.STANDARD) | set(stitky.PREJMENOVAT))))
+over("přejmenování míří jen na štítky základu", set(stitky.PREJMENOVAT.values()) <= set(stitky.STANDARD))
+bez_chyby = [s for s in hotovo if s["name"] != "chyba"] + [{"name": "bug", "color": "d73a4a", "description": "x"}]
+kroky = stitky.plan(bez_chyby)
+over("bug se přejmenuje na chybu, nic se nemaže ani nezakládá",
+     akce(kroky) == [("přejmenovat", "chyba")] and kroky[0][4] == ("bug", "d73a4a", "x"))
 over("vlastní štítky projektu se nemažou",
      not [k for k in stitky.plan(hotovo + [{"name": "odloženo", "color": "C5A06A", "description": ""}])
           if k[0] == "smazat"])
@@ -124,6 +130,22 @@ over("nanečisto anglický štítek nesmaže", not any(v[:2] == ("label", "delet
 stitky.srovnej("a", nanecisto=False)
 over("ostrý běh smaže anglický štítek s --yes",
      [v for v in volani if v[:2] == ("label", "delete")] == [("label", "delete", "wontfix", "--yes", "-R", "Brixyy/a")])
+
+
+def gh_s_bug(*args):
+    volani.append(args)
+    if args[:2] == ("label", "list"):
+        return json.dumps(bez_chyby)
+    return ""
+
+
+stitky._gh = gh_s_bug
+volani.clear()
+stitky.srovnej("a", nanecisto=False)
+zapisy = [v for v in volani if v[:2] != ("label", "list")]
+over("ostrý běh přejmenuje bug přes label edit --name a nic nemaže",
+     zapisy == [("label", "edit", "bug", "--name", "chyba", "--color", "D73A4A", "--description", "Něco nefunguje",
+                 "-R", "Brixyy/a")])
 
 
 def padajici_gh(*args):

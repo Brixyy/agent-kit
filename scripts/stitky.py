@@ -2,7 +2,8 @@
 
 Bez argumentu srovná všechny nearchivované repozitáře účtu s Issues.
 Standardní štítky zakládá a upravuje barvu a popis (jméno se nemění); u úpravy vypíše původní
-hodnoty, aby šla vrátit. Maže jen výchozí anglické štítky GitHubu (SMAZAT, uživatel 21. 11. 2026).
+hodnoty, aby šla vrátit. Používané anglické štítky GitHubu přejmenuje na české (PREJMENOVAT, štítek
+zůstane na issues i PR), ostatní výchozí anglické smaže (SMAZAT); uživatel 21. 11. 2026.
 `--nanecisto` jen vypíše plán. `--kontrola` nic nemění a vypíše otevřená issues, která nemají
 právě jeden štítek stavu. Návratový kód: 0 v pořádku, 1 nález, 2 chyba gh nebo neznámý přepínač.
 Pravidlo a význam štítků: global/PODROBNOSTI.md, oddíl „Štítky issues“.
@@ -34,33 +35,50 @@ OSTATNI = {
     "riziko: vysoké": ("F9D0C4", "Změna s vysokým rizikem"),
     "audit-projektu": ("5D6B7A", "Souhrnné issue auditu projektu (skill audit, 1. a 15. v měsíci)"),
 }
-STANDARD = {**STAVY, **OSTATNI}
+# Typ úkolu: nepovinný, vznikl přejmenováním výchozích anglických štítků.
+TYPY = {
+    "chyba": ("D73A4A", "Něco nefunguje"),
+    "vylepšení": ("A2EEEF", "Nová funkce nebo vylepšení"),
+    "dokumentace": ("0075CA", "Dokumentace a návody"),
+}
+STANDARD = {**STAVY, **OSTATNI, **TYPY}
 # Oblast: názvy si určuje projekt („oblast: …“), barva je společná.
 PREDPONA_OBLASTI = "oblast:"
 BARVA_OBLASTI = "0E8A16"
 VYHRAZENE_BARVY = {b for b, _p in STAVY.values()} | {BARVA_OBLASTI}
 # Výchozí anglické štítky GitHubu: nahrazuje je český základ, mažou se.
-SMAZAT = {"bug", "documentation", "duplicate", "enhancement", "good first issue", "help wanted",
-          "invalid", "question", "wontfix", "accessibility"}
+# Přejmenováním zůstane štítek na všech issues a PR, které ho nesou.
+PREJMENOVAT = {"bug": "chyba", "enhancement": "vylepšení", "documentation": "dokumentace"}
+SMAZAT = {"duplicate", "good first issue", "help wanted", "invalid", "question", "wontfix", "accessibility"}
 
 
 def plan(existujici):
     """Kroky (akce, jméno, barva, popis, původní) pro štítky repozitáře.
 
-    akce = založit / upravit / smazat / varování; „původní“ je (barva, popis) před úpravou nebo
-    smazáním, u varování vlastní štítek projektu v barvě vyhrazené stavu nebo oblasti (nic se
+    akce = založit / přejmenovat / upravit / smazat / varování; „původní“ je (barva, popis) před
+    úpravou nebo smazáním, u přejmenování (staré jméno, barva, popis), u varování vlastní štítek projektu v barvě vyhrazené stavu nebo oblasti (nic se
     s ním nedělá)."""
     podle_jmena = {s["name"]: s for s in existujici}
     kroky = []
+    prejmenovane = set()
     for jmeno, (barva, popis) in STANDARD.items():
         stary = podle_jmena.get(jmeno)
-        if stary is None:
+        puvodni = next((a for a, c in PREJMENOVAT.items() if c == jmeno and a in podle_jmena), None)
+        if stary is None and puvodni:
+            prejmenovane.add(puvodni)
+            p = podle_jmena[puvodni]
+            kroky.append(("přejmenovat", jmeno, barva, popis, (puvodni, p["color"], p.get("description") or "")))
+        elif stary is None:
             kroky.append(("založit", jmeno, barva, popis, None))
         elif stary["color"].upper() != barva or (stary.get("description") or "") != popis:
             kroky.append(("upravit", jmeno, barva, popis, (stary["color"], stary.get("description") or "")))
     for jmeno, stary in podle_jmena.items():
         barva = stary["color"].upper()
-        if jmeno in SMAZAT:
+        if jmeno in prejmenovane:
+            continue
+        if jmeno in PREJMENOVAT:
+            kroky.append(("varování", jmeno, barva, f"vedle existuje „{PREJMENOVAT[jmeno]}“, sluč ručně", None))
+        elif jmeno in SMAZAT:
             kroky.append(("smazat", jmeno, None, None, (stary["color"], stary.get("description") or "")))
         elif jmeno.startswith(PREDPONA_OBLASTI):
             if barva != BARVA_OBLASTI:
@@ -87,12 +105,19 @@ def srovnej(repo, nanecisto):
     kroky = plan(existujici)
     for akce, jmeno, barva, popis, puvodni in kroky:
         if akce == "varování":
-            print(f"{repo}: varování „{jmeno}“ #{barva} má barvu vyhrazenou stavu nebo oblasti, přebarvi ho v projektu")
+            duvod = popis if jmeno in PREJMENOVAT else "má barvu vyhrazenou stavu nebo oblasti, přebarvi ho v projektu"
+            print(f"{repo}: varování „{jmeno}“ #{barva} {duvod}")
             continue
         if akce == "smazat":
             print(f"{repo}: smazat „{jmeno}“ #{puvodni[0]} „{puvodni[1]}“, zmizí z {pouziti(repo, jmeno)} issues a PR")
             if not nanecisto:
                 _gh("label", "delete", jmeno, "--yes", "-R", f"{UCET}/{repo}")
+            continue
+        if akce == "přejmenovat":
+            print(f"{repo}: přejmenovat „{puvodni[0]}“ #{puvodni[1]} „{puvodni[2]}“ → „{jmeno}“ #{barva}")
+            if not nanecisto:
+                _gh("label", "edit", puvodni[0], "--name", jmeno, "--color", barva, "--description", popis,
+                    "-R", f"{UCET}/{repo}")
             continue
         if akce == "upravit":
             print(f"{repo}: upravit „{jmeno}“ #{puvodni[0]} „{puvodni[1]}“ → #{barva} „{popis}“")
