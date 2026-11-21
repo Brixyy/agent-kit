@@ -17,6 +17,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: python -I tests/test_kontext.py
+      - run: python -I tests/test_uzivatel.py
       - run: python -I tests/test_pojistka.py
       - run: python -I tests/test_env_nastav.py
       - run: python -I tests/test_uklid.py

@@ -13,7 +13,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 KOREN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 LIMIT = 10_000  # https://code.claude.com/docs/en/hooks (additionalContext a stdout)
 REZERVA = 9_000
-CLOUD_HLAVICKA = 400  # úvodní řádky a odkaz na podrobnosti z cloud-bootstrap.sh
+CLOUD_HLAVICKA = 600  # úvodní řádky, odkaz na podrobnosti a na výtah o uživateli z cloud-bootstrap.sh
 
 vystup = subprocess.run(
     [sys.executable, "-I", os.path.join(KOREN, "hooks", "kontext.py")],
