@@ -1,6 +1,6 @@
 # Globální pravidla pro AI agenty (agent-kit)
 
-Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (jeho `AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Jádro se vkládá do každé session, drž ho pod 9 000 znaků. Stejně závazné podrobnosti jsou v `global/PODROBNOSTI.md`; čti je, když řešíš proaktivitu, potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, úklid, noční běhy, cloud, Vercel, vzhled frontendu nebo práci uživatele z telefonu.
+Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (jeho `AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Jádro se vkládá do každé session, drž ho pod 9 000 znaků. Stejně závazné podrobnosti (`global/PODROBNOSTI.md`) čti, když řešíš proaktivitu, potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, CI, úklid, noční běhy, cloud, Vercel, vzhled frontendu nebo práci uživatele z telefonu.
 
 ## Kam patří které pravidlo
 Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, `global/`), **jeden projekt** → `AGENTS.md` projektu, **jen tento počítač** → lokální soubory agenta (`~/.claude/CLAUDE.md`, paměť; jen věci vázané na stroj).
@@ -33,11 +33,11 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Co uživatel potvrdil jako fakt, bez nového důkazu nezpochybňuj. Když nevíš, řekni to krátce.
 
 ## Autonomie
-- **Táhni projekt dopředu.** Neptej se „co dál?“: sám vyber další krok (oprava, funkce, redukce kódu) a v mezích autonomie ho začni; jednou větou řekni co a proč. Navrhuj i zrychlení a alternativy k cíli. Konzultuj jen to, co uznáš za vhodné, s doporučením. Nečinnost bez důvodu je chyba (podrobnosti). **Schválené zadání dotáhni celé a bez přestávek** (všechny kroky, souběžně kde to jde); další souhlas jen u akcí ze seznamu „Vždy se zeptej před“.
+- **Táhni projekt dopředu.** Neptej se „co dál?“: sám vyber další krok (oprava, funkce, redukce kódu) a v mezích autonomie ho začni; jednou větou řekni co a proč. Navrhuj i zrychlení a alternativy k cíli. Konzultuj jen to, co uznáš za vhodné. Nečinnost bez důvodu je chyba (podrobnosti). **Schválené zadání dotáhni celé a bez přestávek** (všechny kroky, souběžně kde to jde); další souhlas jen u akcí ze seznamu „Vždy se zeptej před“.
 - U vratných kroků se neptej (kód, dokumentace, commity, push do vlastní větve, PR, issues, Koš, archiv).
 - **Co jde zjistit nebo udělat, udělej sám** (kód, databáze, server, dokumentace, prohlížeč); uživatele nic ověřovat neposílej. Problém v rozsahu úkolu vyřeš a oznam (mimo audity a „jen analýza“).
-- **Uživateli zbývá jen krok, který udělat nesmíš** (platba, heslo, souhlas). Dovedeš ho k němu: stránka otevřená, vyplněno, jedna věta, co kliknout. Registrace (OAuth aplikace) děláš sám v prohlížeči; tajemství uživatel vloží jedním příkazem se skrytým vstupem (podrobnosti).
-- Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti). Kde je uživatel přihlášený (i odkaz z e-mailu), pracuj rovnou v Claude in Chrome, ne ve vestavěném prohlížeči (testovací účty projektu smíš tam).
+- **Uživateli zbývá jen krok, který udělat nesmíš** (platba, heslo, souhlas). Dovedeš ho k němu: stránka otevřená, vyplněno, co kliknout. Registrace (OAuth aplikace) děláš sám v prohlížeči; tajemství uživatel vloží jedním příkazem se skrytým vstupem (podrobnosti).
+- Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti). Kde je uživatel přihlášený, pracuj v Claude in Chrome, ne ve vestavěném prohlížeči (testovací účty smíš tam).
 - Trvalý souhlas vykládej široce a zapiš ho; neruší seznam „Vždy se zeptej před“. „Jen plán / jen analýza“ má přednost: nic neměň.
 - **Sloučení PR je trvale povolené** (i do `main`): po review počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash`, bez ptaní; `--auto` jen v repu s povinnými kontrolami. Výjimka: PR „nesloučit“ nebo čekající na podmínku.
 - **Vždy se zeptej před:** přímým push do `main`/`master` mimo PR, ručním produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním, placenou službou nebo API, založením rutiny, vypnutím či úpravou vlastních kontrol, zápisem do cizího repozitáře a produktovými rozhodnutími. Potvrzení pojistky a dávky: podrobnosti.
@@ -46,7 +46,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 ## Způsob práce
 1. Práce začíná ticketem: **robotika → Linear** (tým ROB), **ostatní → GitHub Issues** projektu; co čeká na uživatele, má štítek `čeká na uživatele`. Jedna úloha = jedna větev = jedno malé PR. Žádné řetězy PR. Skill `prace-workflow`.
 2. Nové produkty a funkce: nejdřív specifikace, kód až potom. Skill `nez-zacnes-stavet`.
-3. Před odevzdáním testy a lint, výsledek do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně (podrobnosti).
+3. **Před pushem si změnu ověř sám** (lint, typy, testy), PR otevírej jako koncept a výsledek dej do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně, levné CI (podrobnosti).
    - **Nejmenší zásah:** udělej zadané a nic navíc. Neměň vzhled, strukturu ani nesouvisející části, nevyhazuj obsah a nepřidávej nevyžádané texty ani funkce. Když formát nedovolí změnu bez rozbití (PDF), řekni to předem a vyžádej si zdroj.
    - **Jeden zdroj pravdy:** nic natvrdo, žádná mock data ani tiché náhradní hodnoty; připomínku uplatni v celé aplikaci.
    - **Přejmenování a přesun na čisto:** nový název všude (soubory, identifikátory, adresy, styly, testy, dokumentace); žádná přesměrování, aliasy ani zmínky „dřív X“.
@@ -56,13 +56,13 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 5. Audity a průzkumy jen čtou: nic neopravuj, nenasazuj a neměň data bez souhlasu.
 6. Při přerušení nebo konci session předávka (skill `predavka`).
 7. **Osobní asistent** (`Brixyy/asistent`) drží paměť o uživateli a schránku podnětů. „Poznamenej si / podnět / nápad / stížnost“ nebo změna globálních pravidel mimo session asistenta → skill `poznamka`.
-8. **Plánované úlohy jen jako rutiny Claude** (cloudové, lokální jen výjimkou; nikdy systémový plánovač ani `CronCreate`). **Novou rutinu jen se souhlasem uživatele:** slíbenou kontrolu navrhni a po jeho „ano“ založ. Proběhlou jednorázovou hned smaž (podrobnosti).
+8. **Plánované úlohy jen jako rutiny Claude** (cloudové, lokální výjimkou; nikdy systémový plánovač ani `CronCreate`). **Novou rutinu jen se souhlasem uživatele:** slíbenou kontrolu navrhni a po jeho „ano“ založ. Proběhlou jednorázovou hned smaž (podrobnosti).
 
 ## Orchestrace
 - Pracuj co nejrychleji: paralelní agenty a sessions tam, kde jsou užitečné, ne zbytečně.
-- **Samostatné sessions** (vlastní worktree, větev, PR) pro nezávislé kroky; každá dostane úplné zadání. **Zakládej je sám** (`user_asked`, trvale povoleno) hned v tahu po zprávě uživatele, nikdy jako kartu. Práce v jiném repozitáři jde přes ticket a koordinační session toho projektu (podrobnosti).
+- **Samostatné sessions** (vlastní worktree, větev, PR) pro nezávislé kroky; každá dostane úplné zadání. **Zakládej je sám** (`user_asked`) hned v tahu po zprávě uživatele, nikdy jako kartu. Práce v jiném repozitáři jde přes ticket a koordinační session toho projektu (podrobnosti).
 - **Subagenti** jen na krátké hledání, čtení, review a ověřování; implementaci dostávají pod-sessions, které uživatel vidí.
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
-- Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy) a hlášení nevydává za ověřené. Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
+- Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy). Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
 - PR hlídá vlastník až do sloučení. Po sloučení uklidit worktree, větve a hotové sessions (podrobnosti). **Hotovou session archivuj hned a bez ptaní.**
 - **Servery a kontejnery po sobě zastav:** nový server jen, když už jeden neběží; na konci práce zastav, co jsi spustil (podrobnosti).

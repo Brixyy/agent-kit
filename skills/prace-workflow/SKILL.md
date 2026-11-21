@@ -14,6 +14,7 @@ description: Podrobný postup práce na úkolu v projektech Brixyy — ticket (G
 ## 2. Větev a PR
 - Větev z aktuální výchozí větve: `<cislo-issue>-<kratky-popis>` (robotika: `rob-<cislo>-<popis>`), např. `12-stranky-sluzeb`. PR, které úkol dokončuje, má v popisu `Closes #12` (issue se zavře při sloučení); průběžné PR k témuž úkolu `Refs #12`.
 - Jedno PR = jeden účel, ideálně do pár set řádků. Míří vždy do výchozí větve, nikdy na jinou feature větev.
+- PR zakládej jako koncept (`gh pr create --draft`); v repech se vzorem ze šablony na něj CI neběží (kontrola je `skipped`, to není zelená). Za hotové ho označ (`gh pr ready <č>`) až po dokončení práce a místním ověření; do hotového PR nepushuj mezikroky zbytečně často (podrobnosti, Levné CI).
 - Popis PR předávej souborem (`gh pr create --body-file popis.md`), ne dlouhým textem v příkazu.
 - Popis PR (česky):
   - **Co a proč** (2–3 věty pro laika),
@@ -23,10 +24,10 @@ description: Podrobný postup práce na úkolu v projektech Brixyy — ticket (G
   - odkaz na ticket.
 
 ## 3. Kontrola a sloučení
-- Spusť testy, lint a typecheck projektu (příkazy jsou v `AGENTS.md`). U UI změn ověř stránku v prohlížeči na desktopu i mobilu.
+- Před pushem spusť testy, lint a typecheck dotčené změnou (příkazy jsou v `AGENTS.md`); CI nemá být první místo, kde se chyba objeví. U UI změn ověř stránku v prohlížeči na desktopu i mobilu.
 - Před sloučením nezávislé review (Claude Code: agent `reviewer`; spouštěj ho bez parametru `effort`, nižší hodnota by přebila jeho `effort: high`). Nálezy oprav nebo je výslovně uveď v PR. U větší změny (nová funkce, výpočet, víc souborů) ho zadej jako samostatného hodnotitele: jen ticket, číslo PR a jak výsledek spustit, bez tvého souhrnu (podrobnosti, Kontroly a testy); použij i skill `rozhodnuti`.
 - **Review po opravách:** když review vrátí NEPROCHÁZÍ, nebo jsi kvůli nálezům měnil logiku či kód, pusť agenta `reviewer` znovu jen nad opravami (seznam nálezů + diff od minulého kola). Opravy textu a drobnosti se znovu nereviewují. Nejvýš 2 opakovaná kola (3 review celkem). Zůstane-li závažný nález neopravený, PR nesluč (ani auto-merge nezapínej): nálezy napiš do PR, issue označ štítkem `čeká na uživatele` (v Linearu stav Blokováno) a polož jednu otázku.
-- Sloučení PR je trvale povolené. Uživatele se kvůli sloučení neptej. **Soukromé repo** (tarif GitHub Free nevynutí povinné kontroly, takže `--auto` by sloučil hned, i když CI ještě běží nebo selhalo): po review počkej na CI v pozadí (`gh pr checks <č> --watch`) a když žádný job neselhal, sluč `gh pr merge <č> --squash`; práci kvůli tomu nepřerušuj. **Veřejné repo s povinnými kontrolami** (agent-kit): zapni automatické sloučení `gh pr merge <č> --auto --squash`, GitHub sloučí sám po kontrolách. Hotovo ale není zapnutím auto-merge: ověř, že PR opravdu doběhl do sloučení (selhání, timeout nebo BEHIND řeš, nebo předej hlídání dál). Repo bez CI slučuj ručně až po ověření.
+- Sloučení PR je trvale povolené. Uživatele se kvůli sloučení neptej. Koncept nejdřív označ za hotové (`gh pr ready <č>`), jinak sloučení selže. **Soukromé repo** (tarif GitHub Free nevynutí povinné kontroly, takže `--auto` by sloučil hned, i když CI ještě běží nebo selhalo): po review počkej na CI v pozadí (`gh pr checks <č> --watch`) a když žádný job neselhal, sluč `gh pr merge <č> --squash`; práci kvůli tomu nepřerušuj. **Veřejné repo s povinnými kontrolami** (agent-kit): zapni automatické sloučení `gh pr merge <č> --auto --squash`, GitHub sloučí sám po kontrolách. Hotovo ale není zapnutím auto-merge: ověř, že PR opravdu doběhl do sloučení (selhání, timeout nebo BEHIND řeš, nebo předej hlídání dál). Repo bez CI slučuj ručně až po ověření.
 
 ## 4. Cloudová session
 - Prostředí připraví `sh scripts/cloud-setup.sh` (je v každém projektu).
