@@ -27,6 +27,7 @@ Obecný postup pro všechny projekty. **Projektová část je v `KOORDINACE.md` 
 - Pod-session skončí tah slovy „čekám“: hned ověř, že jí opravdu něco běží (správa sessions: probíhající práce nebo úloha na pozadí). Když ne, postrč ji. Když hlásí „čekám“ podruhé bez nového commitu, PR nebo výsledku, nebo když ohlášený čas doběhnutí vypršel o víc než 15 minut, přečti její průběh a zjisti proč.
 
 ## Sloučení, nasazení, ověření
+- Každému úkolu při založení určíš riziko štítkem `riziko: nízké / střední / vysoké` (PODROBNOSTI, „Riziko úkolu“). Nízké a střední slučuješ sám (u středního navíc důkladné review a ověření v prohlížeči, uživateli jen shrnutí), vysoké až po „ano“ uživatele. Kontrolor riziko smí zvýšit, ty ho nesnižuješ.
 - Před sloučením zelené kontroly (`gh pr checks <č> --watch`); když repozitář nevynucuje kontroly, slučuj jen bez neúspěšného jobu.
 - Hlášení pod-session si ověř sám (stav PR, diff, CI na hlavní větvi), než ho řekneš uživateli jako hotové.
 - Projekt s Vercelem: před dávkou slučování spusť `python -I <klon agent-kitu>/scripts/vercel_kontrola.py --dnes` (limit 100 nasazení za 24 h na celý účet); při varování slučuj PR se změnou frontendu po dávkách.

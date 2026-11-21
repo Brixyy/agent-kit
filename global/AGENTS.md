@@ -39,12 +39,12 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - **Uživateli zbývá jen krok, který udělat nesmíš** (platba, heslo, souhlas). Dovedeš ho k němu: stránka otevřená, vyplněno, co kliknout. Registrace (OAuth aplikace) děláš sám v prohlížeči; tajemství uživatel vloží jedním příkazem se skrytým vstupem (podrobnosti).
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti). Kde je uživatel přihlášený, pracuj v Claude in Chrome, ne ve vestavěném prohlížeči (testovací účty smíš tam).
 - Trvalý souhlas vykládej široce a zapiš ho; neruší seznam „Vždy se zeptej před“. „Jen plán / jen analýza“ má přednost: nic neměň.
-- **Sloučení PR je trvale povolené** (i do `main`): po review počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash`, bez ptaní; `--auto` jen kde GitHub kontroly vynucuje (ne soukromé repo na Free). Výjimka: PR „nesloučit“ nebo čekající na podmínku.
+- **Sloučení PR je trvale povolené** (i do `main`): po review počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash`, bez ptaní; `--auto` jen kde GitHub kontroly vynucuje (ne soukromé repo na Free). Výjimka: PR „nesloučit“, `riziko: vysoké` (až po „ano“) nebo čekající na podmínku.
 - **Vždy se zeptej před:** přímým push do `main`/`master` mimo PR, ručním produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním, placenou službou nebo API, založením rutiny, vypnutím či úpravou vlastních kontrol, zápisem do cizího repozitáře a produktovými rozhodnutími. Potvrzení pojistky a dávky: podrobnosti.
 - **`.env`:** smíš načíst do procesu, **nikdy nevypisuj** a neotvírej nástrojem pro čtení; zápis jen skriptem `scripts/env_nastav.py` (podrobnosti).
 
 ## Způsob práce
-1. Práce začíná ticketem v GitHub Issues projektu; otázku na uživatele zapiš i do ticketu (komentář, štítek `čeká na uživatele`). Jedna úloha = jedna větev = jedno malé PR. Žádné řetězy PR. Skill `prace-workflow`.
+1. Práce začíná ticketem v GitHub Issues projektu; co čeká na uživatele, má v ticketu komentář a štítek `čeká na uživatele`. Jedna úloha = jedna větev = jedno malé PR. Žádné řetězy PR. Skill `prace-workflow`.
 2. Nové produkty a funkce: nejdřív specifikace, kód až potom. Skill `nez-zacnes-stavet`.
 3. **Před pushem si změnu ověř sám** (lint, typy, testy), PR otevírej jako koncept a výsledek dej do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně, levné CI, testy na riziko, ne na počet (podrobnosti).
    - **Nejmenší zásah:** udělej zadané a nic navíc. Neměň vzhled, strukturu ani nesouvisející části, nevyhazuj obsah a nepřidávej nevyžádané texty ani funkce. Když formát nedovolí změnu bez rozbití (PDF), řekni to předem a vyžádej si zdroj.
