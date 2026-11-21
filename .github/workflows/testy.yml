@@ -3,8 +3,9 @@ on:
   push:
     branches: [main]
   pull_request:
+# Stav konceptu ve skupině: běh z konceptu nesmí zrušit kontrolu po `gh pr ready`.
 concurrency:
-  group: testy-${{ github.event.pull_request.number || github.sha }}
+  group: testy-${{ github.event.pull_request.number || github.sha }}-${{ github.event.pull_request.draft }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   testy:
