@@ -2,7 +2,7 @@
 
 Bez argumentu srovná všechny nearchivované repozitáře účtu s Issues.
 Standardní štítky zakládá a upravuje barvu a popis (jméno se nemění); u úpravy vypíše původní
-hodnoty, aby šla vrátit. Používané anglické štítky GitHubu přejmenuje na české (PREJMENOVAT, štítek
+hodnoty, aby šla vrátit. Anglické bug, enhancement a documentation přejmenuje na české (PREJMENOVAT, štítek
 zůstane na issues i PR), ostatní výchozí anglické smaže (SMAZAT); uživatel 21. 11. 2026.
 `--nanecisto` jen vypíše plán. `--kontrola` nic nemění a vypíše otevřená issues, která nemají
 právě jeden štítek stavu. Návratový kód: 0 v pořádku, 1 nález, 2 chyba gh nebo neznámý přepínač.

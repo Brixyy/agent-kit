@@ -141,6 +141,8 @@ def gh_s_bug(*args):
 
 stitky._gh = gh_s_bug
 volani.clear()
+stitky.srovnej("a", nanecisto=True)
+over("nanečisto přejmenování nic nezapíše", all(v[:2] == ("label", "list") for v in volani))
 stitky.srovnej("a", nanecisto=False)
 zapisy = [v for v in volani if v[:2] != ("label", "list")]
 over("ostrý běh přejmenuje bug přes label edit --name a nic nemaže",
@@ -173,6 +175,19 @@ with open(os.path.join(KOREN, "global", "PODROBNOSTI.md"), encoding="utf-8") as 
 over("PODROBNOSTI mají oddíl o štítcích a odkaz na skript",
      "## Štítky issues" in podrobnosti and "scripts/stitky.py" in podrobnosti
      and all(f"`{j}`" in podrobnosti for j in stitky.STAVY))
+
+def gh_bug_i_chyba(*args):
+    volani.append(args)
+    if args[:2] == ("label", "list"):
+        return json.dumps(hotovo + [{"name": "bug", "color": "d73a4a", "description": "x"}])
+    return ""
+
+
+stitky._gh = gh_bug_i_chyba
+volani.clear()
+stitky.srovnej("a", nanecisto=False)
+over("bug vedle chyby: ostrý běh nic nepřejmenuje ani nesmaže",
+     not [v for v in volani if v[:2] in (("label", "edit"), ("label", "delete"))])
 
 print("VŠE OK" if not chyby else f"{chyby} CHYB")
 sys.exit(1 if chyby else 0)
