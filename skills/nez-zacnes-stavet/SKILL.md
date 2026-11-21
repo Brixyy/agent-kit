@@ -13,6 +13,7 @@ Uživatel chce mít zadání „do posledního puntíku popsané a vyspecifikova
 Odpověz rovnou z toho, co uživatel řekl:
 - **1–3 zásadní volby** skryté v nápadu (méně je lépe). U každé možnosti pár slovy + tvoje doporučení.
 - Typické: jednorázové vs. bude se opakovat · pár řádků vs. pořádný modul · co nejhoršího to může rozbít (data zákazníků, výpočet, produkce) · kdo to bude používat.
+- **Nový projekt s obrazovkami:** vzhled napojit na Brixyy/design s nadstavbou 2,5D, nebo 3D (jen když se uživatel prostorem pohybuje), anebo odpojit kopií základu (zákaznická aplikace). Podrobnosti: agent-kit PODROBNOSTI, „Vzhled frontendu“.
 - Drobnosti vynech. Pak se zastav a počkej na odpovědi.
 
 ## 2. Vizuální pilot (produkt nebo funkce s obrazovkami)
