@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+
+# Místní zprávy auditu (AUDIT.md)
+/_local/
+.claude/worktrees/
