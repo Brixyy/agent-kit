@@ -13,6 +13,11 @@
           },
           {
             "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spust.sh\" uzivatel.py",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/spust.sh\" uklid_hook.py",
             "timeout": 5
           }
