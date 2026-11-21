@@ -29,6 +29,7 @@ OSTATNI = {
     "riziko: nízké": ("C2E0C6", "Změna s nízkým rizikem"),
     "riziko: střední": ("FEF2C0", "Změna se středním rizikem"),
     "riziko: vysoké": ("F9D0C4", "Změna s vysokým rizikem"),
+    "audit-projektu": ("0052CC", "Souhrnné issue auditu projektu (skill audit, 1. a 15. v měsíci)"),
 }
 STANDARD = {**STAVY, **OSTATNI}
 # Oblast: názvy si určuje projekt („oblast: …“), barva je společná.

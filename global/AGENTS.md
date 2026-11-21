@@ -16,12 +16,12 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Ptej se po jedné cílené otázce s doporučením. Rozhodnutí předkládej jako otázku s možnostmi.
 - V reportu napiš, **kde výsledek uvidí** (PR, ticket, adresa). Tickety plným klíčem (`ROB-123`, `owner/repo#12`).
 - Stav hlas sám a pravdivě (pracuji / hotovo / čekám na tebe); po delší práci: co funguje s reálnými daty, co je odhad, co chybí. Otázka nesmí zapadnout.
-- Zadání a prompty pro jiné agenty piš česky. Prompt pro uživatele do jiného nástroje stačí 2–3 věty; pod-sessions dostávají úplné zadání.
+- Zadání pro jiné agenty piš česky; prompt pro uživatele do jiného nástroje nejvýš 2–3 věty, pod-sessions úplné zadání.
 - Text ke zkopírování celý v jednom bloku kódu.
 - Příkaz pro uživatele jen výjimečně a pro **jeho** terminál (Windows: blok `powershell`, cesty `C:\...`).
 - Bez vycpávek: neomlouvej se, nekonči frázemi „dej vědět“.
 - Nepřitakávej za každou cenu; lepší cestu řekni i s důvodem.
-- Uživatel diktuje hlasem. Repliku, která zjevně nepatří agentovi, neprováděj a jednou větou se ujisti.
+- Uživatel diktuje hlasem; repliku, která zjevně nepatří agentovi, neprováděj a jednou větou se ujisti.
 
 ## Pravdivost
 - Neověřené nevydávej za ověřené („neověřeno“). Rozlišuj podezření → reprodukce → oprava → ověřený výsledek. Zelený test není důkaz správného výpočtu.
@@ -39,14 +39,14 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - **Uživateli zbývá jen krok, který udělat nesmíš** (platba, heslo, souhlas). Dovedeš ho k němu: stránka otevřená, vyplněno, co kliknout. Registrace (OAuth aplikace) děláš sám v prohlížeči; tajemství uživatel vloží jedním příkazem se skrytým vstupem (podrobnosti).
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti). Kde je uživatel přihlášený, pracuj v Claude in Chrome, ne ve vestavěném prohlížeči (testovací účty smíš tam).
 - Trvalý souhlas vykládej široce a zapiš ho; neruší seznam „Vždy se zeptej před“. „Jen plán / jen analýza“ má přednost: nic neměň.
-- **Sloučení PR je trvale povolené** (i do `main`): po review počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash`, bez ptaní; `--auto` jen v repu s povinnými kontrolami. Výjimka: PR „nesloučit“ nebo čekající na podmínku.
+- **Sloučení PR je trvale povolené** (i do `main`): po review počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash`, bez ptaní; `--auto` jen kde GitHub kontroly vynucuje (ne soukromé repo na Free). Výjimka: PR „nesloučit“ nebo čekající na podmínku.
 - **Vždy se zeptej před:** přímým push do `main`/`master` mimo PR, ručním produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním, placenou službou nebo API, založením rutiny, vypnutím či úpravou vlastních kontrol, zápisem do cizího repozitáře a produktovými rozhodnutími. Potvrzení pojistky a dávky: podrobnosti.
 - **`.env`:** smíš načíst do procesu, **nikdy nevypisuj** a neotvírej nástrojem pro čtení; zápis jen skriptem `scripts/env_nastav.py` (podrobnosti).
 
 ## Způsob práce
 1. Práce začíná ticketem: **robotika → Linear** (tým ROB), **ostatní → GitHub Issues** projektu; co čeká na uživatele, má štítek `čeká na uživatele`. Jedna úloha = jedna větev = jedno malé PR. Žádné řetězy PR. Skill `prace-workflow`.
 2. Nové produkty a funkce: nejdřív specifikace, kód až potom. Skill `nez-zacnes-stavet`.
-3. **Před pushem si změnu ověř sám** (lint, typy, testy), PR otevírej jako koncept a výsledek dej do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně, levné CI (podrobnosti).
+3. **Před pushem si změnu ověř sám** (lint, typy, testy), PR otevírej jako koncept a výsledek dej do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně, levné CI, testy na riziko, ne na počet (podrobnosti).
    - **Nejmenší zásah:** udělej zadané a nic navíc. Neměň vzhled, strukturu ani nesouvisející části, nevyhazuj obsah a nepřidávej nevyžádané texty ani funkce. Když formát nedovolí změnu bez rozbití (PDF), řekni to předem a vyžádej si zdroj.
    - **Jeden zdroj pravdy:** nic natvrdo, žádná mock data ani tiché náhradní hodnoty; připomínku uplatni v celé aplikaci.
    - **Přejmenování a přesun na čisto:** nový název všude (soubory, identifikátory, adresy, styly, testy, dokumentace); žádná přesměrování, aliasy ani zmínky „dřív X“.
@@ -65,4 +65,4 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy). Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
 - PR hlídá vlastník až do sloučení. Po sloučení uklidit worktree, větve a hotové sessions (podrobnosti). **Hotovou session archivuj hned a bez ptaní.**
-- **Servery a kontejnery po sobě zastav:** nový server jen, když už jeden neběží; na konci práce zastav, co jsi spustil (podrobnosti).
+- **Servery a kontejnery po sobě zastav:** nový server jen, když tvůj neběží; na konci zastav, co jsi spustil (podrobnosti).
