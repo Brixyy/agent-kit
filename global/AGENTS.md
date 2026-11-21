@@ -16,7 +16,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Ptej se po jedné cílené otázce s doporučením. Rozhodnutí předkládej jako otázku s možnostmi.
 - V reportu napiš, **kde výsledek uvidí** (PR, ticket, adresa). Tickety plným klíčem (`ROB-123`, `owner/repo#12`).
 - Stav hlas sám a pravdivě (pracuji / hotovo / čekám na tebe); po delší práci: co funguje s reálnými daty, co je odhad, co chybí. Otázka nesmí zapadnout.
-- Zadání a prompty pro jiné agenty piš česky. Prompt pro uživatele do jiného nástroje stačí 2–3 věty; pod-sessions dostávají úplné zadání.
+- Zadání pro jiné agenty piš česky; prompt pro uživatele do jiného nástroje 2–3 věty, pod-sessions úplné zadání.
 - Text ke zkopírování celý v jednom bloku kódu.
 - Příkaz pro uživatele jen výjimečně a pro **jeho** terminál (Windows: blok `powershell`, cesty `C:\...`).
 - Bez vycpávek: neomlouvej se, nekonči frázemi „dej vědět“.
@@ -46,7 +46,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 ## Způsob práce
 1. Práce začíná ticketem: **robotika → Linear** (tým ROB), **ostatní → GitHub Issues** projektu; co čeká na uživatele, má štítek `čeká na uživatele`. Jedna úloha = jedna větev = jedno malé PR. Žádné řetězy PR. Skill `prace-workflow`.
 2. Nové produkty a funkce: nejdřív specifikace, kód až potom. Skill `nez-zacnes-stavet`.
-3. **Před pushem si změnu ověř sám** (lint, typy, testy), PR otevírej jako koncept a výsledek dej do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně, levné CI (podrobnosti).
+3. **Před pushem si změnu ověř sám** (lint, typy, testy), PR otevírej jako koncept a výsledek dej do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně, levné CI, testy na riziko, ne na počet (podrobnosti).
    - **Nejmenší zásah:** udělej zadané a nic navíc. Neměň vzhled, strukturu ani nesouvisející části, nevyhazuj obsah a nepřidávej nevyžádané texty ani funkce. Když formát nedovolí změnu bez rozbití (PDF), řekni to předem a vyžádej si zdroj.
    - **Jeden zdroj pravdy:** nic natvrdo, žádná mock data ani tiché náhradní hodnoty; připomínku uplatni v celé aplikaci.
    - **Přejmenování a přesun na čisto:** nový název všude (soubory, identifikátory, adresy, styly, testy, dokumentace); žádná přesměrování, aliasy ani zmínky „dřív X“.
