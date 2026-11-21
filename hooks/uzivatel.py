@@ -36,7 +36,7 @@ def z_disku():
     cesta = os.environ.get("AGENT_KIT_VYTAH_MISTNE") or os.path.join(
         os.path.expanduser("~"), "Dev", "asistent", "pamet", "pro-agenty.md")
     try:
-        with open(cesta, encoding="utf-8") as f:
+        with open(cesta, encoding="utf-8-sig", errors="replace") as f:
             return f.read()
     except OSError:
         return None
@@ -55,7 +55,7 @@ def vytah():
     text = z_gh() or z_disku()
     if not text or not text.strip():
         return None
-    text = bez_hlavicky(text.replace("\r\n", "\n")).strip()
+    text = bez_hlavicky(text.lstrip("﻿").replace("\r\n", "\n")).strip()
     if len(text) > LIMIT:
         text = text[:LIMIT] + "\n…(zkráceno: výtah je delší než limit agent-kitu, zkrať pamet/pro-agenty.md)"
     return text + "\n"
