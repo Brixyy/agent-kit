@@ -17,6 +17,8 @@ Obecný postup pro všechny projekty. **Projektová část je v `KOORDINACE.md` 
 - Zásobník bereš podle priority z místa, které určuje `KOORDINACE.md`. Úkoly „čeká na uživatele“ neber bez pokynu, „odloženo“ vůbec. Co `KOORDINACE.md` vyhrazuje uživateli nebo jiné session (typicky UI, na kterém uživatel právě pracuje), bez dohody neber.
 - Samostatné kroky deleguješ do sessions (vlastní worktree a PR). Malé věci a rizikové změny (výpočty, data, nasazení), které chceš mít pod přímou kontrolou, děláš sám.
 - Sám slučuješ, nasazuješ, ověřuješ a archivuješ. Uživatel mluví jen s tebou; otázky a souhlasy pod-sessions jdou přes tebe.
+- **Volné kapacity rozjížděj sám** (Brixyy/asistent#297): po pokynu „začni“ drž souběžně tolik prací, kolik dovoluje strop souběhu z `KOORDINACE.md`. Když jsou v zásobníku připravené nezávislé úkoly (nečekají na uživatele, nemění tytéž soubory jako běžící práce) a běží jich méně, rozjeď další hned, neptej se a nečekej, až se uživatel zeptá. Když strop v `KOORDINACE.md` chybí, zeptej se na něj jednou a zapiš ho.
+- **Rozhodnutí pro uživatele hlas hned**, jakmile na něm cokoli stojí (otázka pod-session, schválení PR, produktová volba): v tom tahu jako otázku v rámečku „další krok“, ne až v dalším hlášení.
 
 ## Delegace do sessions
 - Zakládej je hned po pokynu uživatele. V tahu spuštěném událostí nebo zprávou jiné session je nezaložíš: navrhni je kartou.
@@ -39,6 +41,7 @@ Obecný postup pro všechny projekty. **Projektová část je v `KOORDINACE.md` 
 
 ## Hlášení
 Podle globálního formátu: nahoře „Pro tebe“, pak tabulka úkolů (ticket, stav, kde to je), sessions jako odkaz, neověřené jako „neověřeno“.
+Každé hlášení obsahuje jeden řádek vytížení: „běží N z M (strop), připraveno X, čeká na tebe K“. Když N < M a X > 0, je to chyba, kterou v tomtéž tahu napravíš rozjetím dalších prací (nebo uvedeš důvod, proč ne).
 
 ## Konec nebo plný kontext
 Předávku (skill `predavka`) přidej jako komentář do stálého issue předávek z `KOORDINACE.md`.
@@ -51,6 +54,7 @@ Projektová část skillu `koordinator` (agent-kit). Pravidla projektu jsou v `A
 ## Zásobník a předávky
 - Zásobník: <kde, filtr, štítky priorit>
 - Předávky: stálé issue #<č> (poslední komentář)
+- Strop souběhu: <kolik prací (sessions) najednou>
 
 ## Hranice
 - <co koordinátor nebere bez dohody, např. UI, na kterém pracuje uživatel>
