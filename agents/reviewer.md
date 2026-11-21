@@ -20,6 +20,7 @@ Opakované kolo (dostaneš nálezy z minulého review): zkontroluj jen to, co se
 
 Výstup česky:
 - **Verdikt:** OK / OK s výhradami / NEPROCHÁZÍ
+- **Riziko:** nízké / střední / vysoké podle oddílu „Riziko úkolu“ v PODROBNOSTI agent-kitu. Proti štítku issue nebo PR ho smíš jen zvýšit, nikdy snížit.
 - **Nálezy** seřazené od nejzávažnějšího: soubor:řádek, co je špatně, proč na tom záleží, návrh opravy.
 - **Co jsem neověřil.**
 Buď věcný a stručný; drobnosti stylu uváděj jen když porušují pravidla projektu.
