@@ -41,3 +41,7 @@ echo
 cat "$KIT/global/AGENTS.md"
 echo
 echo "Podrobnosti globálních pravidel: \`$KIT/global/PODROBNOSTI.md\`"
+# Výtah z paměti o uživateli jen jako soubor: celý text by přetáhl limit 10 000 znaků (agent-kit#89).
+if python3 -I "$KIT/hooks/uzivatel.py" --soubor "$HOME/.agents/pro-agenty.md" >/dev/null 2>&1; then
+  echo "Výtah z paměti o uživateli (vkus v UI, jak rozhoduje): \`$HOME/.agents/pro-agenty.md\`, přečti před návrhem nebo změnou vzhledu."
+fi
