@@ -67,6 +67,10 @@ issues = [
 over("kontrola najde issue bez stavu a s víc stavy",
      [(c, s) for c, _n, s in stitky.chybny_stav(issues)] == [(2, []), (3, ["rozpracováno", "čeká na zákazníka"])])
 
+# žádné dva štítky základu nemají stejnou barvu
+barvy_zakladu = [b for b, _p in stitky.STANDARD.values()]
+over("štítky základu mají navzájem různé barvy", len(set(barvy_zakladu)) == len(barvy_zakladu))
+
 # stavy mají navzájem různé barvy (barva sama říká stav)
 barvy = [b for b, _p in stitky.STAVY.values()]
 over("každý stav má jinou barvu", len(set(barvy)) == len(barvy))
@@ -127,7 +131,19 @@ def padajici_gh(*args):
 
 
 stitky._gh = padajici_gh
-over("chyba gh u repozitáře se vypíše a vrátí kód 1", stitky.main(["x", "y"]) == 1)
+over("chyba gh u repozitáře se vypíše a vrátí kód 2", stitky.main(["x", "y"]) == 2)
+over("neznámý přepínač vrátí 2 a nic nespustí", stitky.main(["--nanecisot"]) == 2)
+
+
+def ciste_gh(*args):
+    if args[:2] == ("issue", "list"):
+        return json.dumps([{"number": 1, "title": "ok", "labels": [{"name": "k práci"}]}])
+    return json.dumps(hotovo)
+
+
+stitky._gh = ciste_gh
+over("čisté repo vrátí 0 při kontrole i srovnání",
+     stitky.main(["a", "--kontrola"]) == 0 and stitky.main(["a"]) == 0)
 
 # pravidlo je popsané v podrobnostech
 with open(os.path.join(KOREN, "global", "PODROBNOSTI.md"), encoding="utf-8") as f:

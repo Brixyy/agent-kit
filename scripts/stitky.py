@@ -4,7 +4,7 @@ Bez argumentu srovná všechny nearchivované repozitáře účtu s Issues.
 Standardní štítky zakládá a upravuje barvu a popis (jméno se nemění); u úpravy vypíše původní
 hodnoty, aby šla vrátit. Maže jen výchozí anglické štítky GitHubu (SMAZAT, uživatel 21. 11. 2026).
 `--nanecisto` jen vypíše plán. `--kontrola` nic nemění a vypíše otevřená issues, která nemají
-právě jeden štítek stavu (návratový kód 1, když nějaké najde).
+právě jeden štítek stavu. Návratový kód: 0 v pořádku, 1 nález, 2 chyba gh nebo neznámý přepínač.
 Pravidlo a význam štítků: global/PODROBNOSTI.md, oddíl „Štítky issues“.
 """
 import json
@@ -27,7 +27,7 @@ STAVY = {
 # Zvláštní štítky PR a issues, společné všem projektům.
 OSTATNI = {
     "priorita": ("E4572E", "Další na řadě (pořadí práce)"),
-    "naléhavé": ("B60205", "Má přednost před štítkem priorita"),
+    "naléhavé": ("E11D48", "Má přednost před štítkem priorita"),
     "nesloučit": ("B60205", "PR se nesmí sloučit, dokud podmínka v popisu neplatí"),
     "riziko: nízké": ("C2E0C6", "Změna s nízkým rizikem"),
     "riziko: střední": ("FEF2C0", "Změna se středním rizikem"),
@@ -90,7 +90,7 @@ def srovnej(repo, nanecisto):
             print(f"{repo}: varování „{jmeno}“ #{barva} má barvu vyhrazenou stavu nebo oblasti, přebarvi ho v projektu")
             continue
         if akce == "smazat":
-            print(f"{repo}: smazat „{jmeno}“ #{puvodni[0]} „{puvodni[1]}“")
+            print(f"{repo}: smazat „{jmeno}“ #{puvodni[0]} „{puvodni[1]}“, zmizí z {pouziti(repo, jmeno)} issues a PR")
             if not nanecisto:
                 _gh("label", "delete", jmeno, "--yes", "-R", f"{UCET}/{repo}")
             continue
@@ -115,6 +115,16 @@ def chybny_stav(issues):
     return vysledek
 
 
+def pouziti(repo, jmeno):
+    """Kolik issues a PR (otevřených i zavřených) štítek nese; přiřazení se smazáním ztratí."""
+    pocet = 0
+    for druh in ("issue", "pr"):
+        vystup = _gh(druh, "list", "-R", f"{UCET}/{repo}", "--label", jmeno, "--state", "all",
+                     "--limit", "1000", "--json", "number")
+        pocet += len(json.loads(vystup)) if vystup.strip() else 0
+    return pocet
+
+
 def zkontroluj(repo):
     """Vypíše otevřená issues bez právě jednoho stavu; vrátí jejich počet."""
     issues = json.loads(_gh("issue", "list", "-R", f"{UCET}/{repo}", "--state", "open", "--limit", "1000",
@@ -129,6 +139,11 @@ def zkontroluj(repo):
 
 def main(argv):
     sys.stdout.reconfigure(encoding="utf-8")
+    prepinace = {a for a in argv if a.startswith("--")}
+    nezname = prepinace - {"--nanecisto", "--kontrola"}
+    if nezname:
+        print(f"Neznámý přepínač: {', '.join(sorted(nezname))} (povolené: --nanecisto, --kontrola)")
+        return 2
     nanecisto = "--nanecisto" in argv
     kontrola = "--kontrola" in argv
     repa = [a for a in argv if not a.startswith("--")] or repozitare()
@@ -143,7 +158,7 @@ def main(argv):
         except subprocess.CalledProcessError as e:
             chyby += 1
             print(f"{repo}: CHYBA gh: {(e.stderr or '').strip()}")
-    return 1 if chyby or nalezy else 0
+    return 2 if chyby else 1 if nalezy else 0
 
 
 if __name__ == "__main__":
