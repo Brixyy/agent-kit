@@ -116,12 +116,13 @@ Každou založenou, změněnou nebo smazanou rutinu zapiš do rejstříku `portf
 Uživatel 20. 11. 2026: štítky mají „barevně hrát“ napříč projekty a stav issue musí být vidět na první pohled. Platí ve všech repozitářích s GitHub Issues.
 - **Stav, vždy právě jeden** u otevřeného issue. Agent ho nastaví při založení a mění ho s každou změnou stavu:
   - `rozpracováno`: agent na tom právě pracuje;
-  - `čeká na uživatele`: rozhodnutí nebo krok uživatele, otázka je v komentáři;
+  - `čeká na uživatele`: rozhodnutí nebo krok uživatele, otázka je v komentáři (viz níže);
   - `čeká na zákazníka`: podklad od zákazníka nebo jiné třetí strany;
   - `čeká na termín`: pokračuje až k datu;
   - `stálé`: otevřené záměrně (předávky, přehledy);
   - `myšlenka`: nápad pro kontext, bez zadání se nedělá;
   - `pozastaveno`.
+- **Otázka na uživatele patří i do ticketu** (uživatel 18. 11. 2026, Brixyy/agent-kit#50): hub ukazuje v „Čeká na tebe“ jen issues, chat session nevidí. Otázku, na kterou agent čeká, proto položí v chatu a zároveň ji zapíše jako komentář do ticketu úkolu (jedna konkrétní otázka s doporučením) a ticketu dá štítek `čeká na uživatele` místo dosavadního stavu. Po odpovědi (v chatu nebo komentářem) odpověď z chatu krátce zapiš do ticketu, štítek sundej a vrať stav (obvykle `rozpracováno`). Zvláštní štítek `otázka` se nepoužívá, stačí tento (uživatel 21. 11. 2026).
 - **Oblast, jedna:** `oblast: <název>`. Názvy si určuje projekt v `AGENTS.md`, barva je společná (zelená). Projekt se starším vlastním členěním (např. pilíře) ho smí ponechat.
 - **Zvláštní štítky:** `nesloučit`, `riziko: nízké / střední / vysoké`, `audit-projektu` (souhrnné issue auditu).
 - **Barvy a popisy drží jediný zdroj:** `scripts/stitky.py`. Nový nebo upravený projekt srovná příkazem `python -I scripts/stitky.py <repo>` (bez argumentu všechny repozitáře, `--nanecisto` jen vypíše plán). Skript štítky jen zakládá a upravuje barvu a popis (původní hodnoty vypíše), nic nemaže. Vlastní štítky projektu nepoužívají barvy stavů ani oblastí, skript na ně upozorní. Nový štítek stavu nebo zvláštní štítek přidej jen po dohodě s uživatelem, a to do skriptu, ne ručně v jednom repozitáři.
