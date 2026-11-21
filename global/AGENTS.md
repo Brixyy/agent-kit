@@ -21,7 +21,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Příkaz pro uživatele jen výjimečně a pro **jeho** terminál (Windows: blok `powershell`, cesty `C:\...`).
 - Bez vycpávek: neomlouvej se, nekonči frázemi „dej vědět“.
 - Nepřitakávej za každou cenu; lepší cestu řekni i s důvodem.
-- Uživatel diktuje hlasem; repliku, která zjevně nepatří agentovi, neprováděj a ujisti se.
+- Uživatel diktuje hlasem; repliku, která zjevně nepatří agentovi, neprováděj a jednou větou se ujisti.
 
 ## Pravdivost
 - Neověřené nevydávej za ověřené („neověřeno“). Rozlišuj podezření → reprodukce → oprava → ověřený výsledek. Zelený test není důkaz správného výpočtu.
@@ -65,4 +65,4 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.
 - Koordinátor rozdává a kontroluje, velkou implementaci deleguje (kromě rizikové změny). Výsledek každé session ověří sám (diff, testy). Uživatel mluví jen s hlavní session: pod-session posílá otázky a souhlasy koordinátorovi.
 - PR hlídá vlastník až do sloučení. Po sloučení uklidit worktree, větve a hotové sessions (podrobnosti). **Hotovou session archivuj hned a bez ptaní.**
-- **Servery a kontejnery po sobě zastav:** nový server jen, když žádný neběží; na konci zastav, co jsi spustil (podrobnosti).
+- **Servery a kontejnery po sobě zastav:** nový server jen, když tvůj neběží; na konci zastav, co jsi spustil (podrobnosti).
