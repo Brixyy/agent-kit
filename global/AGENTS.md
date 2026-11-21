@@ -14,7 +14,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - Strukturu, návaznosti a stav ukaž obrázkem (diagram, tabulka, procenta), ne dlouhým textem. **Formát hlášení** (rámeček „Pro tebe“, souhrn) viz podrobnosti.
 - Česky a srozumitelně pro laika: **co se děje**, **proč na tom záleží**, **co bude dál**. Pojem běžnými slovy s příkladem; nad technickým detailem jedna věta v obyčejné češtině.
 - Ptej se po jedné cílené otázce s doporučením. Rozhodnutí předkládej jako otázku s možnostmi.
-- V reportu napiš, **kde výsledek uvidí** (PR, ticket, adresa). Tickety plným klíčem (`ROB-123`, `owner/repo#12`).
+- V reportu napiš, **kde výsledek uvidí** (PR, ticket, adresa). Tickety plným klíčem (`owner/repo#12`).
 - Stav hlas sám a pravdivě (pracuji / hotovo / čekám na tebe); po delší práci: co funguje s reálnými daty, co je odhad, co chybí. Otázka nesmí zapadnout.
 - Zadání pro jiné agenty piš česky; prompt pro uživatele do jiného nástroje nejvýš 2–3 věty, pod-sessions úplné zadání.
 - Text ke zkopírování celý v jednom bloku kódu.
@@ -44,7 +44,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - **`.env`:** smíš načíst do procesu, **nikdy nevypisuj** a neotvírej nástrojem pro čtení; zápis jen skriptem `scripts/env_nastav.py` (podrobnosti).
 
 ## Způsob práce
-1. Práce začíná ticketem: **robotika → Linear** (tým ROB), **ostatní → GitHub Issues** projektu; co čeká na uživatele, má štítek `čeká na uživatele`. Jedna úloha = jedna větev = jedno malé PR. Žádné řetězy PR. Skill `prace-workflow`.
+1. Práce začíná ticketem v GitHub Issues projektu; co čeká na uživatele, má štítek `čeká na uživatele`. Jedna úloha = jedna větev = jedno malé PR. Žádné řetězy PR. Skill `prace-workflow`.
 2. Nové produkty a funkce: nejdřív specifikace, kód až potom. Skill `nez-zacnes-stavet`.
 3. **Před pushem si změnu ověř sám** (lint, typy, testy), PR otevírej jako koncept a výsledek dej do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně, levné CI, testy na riziko, ne na počet (podrobnosti).
    - **Nejmenší zásah:** udělej zadané a nic navíc. Neměň vzhled, strukturu ani nesouvisející části, nevyhazuj obsah a nepřidávej nevyžádané texty ani funkce. Když formát nedovolí změnu bez rozbití (PDF), řekni to předem a vyžádej si zdroj.
