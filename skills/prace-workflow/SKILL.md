@@ -7,8 +7,8 @@ description: Podrobný postup práce na úkolu v projektech Brixyy — ticket (G
 
 ## 1. Ticket
 - Každá práce má ticket: GitHub Issue v repozitáři projektu (`gh issue create`), ve všech projektech včetně robotiky (Linear zrušen 2026-11-20). Žádná společná nástěnka není (GitHub Project zrušen 2026-11-19), stav práce nesou issues a PR.
-- Když ticket uživatel nezadal, založ ho (stručný název, popis cíle, kritéria hotovo) a pracuj až potom.
-- Stav práce na GitHubu: otevřené issue = k práci, s otevřeným PR (`Closes`/`Refs #<č>`) = rozpracované, zavřené sloučením PR s `Closes` = Done (agent pak ověří změnu v produkci a výsledek zapíše do issue, při selhání issue znovu otevře). Když potřebuješ rozhodnutí nebo podklad od uživatele: štítek **`čeká na uživatele`** + komentář s jednou konkrétní otázkou; po odpovědi štítek sundej.
+- Když ticket uživatel nezadal, založ ho (stručný název, popis cíle, kritéria hotovo, štítek `riziko: …` podle PODROBNOSTI, „Riziko úkolu“) a pracuj až potom.
+- Stav práce na GitHubu: otevřené issue = k práci, s otevřeným PR (`Closes`/`Refs #<č>`) = rozpracované, zavřené sloučením PR s `Closes` = Done (agent pak ověří změnu v produkci a výsledek zapíše do issue, při selhání issue znovu otevře). Když potřebuješ rozhodnutí nebo podklad od uživatele: štítek **`čeká na uživatele`** + komentář s jednou konkrétní otázkou, i když se ptáš v chatu (hub vidí jen ticket); po odpovědi štítek vyměň zpět za stav (obvykle `rozpracováno`).
 - Komentáře v ticketu piš česky a krátce: co se udělalo, co je ověřené, co neověřené, odkaz na PR.
 
 ## 2. Větev a PR
