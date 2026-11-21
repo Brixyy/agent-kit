@@ -40,12 +40,12 @@ Audit odpovídá na tři otázky: **Míří aplikace tam, kam má? Funguje oprav
 | 5. Bezpečnost a závislosti | Tajemství v repozitáři a historii, přihlášení a oprávnění, vstupy z internetu, otevřené porty, závislosti se známými zranitelnostmi (`npm audit`, `pip-audit` apod.) i zastaralé závislosti, zálohy a obnova, kdo může co spustit. |
 | 6. Provoz | Chyby a výpadky v logu za období, hlídání a upozornění (hlídá se skutečná práce, nebo jen že proces běží?), disk, paměť, výkon, plánované úlohy a rutiny. |
 | 7. Data | Správnost klíčových výpočtů (kontrolní vzorek přepočtem), úplnost a čerstvost zdrojů dat, konzistence mezi tabulkami, migrace. |
-| 8. UI | Vidí uživatel všechno důležité, co systém ví a dělá, a srozumitelně? Desktop i telefon, přihlášená část, soulad s `DESIGN.md`. Kde UI ukazuje něco, co neplatí? |
+| 8. UI | Vidí uživatel všechno důležité, co systém ví a dělá, a srozumitelně? Desktop i telefon, přihlášená část, soulad s `DESIGN.md` (napojený projekt: komponenty a barvy jen z Brixyy/design a odchylek zapsaných v `DESIGN.md`). Kde UI ukazuje něco, co neplatí? |
 | 9. Dokumentace a znalosti | Je dokumentace pravdivá k pevnému commitu? Jeden zdroj pravdy, zastaralé stavy, otevřené otázky bez majitele. |
 | 10. Proces | Rychlost a velikost PR, reverty a opakované opravy téhož, stáří a štítky issues, zaseknuté úkoly, opakované chyby agentů, co čeká na uživatele a jak dlouho. |
 | 11. Náklady | Kolik projekt stojí a jaký je trend proti minulému auditu: CI runnery (minuty, zrušené a opakované běhy), hosting, databáze, AI a další placené služby. Co platíme a nic to nedává? |
 | 12. Expirace | Kdy vyprší domény, certifikáty, předplatná, tokeny a klíče? Co vyprší do příštích dvou auditů a hlídá to něco? |
-| 13. Soulad s agent-kitem a šablonou | Řídí se repo globálními pravidly (levné CI, štítky, `AGENTS.md`, `DESIGN.md`) a odpovídá šabloně `Brixyy/project-template` (CI, struktura `AGENTS.md`, `.env.example`, `scripts/cloud-setup.sh`)? Co chybí nebo se rozešlo? |
+| 13. Soulad s agent-kitem a šablonou | Řídí se repo globálními pravidly (levné CI, štítky, `AGENTS.md`, `DESIGN.md`: napojený projekt na aktuální verzi Brixyy/design, odpojený jen soulad s vlastním `DESIGN.md`) a odpovídá šabloně `Brixyy/project-template` (CI, struktura `AGENTS.md`, `.env.example`, `scripts/cloud-setup.sh`)? Co chybí nebo se rozešlo? |
 
 ## Velké otázky (vždy)
 1. Kdybychom začínali dnes s tím, co víme, postavili bychom to stejně? Co ne?

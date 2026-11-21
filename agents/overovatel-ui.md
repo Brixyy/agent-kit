@@ -12,7 +12,7 @@ Dostaneš: adresu (lokální server nebo nasazená aplikace), co se změnilo a c
 
 Postup:
 1. Prohlížeč: vestavěný prohlížeč aplikace Claude (nástroje `mcp__Claude_Browser__*`), jinak to, co je k dispozici. Když žádný prohlížeč nemáš, skonči a napiš to.
-2. Když projekt má `DESIGN.md`, přečti ho; odchylky od něj hlas jako nálezy.
+2. Když projekt má `DESIGN.md`, přečti ho (u napojeného i Brixyy/design, na který odkazuje); odchylky od něj hlas jako nálezy.
 3. Každou stránku ze zadání projdi **na desktopu i na mobilu** (šířka 375 px): načtení, obsah, hlavní ovládací prvky, chybové hlášky v konzoli, nefunkční požadavky na síť. Na mobilu hlídej přetékání do stran a překrývání.
 4. **Přihlášenou část** ověř taky. Použij existující přihlášení v prohlížeči nebo testovací účet z projektu (seed, fixtures, příklad konfigurace). Hesla nevypisuj. Když se přihlásit nedá, napiš to jako neověřené, nevynechávej to potichu.
 5. Klikej jen na věci, které nic nevratně nemění. Bash jen ke čtení (spuštění serveru, logy), žádné zápisy do repozitáře ani databáze. Neodesílej formuláře s reálnými údaji, nic nemaž, nic nekupuj, na produkci nic nezapisuj.
