@@ -48,9 +48,34 @@ cizi = hotovo + [
     {"name": "bug", "color": "d73a4a", "description": "Something isn't working"},
 ]
 kroky = stitky.plan(cizi)
-over("oblast se upraví s popisem, cizí štítek v barvě stavu je jen varování",
-     akce(kroky) == [("upravit", "oblast: Blitz"), ("varování", "podnět")]
+over("oblast se upraví s popisem, cizí štítek v barvě stavu je jen varování, bug vedle chyby jen varuje",
+     akce(kroky) == [("upravit", "oblast: Blitz"), ("varování", "podnět"), ("varování", "bug")]
      and kroky[0][2:4] == (stitky.BARVA_OBLASTI, "Fasády"))
+
+# mazat se smí jen výchozí anglické štítky GitHubu, nikdy standardní ani vlastní štítek projektu
+over("SMAZAT neobsahuje standardní ani přejmenovávané štítky",
+     not (stitky.SMAZAT & (set(stitky.STANDARD) | set(stitky.PREJMENOVAT))))
+over("přejmenování míří jen na štítky základu", set(stitky.PREJMENOVAT.values()) <= set(stitky.STANDARD))
+bez_chyby = [s for s in hotovo if s["name"] != "chyba"] + [{"name": "bug", "color": "d73a4a", "description": "x"}]
+kroky = stitky.plan(bez_chyby)
+over("bug se přejmenuje na chybu, nic se nemaže ani nezakládá",
+     akce(kroky) == [("přejmenovat", "chyba")] and kroky[0][4] == ("bug", "d73a4a", "x"))
+over("vlastní štítky projektu se nemažou",
+     not [k for k in stitky.plan(hotovo + [{"name": "odloženo", "color": "C5A06A", "description": ""}])
+          if k[0] == "smazat"])
+
+# kontrola stavu: právě jeden štítek stavu
+issues = [
+    {"number": 1, "title": "ok", "labels": [{"name": "k práci"}, {"name": "oblast: CAD"}]},
+    {"number": 2, "title": "bez", "labels": [{"name": "riziko: nízké"}]},
+    {"number": 3, "title": "dva", "labels": [{"name": "rozpracováno"}, {"name": "čeká na zákazníka"}]},
+]
+over("kontrola najde issue bez stavu a s víc stavy",
+     [(c, s) for c, _n, s in stitky.chybny_stav(issues)] == [(2, []), (3, ["rozpracováno", "čeká na zákazníka"])])
+
+# žádné dva štítky základu nemají stejnou barvu
+barvy_zakladu = [b for b, _p in stitky.STANDARD.values()]
+over("štítky základu mají navzájem různé barvy", len(set(barvy_zakladu)) == len(barvy_zakladu))
 
 # stavy mají navzájem různé barvy (barva sama říká stav)
 barvy = [b for b, _p in stitky.STAVY.values()]
@@ -70,6 +95,8 @@ def falesne_gh(*args):
             {"name": "robotika", "isArchived": False, "hasIssuesEnabled": True},
             {"name": "stare", "isArchived": True, "hasIssuesEnabled": True},
         ])
+    if args[:2] == ("issue", "list"):
+        return json.dumps([{"number": 7, "title": "x", "labels": []}])
     return ""
 
 
@@ -79,11 +106,48 @@ over("nanečisto jen čte", all(v[:2] == ("label", "list") for v in volani))
 volani.clear()
 stitky.srovnej("a", nanecisto=False)
 zapisy = [v for v in volani if v[:2] != ("label", "list")]
-over("ostrý běh jen zakládá s --force, nic nemaže ani nepřejmenuje",
+over("ostrý běh zakládá s --force, vlastní štítek nemaže ani nepřejmenuje",
      len(zapisy) == len(stitky.STANDARD)
      and all(v[:2] == ("label", "create") and "--force" in v and "--name" not in v for v in zapisy)
      and not any("delete" in v for v in volani))
 over("výčet repozitářů zahrne robotiku, vynechá archivované", stitky.repozitare() == ["a", "robotika"])
+volani.clear()
+over("--kontrola jen čte a s nálezem vrátí 1",
+     stitky.main(["a", "--kontrola"]) == 1 and all(v[:2] == ("issue", "list") for v in volani))
+
+
+def gh_s_anglickym(*args):
+    volani.append(args)
+    if args[:2] == ("label", "list"):
+        return json.dumps(hotovo + [{"name": "wontfix", "color": "ffffff", "description": ""}])
+    return ""
+
+
+stitky._gh = gh_s_anglickym
+volani.clear()
+stitky.srovnej("a", nanecisto=True)
+over("nanečisto anglický štítek nesmaže", not any(v[:2] == ("label", "delete") for v in volani))
+stitky.srovnej("a", nanecisto=False)
+over("ostrý běh smaže anglický štítek s --yes",
+     [v for v in volani if v[:2] == ("label", "delete")] == [("label", "delete", "wontfix", "--yes", "-R", "Brixyy/a")])
+
+
+def gh_s_bug(*args):
+    volani.append(args)
+    if args[:2] == ("label", "list"):
+        return json.dumps(bez_chyby)
+    return ""
+
+
+stitky._gh = gh_s_bug
+volani.clear()
+stitky.srovnej("a", nanecisto=True)
+over("nanečisto přejmenování nic nezapíše", all(v[:2] == ("label", "list") for v in volani))
+stitky.srovnej("a", nanecisto=False)
+zapisy = [v for v in volani if v[:2] != ("label", "list")]
+over("ostrý běh přejmenuje bug přes label edit --name a nic nemaže",
+     zapisy == [("label", "edit", "bug", "--name", "chyba", "--color", "D73A4A", "--description", "Něco nefunguje",
+                 "-R", "Brixyy/a")])
 
 
 def padajici_gh(*args):
@@ -91,7 +155,19 @@ def padajici_gh(*args):
 
 
 stitky._gh = padajici_gh
-over("chyba gh u repozitáře se vypíše a vrátí kód 1", stitky.main(["x", "y"]) == 1)
+over("chyba gh u repozitáře se vypíše a vrátí kód 2", stitky.main(["x", "y"]) == 2)
+over("neznámý přepínač vrátí 2 a nic nespustí", stitky.main(["--nanecisot"]) == 2)
+
+
+def ciste_gh(*args):
+    if args[:2] == ("issue", "list"):
+        return json.dumps([{"number": 1, "title": "ok", "labels": [{"name": "k práci"}]}])
+    return json.dumps(hotovo)
+
+
+stitky._gh = ciste_gh
+over("čisté repo vrátí 0 při kontrole i srovnání",
+     stitky.main(["a", "--kontrola"]) == 0 and stitky.main(["a"]) == 0)
 
 # pravidlo je popsané v podrobnostech
 with open(os.path.join(KOREN, "global", "PODROBNOSTI.md"), encoding="utf-8") as f:
@@ -99,6 +175,19 @@ with open(os.path.join(KOREN, "global", "PODROBNOSTI.md"), encoding="utf-8") as 
 over("PODROBNOSTI mají oddíl o štítcích a odkaz na skript",
      "## Štítky issues" in podrobnosti and "scripts/stitky.py" in podrobnosti
      and all(f"`{j}`" in podrobnosti for j in stitky.STAVY))
+
+def gh_bug_i_chyba(*args):
+    volani.append(args)
+    if args[:2] == ("label", "list"):
+        return json.dumps(hotovo + [{"name": "bug", "color": "d73a4a", "description": "x"}])
+    return ""
+
+
+stitky._gh = gh_bug_i_chyba
+volani.clear()
+stitky.srovnej("a", nanecisto=False)
+over("bug vedle chyby: ostrý běh nic nepřejmenuje ani nesmaže",
+     not [v for v in volani if v[:2] in (("label", "edit"), ("label", "delete"))])
 
 print("VŠE OK" if not chyby else f"{chyby} CHYB")
 sys.exit(1 if chyby else 0)
