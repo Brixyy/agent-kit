@@ -35,6 +35,6 @@ Cloudová session pluginy z `.claude/settings.json` projektu neinstaluje. Hooky 
 
 ## Úpravy, testy, verze
 - Změna → zvyš `version` v `.claude-plugin/plugin.json` a ověř `claude plugin validate .` a testy v `tests/` (CI `testy` je spouští při každém push a PR).
-- **`global/AGENTS.md` je jádro do 9 000 znaků.** Claude Code vloží z hooku nejvýš 10 000 znaků, delší text nahradí náhledem 2 000 znaků a zbytek agent neuvidí. Nové podrobné pravidlo patří do `PODROBNOSTI.md`, do jádra jen jeho krátká verze; hlídá to `tests/test_kontext.py`.
+- **`global/AGENTS.md` je jádro do 8 500 znaků.** Claude Code vloží z hooku nejvýš 10 000 znaků, delší text nahradí náhledem 2 000 znaků a zbytek agent neuvidí. Nové podrobné pravidlo patří do `PODROBNOSTI.md`, do jádra jen jeho krátká verze; hlídá to `tests/test_kontext.py`.
 - Nový skill jen z opakovaného postupu, který agent sám neumí (ne obecné znalosti typu React nebo TypeScript). Skills `predavka`, `rozhodnuti` a `nez-zacnes-stavet` jsou upravené podle [davidondrej/skills](https://github.com/davidondrej/skills) (MIT).
 - Verze `HLAVNÍ.VEDLEJŠÍ.OPRAVA`: oprava → poslední číslo, nové pravidlo/skill → prostřední, změna vyžadující úpravu všech projektů → první. Nikdy se nesnižuje.

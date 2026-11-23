@@ -13,6 +13,8 @@ sys.stdout.reconfigure(encoding="utf-8")
 KOREN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 LIMIT = 10_000  # https://code.claude.com/docs/en/hooks (additionalContext a stdout)
 REZERVA = 9_000
+JADRO = 8_500  # rezerva pro výtah o uživateli a delší cesty (audit Brixyy/agent-kit#96)
+CESTA = 150  # rozpočet na absolutní cestu k podrobnostem; skutečná délka závisí na stroji
 CLOUD_HLAVICKA = 600  # úvodní řádky, odkaz na podrobnosti a na výtah o uživateli z cloud-bootstrap.sh
 
 vystup = subprocess.run(
@@ -23,9 +25,15 @@ text = json.loads(vystup)["hookSpecificOutput"]["additionalContext"]
 with open(os.path.join(KOREN, "global", "AGENTS.md"), encoding="utf-8") as f:
     jadro = f.read()
 
+# Měří se bez skutečné cesty, aby výsledek nezávisel na stroji (worktree, nainstalovaný plugin).
+cesta = text.rsplit("`", 2)[-2]
+assert cesta.endswith("PODROBNOSTI.md"), "hook změnil formát řádku s cestou, uprav měření"
+delka = len(text) - len(cesta) + CESTA
+
 chyby = 0
 for nazev, ok in [
-    (f"hook vloží {len(text)} znaků, rezerva {REZERVA}", len(text) <= REZERVA),
+    (f"hook vloží {delka} znaků (cesta počítaná jako {CESTA}), rezerva {REZERVA}", delka <= REZERVA),
+    (f"jádro má {len(jadro)} znaků, limit {JADRO}", len(jadro) <= JADRO),
     (f"cloud vypíše asi {len(jadro) + CLOUD_HLAVICKA} znaků, limit {LIMIT}", len(jadro) + CLOUD_HLAVICKA <= LIMIT),
     ("hook předá cestu k podrobnostem, soubor existuje",
      "PODROBNOSTI.md" in text and os.path.isfile(os.path.join(KOREN, "global", "PODROBNOSTI.md"))),
