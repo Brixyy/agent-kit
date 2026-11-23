@@ -44,12 +44,13 @@ def klic(verze):
 
 
 def nejnovejsi(root):
-    """(verze, složka) nejvyšší platné verze v cache vedle root (s plugin.json, bez .orphaned_at); jinak None."""
+    """(verze, složka) nejvyšší platné verze v cache vedle root (s plugin.json a jádrem, bez .orphaned_at); jinak None."""
     cache = os.path.dirname(os.path.normpath(root))
     nalezene = []
     for nazev in os.listdir(cache):
         cesta = os.path.join(cache, nazev)
         if (VERZE.match(nazev) and os.path.isfile(os.path.join(cesta, ".claude-plugin", "plugin.json"))
+                and os.path.isfile(os.path.join(cesta, "global", "AGENTS.md"))  # ne rozbalovaná
                 and not os.path.exists(os.path.join(cesta, ".orphaned_at"))):  # odinstalovaná verze
             nalezene.append((klic(nazev), nazev, cesta))
     if not nalezene:

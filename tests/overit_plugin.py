@@ -1,7 +1,9 @@
 """Ověří nainstalovanou kopii pluginu: python -I tests/overit_plugin.py <složka pluginu>"""
 import json
+import os
 import subprocess
 import sys
+import tempfile
 
 sys.stdout.reconfigure(encoding="utf-8")
 koren = sys.argv[1]
@@ -12,5 +14,6 @@ vstup = json.dumps({"tool_name": "Bash", "tool_use_id": "x", "tool_input": {"com
 pojistka = subprocess.run(["sh", f"{koren}/hooks/spust.sh", "pojistka.py"], input=vstup, capture_output=True, text=True, encoding="utf-8").stdout
 print("pojistka:", "blokuje push do main" if '"deny"' in pojistka else "NEBLOKUJE")
 vstup = json.dumps({"hook_event_name": "UserPromptSubmit", "session_id": "overit-plugin", "prompt": "x"})
-verze = subprocess.run(["sh", f"{koren}/hooks/spust.sh", "verze.py"], input=vstup, capture_output=True, text=True, encoding="utf-8")
+prostredi = {**os.environ, "AGENT_KIT_STAV": tempfile.mkdtemp()}  # stav ověření nezůstane ve skutečném
+verze = subprocess.run(["sh", f"{koren}/hooks/spust.sh", "verze.py"], input=vstup, env=prostredi, capture_output=True, text=True, encoding="utf-8")
 print("verze:", "běží" if verze.returncode == 0 else f"CHYBA {verze.returncode} {verze.stderr.strip()}", verze.stdout.strip()[:120])

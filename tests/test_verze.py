@@ -24,6 +24,8 @@ def verze(nazev, s_manifestem=True):
     if s_manifestem:
         with open(os.path.join(slozka, ".claude-plugin", "plugin.json"), "w", encoding="utf-8") as f:
             json.dump({"name": "agent-kit", "version": nazev}, f)
+        os.makedirs(os.path.join(slozka, "global"), exist_ok=True)
+        open(os.path.join(slozka, "global", "AGENTS.md"), "w").close()
     return slozka
 
 
@@ -61,6 +63,8 @@ try:
     over("bez nové verze žádné upozornění", zprava("s1", stara) == "")
 
     verze("2.10.0", s_manifestem=False)  # rozbalovaná / neúplná složka se nepočítá
+    os.makedirs(os.path.join(verze("2.10.5"), "global"), exist_ok=True)
+    os.remove(os.path.join(CACHE, "2.10.5", "global", "AGENTS.md"))  # manifest bez jádra
     verze("neni-verze")
     over("neúplná složka ani cizí název nevadí", zprava("s1", stara) == "")
 
@@ -88,7 +92,8 @@ try:
     over("session bez záznamu ze startu bere verzi hooku",
          "běží na 2.9.0" in zprava("s3", stara))
     over("zvláštní znaky v session_id nezapíšou mimo složku stavu",
-         zprava("../../ven", stara) != "KÓD 1" and not os.path.exists(os.path.join(TMP, "ven.json")))
+         zprava("../../ven", stara) != "KÓD 1" and ".._.._ven.json" in os.listdir(STAV)
+         and not os.path.exists(os.path.join(os.path.dirname(TMP), "ven.json")))
 
     over("rozbitý vstup → tichý konec", spust("není json", stara) == (0, ""))
     over("chybí session_id → tichý konec", spust({"hook_event_name": "UserPromptSubmit"}, stara) == (0, ""))
