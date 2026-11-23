@@ -1,6 +1,6 @@
 # Globální pravidla pro AI agenty (agent-kit)
 
-Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (jeho `AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Jádro se vkládá do každé session, drž ho pod 9 000 znaků. Stejně závazné podrobnosti (`global/PODROBNOSTI.md`) čti, když řešíš proaktivitu, potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, CI, závislosti (Dependabot), úklid, noční běhy, cloud, Vercel, vzhled frontendu nebo práci uživatele z telefonu.
+Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (`AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Jádro drž pod 9 000 znaků. Stejně závazné podrobnosti (`global/PODROBNOSTI.md`) čti, když řešíš proaktivitu, potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, CI, závislosti (Dependabot), úklid, noční běhy, cloud, Vercel, ladění (produkční data, kritéria), vzhled frontendu nebo práci uživatele z telefonu.
 
 ## Kam patří které pravidlo
 Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, `global/`), **jeden projekt** → `AGENTS.md` projektu, **jen tento počítač** → lokální soubory agenta (`~/.claude/CLAUDE.md`, paměť; jen věci vázané na stroj).
@@ -39,7 +39,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - **Uživateli zbývá jen krok, který udělat nesmíš** (platba, heslo, souhlas). Dovedeš ho k němu: stránka otevřená, vyplněno, co kliknout. Registrace (OAuth aplikace) děláš sám v prohlížeči; tajemství uživatel vloží jedním příkazem se skrytým vstupem (podrobnosti).
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti). Kde je uživatel přihlášený, pracuj v Claude in Chrome, ne ve vestavěném prohlížeči (testovací účty smíš tam).
 - Trvalý souhlas vykládej široce a zapiš ho; neruší seznam „Vždy se zeptej před“. „Jen plán / jen analýza“ má přednost: nic neměň.
-- **Sloučení PR je trvale povolené** (i do `main`): po review počkej na zelené CI (`gh pr checks <č> --watch`) a sluč `gh pr merge <č> --squash`, bez ptaní; `--auto` jen kde GitHub kontroly vynucuje (ne soukromé repo na Free). Výjimka: PR „nesloučit“, `riziko: vysoké` (až po „ano“) nebo čekající na podmínku.
+- **Sloučení PR je trvale povolené** (i do `main`): po review počkej na zelené CI (`gh pr checks <č> --watch -i 60`) a sluč `gh pr merge <č> --squash`, bez ptaní; `--auto` jen kde GitHub kontroly vynucuje (ne soukromé repo na Free). Výjimka: PR „nesloučit“, `riziko: vysoké` (až po „ano“) nebo čekající na podmínku.
 - **Vždy se zeptej před:** přímým push do `main`/`master` mimo PR, ručním produkčním deployem, migrací nebo zápisem do produkční databáze, mazáním, placenou službou nebo API, založením rutiny, vypnutím či úpravou vlastních kontrol, zápisem do cizího repozitáře a produktovými rozhodnutími. Potvrzení pojistky a dávky: podrobnosti.
 - **`.env`:** smíš načíst do procesu, **nikdy nevypisuj** a neotvírej nástrojem pro čtení; zápis jen skriptem `scripts/env_nastav.py` (podrobnosti).
 
