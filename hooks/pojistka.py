@@ -76,6 +76,124 @@ def bez_prepinacu_gitu(prikaz):
     return GIT_PREPINACE.sub("git", re.sub(r"\\\r?\n", " ", prikaz))
 
 
+# Vzdálené servery (audit Brixyy/agent-kit#96). Pojistka chytá běžné chyby agenta, ne záměrné
+# obcházení: rozbor shellu regulárními výrazy nikdy není úplný. Skutečnou ochranu dávají práva
+# na serveru (agent má klíč, který smí jen číst). Pojistka nezná jména serverů (soubor je veřejný),
+# proto hlídá každý server kromě GitHubu: ssh, scp, rsync a podobné na pozici příkazu chtějí
+# potvrzení, pokud volání přesně neodpovídá bezpečnému tvaru (čtení logů a stavu, tunel, stažení
+# ze serveru, místní kopie). Slovo ssh jako argument (grep ssh, ssh://) se nehlídá.
+SSH_NAZVY = r"(?P<nazev>ssh|scp|rsync|sftp|ssh-copy-id|autossh|plink|mosh)(\.exe)?"
+SSH_VOLANI = re.compile(
+    r"(^|(?<=[;&|(\n`{\"']))[ \t]*"
+    r"((sudo|nohup|time|command|exec|if|then|do|else|xargs)[ \t]+|timeout[ \t]+\S+[ \t]+|env[ \t]+"
+    r"|\w+=\S*[ \t]+|&[ \t]*|\$\w+[ \t]*=[ \t]*)*"
+    r"(?P<q>[\"']?)(\S*[\\/])?" + SSH_NAZVY + r"(?P=q)(?=[ \t]|$)",
+    re.I | re.M,
+)
+SSH_ZA = r"(?=[ \t]*($|\n|&|\|\|?|;|[12]?>))"
+SLOVO = r"[\w./\\~:@=,+%*-]+"
+SSH_BEZPECNE = re.compile(
+    r"ssh(\.exe)?(?P<prep>([ \t]+-[NTqvCtnf46]+|[ \t]+-[NTqvCtnf46]*[pilFJLRDE][ \t]*" + SLOVO +
+    r"|[ \t]+-o[ \t]*(BatchMode|ConnectTimeout|StrictHostKeyChecking|ServerAliveInterval|ServerAliveCountMax"
+    r"|LogLevel|ConnectionAttempts)=[\w-]+))*"
+    r"[ \t]+(?P<host>[\w.@-]+)"
+    r"([ \t]+(?P<cmd>'[^'\n]*'|\"[^\"\n]*\"|[^'\"\n;&|<>]+?))?" + SSH_ZA,
+    re.I,
+)
+SSH_VERZE = re.compile(r"ssh(\.exe)?[ \t]+-V" + SSH_ZA, re.I)
+STAZENI = re.compile(
+    r"(scp|rsync)(\.exe)?([ \t]+-(?![a-zA-Z]*[eoFSJ])[a-zA-Z]+|[ \t]+-P[ \t]+\d+"
+    r"|[ \t]+--(archive|verbose|compress|progress|partial|human-readable|dry-run|stats|checksum|times|recursive"
+    r"|list-only|delete|ignore-existing|update|itemize-changes|size-only|(info|exclude|include)=" + SLOVO + r"))*"
+    r"[ \t]+[\w.@-]+:" + SLOVO + r"[ \t]+(?![\w.@-]{2,}:)(" + SLOVO + r"|[A-Za-z]:[\\/]" + SLOVO + r")" + SSH_ZA,
+    re.I,
+)
+ARG = r"([ \t]+(?!-)" + SLOVO + r"|[ \t]+-" + SLOVO + r"|[ \t]+(" + SLOVO + r")?('[^']*'|\"[^\"$`\\]*\"))*"
+CTENI_VZDALENE = re.compile(
+    r"[ \t]*(sudo([ \t]+-n)?[ \t]+)?("
+    r"(tail|head|cat|ls|ll|df|du|free|uptime|wc|stat|whoami|uname|pwd|nproc|id|lsblk|findmnt|ps|pgrep|grep|egrep"
+    r"|realpath|which|echo|cd|true|test)" + ARG +
+    r"|hostname|rg(?![^|;&]*--pre)" + ARG +
+    r"|journalctl(?![^|;&]*--(vacuum|rotate|flush|sync|relinquish|setup-keys))" + ARG +
+    r"|systemctl([ \t]+--no-pager)?[ \t]+(status|is-active|is-enabled|is-failed|list-units|list-timers|show|cat)\b" + ARG +
+    r"|docker[ \t]+(ps|logs|inspect|stats|images|version|info|top)\b" + ARG +
+    r"|docker[ \t]+compose[ \t]+(ps|logs|ls|top|images|version)\b" + ARG +
+    r"|git([ \t]+-C[ \t]+" + SLOVO + r")?([ \t]+--no-pager)?[ \t]+(status|log|show|rev-parse|describe)\b"
+    r"(?![^|;&]*--output)" + ARG +
+    r"|(ss|netstat)(?![^|;&]*(-\w*K|--kill))" + ARG +
+    r")[ \t]*",
+    re.I,
+)
+
+
+# Obsah, který shell spustí jako příkaz (sh -c '…', eval, iex).
+SPOUSTI_OBSAH = (r"(?:\b(?:sh|bash|zsh|pwsh|powershell|cmd)(?:\.exe)?\s+(?:-c|-Command|/c)|\beval|\biex|\bInvoke-Expression)"
+                 r"\s+('([^']*)'|\"([^\"]*)\")")
+
+
+def _maskuj(text):
+    """Text v uvozovkách s mezerou nahradí mezerami stejné délky (pozice zůstanou). Apostrofy jen
+    v rámci řádku, aby „don't“ v komentáři neschovalo další řádky. Cesta k ssh (C:\\Program Files\\…\\ssh.exe)
+    zůstane vidět."""
+    def nahrad(m):
+        obsah = m.group(0)
+        if re.search(r"[\\/]" + SSH_NAZVY + r"[\"']$", obsah, re.I):
+            return re.sub(r"\s", "_", obsah)
+        return obsah[0] + re.sub(r"[^\n]", " ", obsah[1:-1]) + obsah[-1] if re.search(r"\s", obsah) else obsah
+    text = re.sub(r"@'[\s\S]*?\n'@|@\"[\s\S]*?\n\"@", lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
+    return re.sub(r"(?<![^\s=(])'[^']*'|'[^'\n]*'|\"(\\.|[^\"\\])*\"", nahrad, text)
+
+
+def _vzdaleny_jen_cte(cmd):
+    if cmd[:1] in "'\"":
+        cmd = cmd[1:-1]
+    cmd = re.sub(r"[ \t]*(2>&1|[12]?>[ \t]*/dev/null(?=[ \t]|$))", " ", cmd)
+    # Nahrazení a komentáře ($(), ``, ${}, #, \, přesměrování) se nepouští, ať je rozbor jistý.
+    if re.search(r"[`$#\\<>(){}!\n]", cmd):
+        return False
+    # Rozdělit podle ; && || | mimo uvozovky.
+    casti, cast = [], ""
+    for t in re.findall(r"'[^']*'|\"[^\"]*\"|&&|\|\||[;|]|[^'\"&|;]+|.", cmd):
+        if t in ("&&", "||", ";", "|"):
+            casti.append(cast)
+            cast = ""
+        else:
+            cast += t
+    casti.append(cast)
+    return all(CTENI_VZDALENE.fullmatch(c) for c in casti)
+
+
+def ssh_riziko(prikaz, maskovat=True):
+    """Vrátí popis rizika pro ssh/scp/rsync/… na server, nebo None."""
+    prikaz = prikaz.replace("\r", "")
+    hledany = _maskuj(prikaz) if maskovat else prikaz
+    for m in SSH_VOLANI.finditer(hledany):
+        nastroj, zacatek = m.group("nazev").lower(), m.start("nazev")
+        if nastroj in ("scp", "rsync"):
+            # Kopie mezi místními složkami (bez host:) a stažení ze serveru projdou.
+            volani = re.match(r"[^\n;&|]*", prikaz[zacatek:]).group(0)
+            if not re.search(r"(?<![\w.@-])[\w.@-]{2,}:", volani) or STAZENI.match(prikaz, zacatek):
+                continue
+            return "nahrání souborů na server nebo změna na serveru (" + nastroj + ")"
+        if nastroj != "ssh":
+            return "příkaz na vzdáleném serveru (" + nastroj + ")"
+        if SSH_VERZE.match(prikaz, zacatek):
+            continue
+        b = SSH_BEZPECNE.match(prikaz, zacatek)
+        if not b:
+            return "příkaz na vzdáleném serveru (ssh)"
+        if re.search(r"(^|@)github\.com$", b.group("host"), re.I):
+            continue
+        cmd = (b.group("cmd") or "").strip()
+        if not cmd:
+            if re.search(r"\s-\w*N", prikaz[zacatek:b.start("host")]):
+                continue  # tunel bez příkazu
+            return "interaktivní přihlášení na server (ssh)"
+        if not _vzdaleny_jen_cte(cmd):
+            return "příkaz, který mění vzdálený server (ssh)"
+    return None
+
+
 # Začátek příkazu: začátek řádku nebo za ; & | ( (volitelně sudo).
 ZACATEK_PRIKAZU = r"(^|(?<=[;&|(\n]))\s*(sudo\s+)?"
 # Příkazy, které find spustí nad nalezenými soubory a které soubor mění.
@@ -83,7 +201,7 @@ FIND_MENI = r"(rm|mv|cp|tee|truncate|sed\s+-i|ln|shred|dd|Remove-Item)\b"
 
 RIZIKOVE_PRIKAZY = [
     (r"\bgit\s+push\b[^\n;&|]*\b(main|master)\b", "push do main/master"),
-    (r"\bgit\s+push\b[^\n;&|]*(\s--force\b|\s-f\b|\s--delete\b|\s:\S)", "force push nebo mazání větve na GitHubu"),
+    (r"\bgit\s+push\b[^\n;&|]*(\s--force\b|\s-f\b|\s--delete\b|\s:\S|\s\+\S)", "force push nebo mazání větve na GitHubu"),
     (r"\bgh\s+repo\s+(delete|archive|rename)\b", "mazání/archivace repozitáře"),
     # Úpravy issues (zavřít, štítek, komentář) jsou vratné a sloučení PR je trvale povolené (i přes REST v cloudu);
     # hlídají se zápisy do nastavení, větví a obsahu.
@@ -292,13 +410,18 @@ def main():
         if ENV_CTENI.search(prikaz):
             vystup("deny", "Pojistka: vypisování souborů .env je zakázané. Hodnoty smíš jen načíst do procesu (`set -a; . ./.env; set +a`, `--env-file`) a použít, nikdy je nevypisuj.")
         # Text v uvozovkách se ignoruje, kromě případů, kdy se spouští jako příkaz (sh -c, eval, PowerShell -Command).
-        spousti_text = re.search(r"\b(sh|bash|zsh|pwsh|powershell|cmd)(\.exe)?\b[^\n]*\s(-c|-Command|/c)\b|\beval\b", prikaz, re.I)
+        spousti_text = re.search(r"\b(sh|bash|zsh|pwsh|powershell|cmd)(\.exe)?\b[^\n]*\s(-c|-Command|/c)\b|\b(eval|iex|Invoke-Expression)\b", prikaz, re.I)
         kontrolovany = prikaz if spousti_text else bez_textu(prikaz)
         upraveny = bez_prepinacu_gitu(kontrolovany)
         for vzor, nazev in RIZIKOVE_PRIKAZY:
             if re.search(vzor, kontrolovany, re.IGNORECASE) or re.search(vzor, upraveny, re.IGNORECASE):
                 popis = nazev
                 break
+        if popis is None:
+            # Vzdálený příkaz bývá v uvozovkách: hledá se v textu s maskovanými uvozovkami, posuzuje v původním.
+            popis = ssh_riziko(bez_heredocu(prikaz))
+            for obsah in re.findall(SPOUSTI_OBSAH, prikaz, re.I):
+                popis = popis or ssh_riziko(obsah[1] or obsah[2])
         # Push do main/master chce potvrzení v každém repu, i v agent-kitu a šabloně (Brixyy/agent-kit#95):
         # výjimka podle textu cwd + příkazu pouštěla i push do jiného repa.
     elif RIZIKOVE_MCP.search(nastroj) and not VOLNE_MCP.search(nastroj):
