@@ -18,6 +18,7 @@ Projektová část skillu `audit` (`skills/audit/SKILL.md`). Repo je veřejné: 
 - Kontext vkládaný hookem pod 9 000 znaků (hlídá `tests/test_kontext.py`, jádro je `global/AGENTS.md`); kolik místa zbývá.
 - Opakované chyby agentů: kolik podnětů za období vedlo ke změně pravidla, kontroly nebo skriptu a zda se chyba přestala opakovat (odkud brát: doplnit s uživatelem).
 - Používají všechny počítače a cloud aktuální verzi pluginu?
+- Vydání po dávkách (README): kolik verzí vyšlo za období a nečekají sloučené změny na vydání déle než 2 dny?
 
 ## Otázky projektu
 - Neobsahuje repo ani historie nic citlivého (repo je veřejné)?
