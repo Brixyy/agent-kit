@@ -40,7 +40,7 @@ jobs:
           echo "hotovo=$hotovo" >> "$GITHUB_OUTPUT"
           if [ "$hotovo" = true ]; then echo "::notice::Strom $strom už prošel v PR, testy se přeskakují."; fi
       - if: steps.strom.outputs.hotovo != 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.13"
       - name: Testy
