@@ -87,13 +87,13 @@ SSH_VOLANI = re.compile(
     r"(^|(?<=[;&|(\n`{\"']))[ \t]*"
     r"((sudo|nohup|time|command|exec|if|then|do|else|xargs)[ \t]+|timeout[ \t]+\S+[ \t]+|env[ \t]+"
     r"|\w+=\S*[ \t]+|&[ \t]*|\$\w+[ \t]*=[ \t]*)*"
-    r"[\"']?(\S*[\\/])?" + SSH_NAZVY + r"[\"']?(?=[ \t]|$)",
+    r"(?P<q>[\"']?)(\S*[\\/])?" + SSH_NAZVY + r"(?P=q)(?=[ \t]|$)",
     re.I | re.M,
 )
-SSH_ZA = r"(?=[ \t]*($|\n|&&|\|\|?|;|[12]?>))"
-SLOVO = r"[\w./~:@=,+%*-]+"
+SSH_ZA = r"(?=[ \t]*($|\n|&|\|\|?|;|[12]?>))"
+SLOVO = r"[\w./\\~:@=,+%*-]+"
 SSH_BEZPECNE = re.compile(
-    r"ssh(\.exe)?(?P<prep>([ \t]+-[NTqvCtnf46]+|[ \t]+-[pilFJLRDE][ \t]+" + SLOVO +
+    r"ssh(\.exe)?(?P<prep>([ \t]+-[NTqvCtnf46]+|[ \t]+-[NTqvCtnf46]*[pilFJLRDE][ \t]*" + SLOVO +
     r"|[ \t]+-o[ \t]*(BatchMode|ConnectTimeout|StrictHostKeyChecking|ServerAliveInterval|ServerAliveCountMax"
     r"|LogLevel|ConnectionAttempts)=[\w-]+))*"
     r"[ \t]+(?P<host>[\w.@-]+)"
@@ -108,7 +108,7 @@ STAZENI = re.compile(
     r"[ \t]+[\w.@-]+:" + SLOVO + r"[ \t]+(?![\w.@-]{2,}:)(" + SLOVO + r"|[A-Za-z]:[\\/]" + SLOVO + r")" + SSH_ZA,
     re.I,
 )
-ARG = r"([ \t]+(?!-)" + SLOVO + r"|[ \t]+-" + SLOVO + r")*"
+ARG = r"([ \t]+(?!-)" + SLOVO + r"|[ \t]+-" + SLOVO + r"|[ \t]+(" + SLOVO + r")?('[^']*'|\"[^\"$`\\]*\"))*"
 CTENI_VZDALENE = re.compile(
     r"[ \t]*(sudo([ \t]+-n)?[ \t]+)?("
     r"(tail|head|cat|ls|ll|df|du|free|uptime|wc|stat|whoami|uname|pwd|nproc|id|lsblk|findmnt|ps|pgrep|grep|egrep"
@@ -126,6 +126,11 @@ CTENI_VZDALENE = re.compile(
 )
 
 
+# Obsah, který shell spustí jako příkaz (sh -c '…', eval, iex).
+SPOUSTI_OBSAH = (r"(?:\b(?:sh|bash|zsh|pwsh|powershell|cmd)(?:\.exe)?\s+(?:-c|-Command|/c)|\beval|\biex|\bInvoke-Expression)"
+                 r"\s+('([^']*)'|\"([^\"]*)\")")
+
+
 def _maskuj(text):
     """Text v uvozovkách s mezerou nahradí mezerami stejné délky (pozice zůstanou). Apostrofy jen
     v rámci řádku, aby „don't“ v komentáři neschovalo další řádky. Cesta k ssh (C:\\Program Files\\…\\ssh.exe)
@@ -135,7 +140,8 @@ def _maskuj(text):
         if re.search(r"[\\/]" + SSH_NAZVY + r"[\"']$", obsah, re.I):
             return re.sub(r"\s", "_", obsah)
         return obsah[0] + re.sub(r"[^\n]", " ", obsah[1:-1]) + obsah[-1] if re.search(r"\s", obsah) else obsah
-    return re.sub(r"'[^'\n]*'|\"(\\.|[^\"\\])*\"", nahrad, text)
+    text = re.sub(r"@'[\s\S]*?\n'@|@\"[\s\S]*?\n\"@", lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
+    return re.sub(r"(?<![^\s=(])'[^']*'|'[^'\n]*'|\"(\\.|[^\"\\])*\"", nahrad, text)
 
 
 def _vzdaleny_jen_cte(cmd):
@@ -145,7 +151,16 @@ def _vzdaleny_jen_cte(cmd):
     # Nahrazení a komentáře ($(), ``, ${}, #, \, přesměrování) se nepouští, ať je rozbor jistý.
     if re.search(r"[`$#\\<>(){}!\n]", cmd):
         return False
-    return all(CTENI_VZDALENE.fullmatch(cast) for cast in re.split(r"&&|\|\||[;|]", cmd))
+    # Rozdělit podle ; && || | mimo uvozovky.
+    casti, cast = [], ""
+    for t in re.findall(r"'[^']*'|\"[^\"]*\"|&&|\|\||[;|]|[^'\"&|;]+|.", cmd):
+        if t in ("&&", "||", ";", "|"):
+            casti.append(cast)
+            cast = ""
+        else:
+            cast += t
+    casti.append(cast)
+    return all(CTENI_VZDALENE.fullmatch(c) for c in casti)
 
 
 def ssh_riziko(prikaz, maskovat=True):
@@ -404,7 +419,9 @@ def main():
                 break
         if popis is None:
             # Vzdálený příkaz bývá v uvozovkách: hledá se v textu s maskovanými uvozovkami, posuzuje v původním.
-            popis = ssh_riziko(bez_heredocu(prikaz), maskovat=not spousti_text)
+            popis = ssh_riziko(bez_heredocu(prikaz))
+            for obsah in re.findall(SPOUSTI_OBSAH, prikaz, re.I):
+                popis = popis or ssh_riziko(obsah[1] or obsah[2])
         # Push do main/master chce potvrzení v každém repu, i v agent-kitu a šabloně (Brixyy/agent-kit#95):
         # výjimka podle textu cwd + příkazu pouštěla i push do jiného repa.
     elif RIZIKOVE_MCP.search(nastroj) and not VOLNE_MCP.search(nastroj):
