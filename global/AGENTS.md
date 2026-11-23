@@ -36,7 +36,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - **Táhni projekt dopředu.** Neptej se „co dál?“: sám vyber další krok (oprava, funkce, redukce kódu) a v mezích autonomie ho začni; jednou větou řekni co a proč. Navrhuj i zrychlení a alternativy k cíli. Nečinnost bez důvodu je chyba (podrobnosti). **Schválené zadání dotáhni celé a bez přestávek** (všechny kroky, souběžně kde to jde); další souhlas jen u akcí ze seznamu „Vždy se zeptej před“.
 - U vratných kroků se neptej (kód, dokumentace, commity, push do vlastní větve, PR, issues, Koš, archiv).
 - **Co jde zjistit nebo udělat, udělej sám** (kód, databáze, server, dokumentace, prohlížeč); uživatele nic ověřovat neposílej. Problém v rozsahu úkolu vyřeš a oznam (mimo audity a „jen analýza“).
-- **Uživateli zbývá jen krok, který udělat nesmíš** (platba, heslo, souhlas). Dovedeš ho k němu: stránka otevřená, vyplněno, co kliknout. Registrace a tajemství: podrobnosti.
+- **Uživateli zbývá jen krok, který udělat nesmíš** (platba, heslo, souhlas). Dovedeš ho k němu: stránka otevřená, vyplněno, co kliknout. Registraci (OAuth) děláš sám, tajemství přes skrytý vstup (podrobnosti).
 - Když nástroj něco neumí, použij prohlížeč, než řekneš „nejde“ (podrobnosti). Kde je uživatel přihlášený, pracuj v Claude in Chrome.
 - Trvalý souhlas vykládej široce a zapiš ho; neruší seznam „Vždy se zeptej před“. „Jen plán / jen analýza“ má přednost: nic neměň.
 - **Sloučení PR je trvale povolené** (i do `main`): po review a zeleném CI sluč squashem bez ptaní (příkazy: podrobnosti). Výjimka: PR „nesloučit“, `riziko: vysoké` (až po „ano“) nebo čekající na podmínku.
@@ -46,7 +46,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 ## Způsob práce
 1. Práce začíná ticketem v GitHub Issues projektu; co čeká na uživatele, má v ticketu komentář a štítek `čeká na uživatele`. Jedna úloha = jedna větev = jedno malé PR. Žádné řetězy PR. Skill `prace-workflow`.
 2. Nové produkty a funkce: nejdřív specifikace, kód až potom. Skill `nez-zacnes-stavet`.
-3. **Před pushem si změnu ověř sám** (lint, typy, testy), PR otevírej jako koncept a výsledek dej do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly a levné CI úměrné riziku (podrobnosti).
+3. **Před pushem si změnu ověř sám** (lint, typy, testy), PR otevírej jako koncept a výsledek dej do PR i ticketu; před sloučením nezávislé review (agent `reviewer` nebo `/code-review`). Kontroly úměrné změně, levné CI, testy na riziko (podrobnosti).
    - **Nejmenší zásah:** udělej zadané a nic navíc. Neměň vzhled, strukturu ani nesouvisející části, nevyhazuj obsah a nepřidávej nevyžádané texty ani funkce. Když formát nedovolí změnu bez rozbití (PDF), řekni to předem a vyžádej si zdroj.
    - **Jeden zdroj pravdy:** nic natvrdo, žádná mock data ani tiché náhradní hodnoty; připomínku uplatni v celé aplikaci.
    - **Přejmenování a přesun na čisto:** nový název všude (soubory, identifikátory, adresy, styly, testy, dokumentace); žádná přesměrování, aliasy ani zmínky „dřív X“.
@@ -59,7 +59,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 8. **Plánované úlohy jen jako rutiny Claude** (nikdy systémový plánovač ani `CronCreate`). **Novou rutinu jen se souhlasem uživatele:** slíbenou kontrolu navrhni a po jeho „ano“ založ. Proběhlou jednorázovou hned smaž (podrobnosti).
 
 ## Orchestrace
-- Pracuj co nejrychleji: paralelní agenty a sessions tam, kde jsou užitečné, ne zbytečně.
+- Pracuj rychle: paralelní agenty a sessions, kde pomohou.
 - **Samostatné sessions** (vlastní worktree, větev, PR) pro nezávislé kroky; každá dostane úplné zadání. **Zakládej je sám** (`user_asked`) hned v tahu po zprávě uživatele, nikdy jako kartu. Práce v jiném repozitáři jde přes ticket a koordinační session toho projektu (podrobnosti).
 - **Subagenti** jen na krátké hledání, čtení, review a ověřování; implementaci dostávají pod-sessions, které uživatel vidí.
 - Rizikovou nebo výpočetní změnu drží hlavní session pod přímou kontrolou. Dva zapisující agenti nikdy nemění tytéž soubory.

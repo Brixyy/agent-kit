@@ -27,6 +27,7 @@ with open(os.path.join(KOREN, "global", "AGENTS.md"), encoding="utf-8") as f:
 
 # Měří se bez skutečné cesty, aby výsledek nezávisel na stroji (worktree, nainstalovaný plugin).
 cesta = text.rsplit("`", 2)[-2]
+assert cesta.endswith("PODROBNOSTI.md"), "hook změnil formát řádku s cestou, uprav měření"
 delka = len(text) - len(cesta) + CESTA
 
 chyby = 0
