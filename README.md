@@ -34,7 +34,15 @@ nebo v terminálu `claude plugin marketplace add Brixyy/agent-kit` a `claude plu
 Cloudová session pluginy z `.claude/settings.json` projektu neinstaluje. Hooky projektu proto v cloudu spustí `scripts/cloud-bootstrap.sh` (stáhne tento repozitář do `~/.agents/agent-kit`, nainstaluje plugin, vloží pravidla) a `scripts/cloud-pojistka.sh` (pojistka). Lokálně nedělají nic. Ověřeno v Brixyy/elyon 22. 10. 2026.
 
 ## Úpravy, testy, verze
-- Změna → zvyš `version` v `.claude-plugin/plugin.json` a ověř `claude plugin validate .` a testy v `tests/` (CI `testy` je spouští u hotového PR, ne u konceptu, a po sloučení přeskočí strom, který už prošel v PR; vzor Levné CI v `PODROBNOSTI.md`).
+- **Vydání po dávkách** (uživatel 23. 11. 2026, audit Brixyy/agent-kit#96). Běžné PR `version` v `.claude-plugin/plugin.json` nemění. Claude Code bez změny verze nový obsah nestáhne ([dokumentace](https://code.claude.com/docs/en/plugins/host-marketplace.md), „Release a new version“), takže sloučené změny čekají na vydání.
+  - Vydání je zvýšení `version` (a verze v názvu PR), nejvýš jednou za 24 h. Vydává se vždy celá dávka nevydaných změn.
+  - **Kdo vydává:** každá session, která v agent-kitu pracuje, na začátku i před sloučením PR zkontroluje nevydané změny. Když je poslední vydání starší než 24 h, přidá zvýšení do slučovaného PR. Když žádné PR neslučuje, založí malé PR „Vydání X.Y.Z“. Při konfliktu v `plugin.json` platí PR sloučené dřív, druhé zvýšení odebere.
+  - **Hned se vydává:** oprava pojistky, bezpečnosti nebo rozbitého hooku (sessions bez pravidel) a pravidlo, které má podle uživatele platit hned.
+  - **Příkazy (Git Bash):**
+    - Nevydané změny: `git fetch -q origin && git log --oneline $(git log -1 --format=%H -G'"version"' origin/main -- .claude-plugin/plugin.json)..origin/main`.
+    - Čas posledního vydání: `git log -1 --format=%cI -G'"version"' origin/main -- .claude-plugin/plugin.json`.
+  - **Cloud a Codex vydání nečekají.** `cloud-bootstrap.sh` a `install.py` berou `main` přímo, takže každé sloučené PR musí být bezpečné hned.
+- Před sloučením ověř `claude plugin validate .` a testy v `tests/` (CI `testy` je spouští u hotového PR, ne u konceptu, a po sloučení přeskočí strom, který už prošel v PR; vzor Levné CI v `PODROBNOSTI.md`).
 - **`global/AGENTS.md` je jádro do 8 500 znaků.** Claude Code vloží z hooku nejvýš 10 000 znaků, delší text nahradí náhledem 2 000 znaků a zbytek agent neuvidí. Nové podrobné pravidlo patří do `PODROBNOSTI.md`, do jádra jen jeho krátká verze; hlídá to `tests/test_kontext.py`.
 - Nový skill jen z opakovaného postupu, který agent sám neumí (ne obecné znalosti typu React nebo TypeScript). Skills `predavka`, `rozhodnuti` a `nez-zacnes-stavet` jsou upravené podle [davidondrej/skills](https://github.com/davidondrej/skills) (MIT).
-- Verze `HLAVNÍ.VEDLEJŠÍ.OPRAVA`: oprava → poslední číslo, nové pravidlo/skill → prostřední, změna vyžadující úpravu všech projektů → první. Nikdy se nesnižuje.
+- Verze `HLAVNÍ.VEDLEJŠÍ.OPRAVA` podle největší změny v dávce: oprava → poslední číslo, nové pravidlo/skill → prostřední, změna vyžadující úpravu všech projektů → první. Nikdy se nesnižuje.
