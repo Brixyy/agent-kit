@@ -22,6 +22,7 @@ jobs:
       - run: python -I tests/test_env_nastav.py
       - run: python -I tests/test_uklid.py
       - run: python -I tests/test_pro_tebe.py
+      - run: python -I tests/test_verze.py
       - run: python -I tests/test_vercel_kontrola.py
       - run: python -I tests/test_vercel_ucet.py
       - run: python -I tests/test_stitky.py
