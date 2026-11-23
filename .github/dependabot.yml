@@ -1,0 +1,20 @@
+# Hlídání nových verzí závislostí (Brixyy/agent-kit#87, pravidlo v global/PODROBNOSTI.md,
+# oddíl Aktualizace závislostí). Jednou týdně v pondělí ráno; drobné aktualizace
+# (minor, patch) chodí v jednom PR, velké (major) každá zvlášť.
+#
+# Repozitář má jediný ekosystém: akce GitHubu v .github/workflows. Kritické knihovny
+# (výpočty, peníze, data) agent-kit nemá, nic se proto ze skupiny nevyřazuje.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Prague
+    labels: ["závislosti"]
+    groups:
+      akce-drobne:
+        update-types: [minor, patch]
+        patterns: ["*"]
