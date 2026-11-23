@@ -58,6 +58,21 @@ INSTALACE = (
     r"(\.claude([\\/](plugins([\\/](cache|marketplaces))?))?[\\/]?(\*|\s|$)|\.claude[\\/]plugins[\\/]\S*agent-kit"
     r"|\.agents([\\/]agent-kit)?[\\/]?(\*|\s|$)|(?<![\w./\\-])agent-kit[\\/]?(\*|\s|$))"
 )
+# Globální přepínače gitu před podpříkazem (git -C . push, git -c a=b push, git --no-pager push,
+# Brixyy/agent-kit#95). Přepínače s hodnotou v dalším slově jsou vyjmenované, ostatní jsou bez hodnoty
+# nebo s ní za „=“.
+GIT_PREPINACE = re.compile(
+    r"\bgit((\s+(-C|-c|--git-dir|--work-tree|--namespace|--super-prefix|--config-env)(\s+|=)\S+"
+    r"|\s+--?[\w-]+(=\S+)?))+(?=\s)",
+    re.I,
+)
+
+
+def bez_prepinacu_gitu(prikaz):
+    """git <globální přepínače> <podpříkaz> → git <podpříkaz>, aby vzory viděly podpříkaz hned za gitem."""
+    return GIT_PREPINACE.sub("git", prikaz)
+
+
 # Začátek příkazu: začátek řádku nebo za ; & | ( (volitelně sudo).
 ZACATEK_PRIKAZU = r"(^|(?<=[;&|(\n]))\s*(sudo\s+)?"
 # Příkazy, které find spustí nad nalezenými soubory a které soubor mění.
@@ -275,15 +290,13 @@ def main():
             vystup("deny", "Pojistka: vypisování souborů .env je zakázané. Hodnoty smíš jen načíst do procesu (`set -a; . ./.env; set +a`, `--env-file`) a použít, nikdy je nevypisuj.")
         # Text v uvozovkách se ignoruje, kromě případů, kdy se spouští jako příkaz (sh -c, eval, PowerShell -Command).
         spousti_text = re.search(r"\b(sh|bash|zsh|pwsh|powershell|cmd)(\.exe)?\b[^\n]*\s(-c|-Command|/c)\b|\beval\b", prikaz, re.I)
-        kontrolovany = prikaz if spousti_text else bez_textu(prikaz)
+        kontrolovany = bez_prepinacu_gitu(prikaz if spousti_text else bez_textu(prikaz))
         for vzor, nazev in RIZIKOVE_PRIKAZY:
             if re.search(vzor, kontrolovany, re.IGNORECASE):
                 popis = nazev
                 break
-        # Nástrojová repa bez produkce (agent-kit, šablona) smí pushovat do main bez potvrzení.
-        misto = (str(data.get("cwd", "")) + " " + prikaz).replace("\\", "/").lower()
-        if popis == "push do main/master" and re.search(r"/dev/(agent-kit|project-template)\b", misto):
-            popis = None
+        # Push do main/master chce potvrzení v každém repu, i v agent-kitu a šabloně (Brixyy/agent-kit#95):
+        # výjimka podle textu cwd + příkazu pouštěla i push do jiného repa.
     elif RIZIKOVE_MCP.search(nastroj) and not VOLNE_MCP.search(nastroj):
         popis = "produkční akce přes " + nastroj.split("__")[-1]
 
