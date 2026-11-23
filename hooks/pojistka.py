@@ -76,25 +76,36 @@ def bez_prepinacu_gitu(prikaz):
     return GIT_PREPINACE.sub("git", re.sub(r"\\\r?\n", " ", prikaz))
 
 
-# Vzdálené servery (audit Brixyy/agent-kit#96). Pojistka nezná jména serverů (soubor je veřejný),
-# proto hlídá každý server kromě GitHubu a postupuje obráceně: každé ssh, scp, rsync, sftp
-# a ssh-copy-id chce potvrzení, pokud celé volání přesně neodpovídá bezpečnému tvaru níže
-# (čtení logů a stavu, tunel, stažení souboru ze serveru). Nerozpoznaný zápis = potvrzení.
-SSH_SLOVO = re.compile(r"(?<![\w.-])(ssh|scp|rsync|sftp|ssh-copy-id)(\.exe)?(?![\w.\\/-])", re.I)
-# Před bezpečným voláním smí na řádku stát jen začátek příkazu nebo && || ; |.
-SSH_PRED = re.compile(r"(^|&&|\|\|?|;)[ \t]*$")
-# Za bezpečným voláním: konec, další příkaz nebo lokální přesměrování výstupu.
+# Vzdálené servery (audit Brixyy/agent-kit#96). Pojistka chytá běžné chyby agenta, ne záměrné
+# obcházení: rozbor shellu regulárními výrazy nikdy není úplný. Skutečnou ochranu dávají práva
+# na serveru (agent má klíč, který smí jen číst). Pojistka nezná jména serverů (soubor je veřejný),
+# proto hlídá každý server kromě GitHubu: ssh, scp, rsync a podobné na pozici příkazu chtějí
+# potvrzení, pokud volání přesně neodpovídá bezpečnému tvaru (čtení logů a stavu, tunel, stažení
+# ze serveru, místní kopie). Slovo ssh jako argument (grep ssh, ssh://) se nehlídá.
+SSH_NAZVY = r"(?P<nazev>ssh|scp|rsync|sftp|ssh-copy-id|autossh|plink|mosh)(\.exe)?"
+SSH_VOLANI = re.compile(
+    r"(^|(?<=[;&|(\n`{\"']))[ \t]*"
+    r"((sudo|nohup|time|command|exec|if|then|do|else|xargs)[ \t]+|timeout[ \t]+\S+[ \t]+|env[ \t]+"
+    r"|\w+=\S*[ \t]+|&[ \t]*|\$\w+[ \t]*=[ \t]*)*"
+    r"[\"']?(\S*[\\/])?" + SSH_NAZVY + r"[\"']?(?=[ \t]|$)",
+    re.I | re.M,
+)
 SSH_ZA = r"(?=[ \t]*($|\n|&&|\|\|?|;|[12]?>))"
 SLOVO = r"[\w./~:@=,+%*-]+"
 SSH_BEZPECNE = re.compile(
-    r"ssh(\.exe)?(?P<prep>([ \t]+-[NTqvCtnf46]+|[ \t]+-[pilFJLRDE][ \t]+" + SLOVO + r"))*"
+    r"ssh(\.exe)?(?P<prep>([ \t]+-[NTqvCtnf46]+|[ \t]+-[pilFJLRDE][ \t]+" + SLOVO +
+    r"|[ \t]+-o[ \t]*(BatchMode|ConnectTimeout|StrictHostKeyChecking|ServerAliveInterval|ServerAliveCountMax"
+    r"|LogLevel|ConnectionAttempts)=[\w-]+))*"
     r"[ \t]+(?P<host>[\w.@-]+)"
     r"([ \t]+(?P<cmd>'[^'\n]*'|\"[^\"\n]*\"|[^'\"\n;&|<>]+?))?" + SSH_ZA,
     re.I,
 )
+SSH_VERZE = re.compile(r"ssh(\.exe)?[ \t]+-V" + SSH_ZA, re.I)
 STAZENI = re.compile(
-    r"(scp|rsync)(\.exe)?([ \t]+-[\w]+|[ \t]+--(?!remove-source-files)[\w-]+(=" + SLOVO + r")?)*"
-    r"[ \t]+[\w.@-]+:" + SLOVO + r"[ \t]+(?![\w.@-]+:)(" + SLOVO + r"|[A-Za-z]:[\\/]" + SLOVO + r")" + SSH_ZA,
+    r"(scp|rsync)(\.exe)?([ \t]+-(?![a-zA-Z]*[eoFSJ])[a-zA-Z]+|[ \t]+-P[ \t]+\d+"
+    r"|[ \t]+--(archive|verbose|compress|progress|partial|human-readable|dry-run|stats|checksum|times|recursive"
+    r"|list-only|delete|ignore-existing|update|itemize-changes|size-only|(info|exclude|include)=" + SLOVO + r"))*"
+    r"[ \t]+[\w.@-]+:" + SLOVO + r"[ \t]+(?![\w.@-]{2,}:)(" + SLOVO + r"|[A-Za-z]:[\\/]" + SLOVO + r")" + SSH_ZA,
     re.I,
 )
 ARG = r"([ \t]+(?!-)" + SLOVO + r"|[ \t]+-" + SLOVO + r")*"
@@ -105,26 +116,32 @@ CTENI_VZDALENE = re.compile(
     r"|hostname|rg(?![^|;&]*--pre)" + ARG +
     r"|journalctl(?![^|;&]*--(vacuum|rotate|flush|sync|relinquish|setup-keys))" + ARG +
     r"|systemctl([ \t]+--no-pager)?[ \t]+(status|is-active|is-enabled|is-failed|list-units|list-timers|show|cat)\b" + ARG +
-    r"|docker([ \t]+compose)?[ \t]+(ps|logs|inspect|stats|images|version|info|top|config|ls)\b" + ARG +
-    r"|git([ \t]+-C[ \t]+" + SLOVO + r")?([ \t]+--no-pager)?[ \t]+(status|log|show|rev-parse|describe)\b" + ARG +
-    r"|(ss|netstat)(?![^|;&]*-K)" + ARG +
+    r"|docker[ \t]+(ps|logs|inspect|stats|images|version|info|top)\b" + ARG +
+    r"|docker[ \t]+compose[ \t]+(ps|logs|ls|top|images|version)\b" + ARG +
+    r"|git([ \t]+-C[ \t]+" + SLOVO + r")?([ \t]+--no-pager)?[ \t]+(status|log|show|rev-parse|describe)\b"
+    r"(?![^|;&]*--output)" + ARG +
+    r"|(ss|netstat)(?![^|;&]*(-\w*K|--kill))" + ARG +
     r")[ \t]*",
     re.I,
 )
 
 
 def _maskuj(text):
-    """Text v uvozovkách s mezerou nahradí mezerami stejné délky (pozice zůstanou)."""
+    """Text v uvozovkách s mezerou nahradí mezerami stejné délky (pozice zůstanou). Apostrofy jen
+    v rámci řádku, aby „don't“ v komentáři neschovalo další řádky. Cesta k ssh (C:\\Program Files\\…\\ssh.exe)
+    zůstane vidět."""
     def nahrad(m):
         obsah = m.group(0)
-        return obsah[0] + " " * (len(obsah) - 2) + obsah[-1] if re.search(r"\s", obsah) else obsah
-    return re.sub(r"'[^']*'|\"(\\.|[^\"\\])*\"", nahrad, text)
+        if re.search(r"[\\/]" + SSH_NAZVY + r"[\"']$", obsah, re.I):
+            return re.sub(r"\s", "_", obsah)
+        return obsah[0] + re.sub(r"[^\n]", " ", obsah[1:-1]) + obsah[-1] if re.search(r"\s", obsah) else obsah
+    return re.sub(r"'[^'\n]*'|\"(\\.|[^\"\\])*\"", nahrad, text)
 
 
 def _vzdaleny_jen_cte(cmd):
     if cmd[:1] in "'\"":
         cmd = cmd[1:-1]
-    cmd = re.sub(r"[ \t]*(2>&1|[12]?>[ \t]*/dev/null)", " ", cmd)
+    cmd = re.sub(r"[ \t]*(2>&1|[12]?>[ \t]*/dev/null(?=[ \t]|$))", " ", cmd)
     # Nahrazení a komentáře ($(), ``, ${}, #, \, přesměrování) se nepouští, ať je rozbor jistý.
     if re.search(r"[`$#\\<>(){}!\n]", cmd):
         return False
@@ -132,29 +149,29 @@ def _vzdaleny_jen_cte(cmd):
 
 
 def ssh_riziko(prikaz, maskovat=True):
-    """Vrátí popis rizika pro ssh/scp/rsync/sftp na server, nebo None."""
+    """Vrátí popis rizika pro ssh/scp/rsync/… na server, nebo None."""
+    prikaz = prikaz.replace("\r", "")
     hledany = _maskuj(prikaz) if maskovat else prikaz
-    for m in SSH_SLOVO.finditer(hledany):
-        nastroj = m.group(1).lower()
-        zacatek_radku = prikaz.rfind("\n", 0, m.start()) + 1
-        if not SSH_PRED.search(prikaz[zacatek_radku:m.start()]):
-            return "příkaz na vzdáleném serveru (" + nastroj + ")"
+    for m in SSH_VOLANI.finditer(hledany):
+        nastroj, zacatek = m.group("nazev").lower(), m.start("nazev")
         if nastroj in ("scp", "rsync"):
             # Kopie mezi místními složkami (bez host:) a stažení ze serveru projdou.
-            volani = re.match(r"[^\n;&|]*", prikaz[m.start():]).group(0)
-            if not re.search(r"(?<![\w.@-])[\w.@-]{2,}:", volani) or STAZENI.match(prikaz, m.start()):
+            volani = re.match(r"[^\n;&|]*", prikaz[zacatek:]).group(0)
+            if not re.search(r"(?<![\w.@-])[\w.@-]{2,}:", volani) or STAZENI.match(prikaz, zacatek):
                 continue
             return "nahrání souborů na server nebo změna na serveru (" + nastroj + ")"
         if nastroj != "ssh":
             return "příkaz na vzdáleném serveru (" + nastroj + ")"
-        b = SSH_BEZPECNE.match(prikaz, m.start())
+        if SSH_VERZE.match(prikaz, zacatek):
+            continue
+        b = SSH_BEZPECNE.match(prikaz, zacatek)
         if not b:
             return "příkaz na vzdáleném serveru (ssh)"
         if re.search(r"(^|@)github\.com$", b.group("host"), re.I):
             continue
         cmd = (b.group("cmd") or "").strip()
         if not cmd:
-            if re.search(r"\s-\w*N", prikaz[m.start():b.start("host")]):
+            if re.search(r"\s-\w*N", prikaz[zacatek:b.start("host")]):
                 continue  # tunel bez příkazu
             return "interaktivní přihlášení na server (ssh)"
         if not _vzdaleny_jen_cte(cmd):
