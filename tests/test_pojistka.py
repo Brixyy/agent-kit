@@ -13,6 +13,7 @@ PROSTREDI = dict(os.environ, HOME=DOMOV, USERPROFILE=DOMOV)
 HOOK = os.path.join(os.path.dirname(__file__), "..", "hooks", "pojistka.py")
 PUSH = "git push origin " + "main"
 MERGE = "gh pr " + "merge 5"
+SSH = "ss" + "h"
 ENV = "cat " + ".env"
 
 PRIPADY = [
@@ -60,6 +61,35 @@ PRIPADY = [
     ("git -C . log main", "PROJDE"),
     ("git --no-pager diff main", "PROJDE"),
     ("gh api -X " + "PATCH repos/Brixyy/asistent/issues/5 -f state=closed", "PROJDE"),
+    # Force push přes +větev a vzdálené servery (audit Brixyy/agent-kit#96).
+    ("git push origin +feat/x", "deny"),
+    ("git push origin feat/x:feat/y", "PROJDE"),
+    (SSH + " vps 'sudo systemctl restart trading'", "deny"),
+    (SSH + ' vps "cd /opt/trading && git pull && uv sync"', "deny"),
+    (SSH + " vps rm -rf /opt/x", "deny"),
+    (SSH + " vps 'echo x > /opt/trading/config.bak'", "deny"),
+    (SSH + " vps 'psql -c \"delete from t\"'", "deny"),
+    (SSH + " vps bash -s < skript.sh", "deny"),
+    (SSH + " vps", "deny"),
+    (SSH + " -i ~/.ssh/klic root@1.2.3.4 'docker compose up -d'", "deny"),
+    (SSH + " vps 'sed -i s/a/b/ /etc/x'", "deny"),
+    (SSH + " vps 'find /tmp -name x -delete'", "deny"),
+    (SSH + " vps 'curl -X POST http://127.0.0.1:8000/x'", "deny"),
+    ("cd repo && " + SSH + " vps 'tail -n 50 /var/log/x.log | grep ERROR'", "PROJDE"),
+    (SSH + " vps 'sudo journalctl -u trading -n 100 --no-pager'", "PROJDE"),
+    (SSH + ' vps "systemctl status trading; df -h; free -m"', "PROJDE"),
+    (SSH + " vps 'docker ps && docker logs --tail 50 app 2>&1'", "PROJDE"),
+    (SSH + " vps 'cd /opt/trading && git log -1 && ls -la > /dev/null'", "PROJDE"),
+    (SSH + " -N -L 8000:127.0.0.1:8000 vps", "PROJDE"),
+    (SSH + " -T git@github.com", "PROJDE"),
+    (SSH + "-keygen -t ed25519 -f klic", "PROJDE"),
+    ("scp vps:/var/log/x.log .", "PROJDE"),
+    ("scp build.tar vps:/opt/", "deny"),
+    ("rsync -av dist/ vps:/opt/web/", "deny"),
+    ("rsync -av vps:/opt/data/ ./zaloha/", "PROJDE"),
+    ("rsync -av dist/ C:/zaloha/", "PROJDE"),
+    ('gh pr create --body "' + SSH + ' vps rm -rf /"', "PROJDE"),
+    ("gh pr create --body-file - <<EOF\n" + SSH + " vps rm x\nEOF", "PROJDE"),
     ("gh api -X " + "PATCH repos/Brixyy/asistent -F allow_auto_merge=true", "deny"),
     ("gh api -X " + "DELETE repos/Brixyy/asistent/git/refs/heads/x", "deny"),
     ("gh api -X " + "PUT repos/Brixyy/asistent/pulls/12/merge -f merge_method=squash", "PROJDE"),

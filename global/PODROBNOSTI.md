@@ -37,6 +37,8 @@ Nevratné akce hlídá pojistka z agent-kitu; potvrzovací soubor `~/.agents/pot
 
 **Dávka:** když úkol obsahuje víc nebezpečných kroků, vypiš uživateli předem přesně všechny a po jeho „ano“ zapiš do souboru pro každý krok řádek `krok: <konkrétní text příkazu nebo název nástroje>` (např. `krok: supabase db push`, `krok: execute_sql`). Souhlas pak platí 15 minut na tyto kroky a jinou nebezpečnou akci pojistka zastaví. Kroky piš co nejkonkrétněji, ne obecně (`git`, `gh api`) (uživatel 24. 10. 2026, Brixyy/asistent#38).
 
+**Servery:** `ssh` na server bez potvrzení projde jen se čtením (logy, `systemctl status`, `docker ps`, výpis souborů) nebo jako tunel `ssh -N -L`. Příkaz, který něco mění (restart, `git pull`, zápis souboru, `psql`), interaktivní přihlášení a nahrání souborů na server (`scp`, `rsync`) chtějí potvrzení. Neznámý příkaz pojistka bere jako změnu (Brixyy/agent-kit#96).
+
 Vypnutí nebo úprava vlastních kontrol: pojistka, hooky, vypnutí či smazání GitHub workflow. Úprava workflow v PR je v pořádku (Brixyy/asistent#105). Zápis do cizího repozitáře (PR, issue nebo komentář v open-source projektu): veřejný text piš obecně, bez interních údajů.
 
 ## Soubory `.env`
