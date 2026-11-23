@@ -1,28 +1,66 @@
+# Levné CI podle PODROBNOSTI (oddíl Levné CI, audit Brixyy/agent-kit#96): koncept PR nic nespouští,
+# po sloučení do main se znovu netestuje strom, který už prošel v PR. Repozitář je veřejný, proto
+# běží na runnerech GitHubu (zdarma); job „testy“ je povinná kontrola ruleset main.
 name: testy
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
-  pull_request:
-# Stav konceptu ve skupině: běh z konceptu nesmí zrušit kontrolu po `gh pr ready`.
+# Stav konceptu ve skupině: přeskočený běh z pushe do konceptu nesmí zrušit kontrolu po `gh pr ready`.
 concurrency:
-  group: testy-${{ github.event.pull_request.number || github.sha }}-${{ github.event.pull_request.draft }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event.pull_request.draft }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+permissions:
+  contents: read
+  actions: read # vyhledání značky otestovaného stromu
 jobs:
   testy:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # PR testuje slučovací commit; jeho strom je po sloučení (bez mezitím sloučeného PR) shodný se stromem na main.
+      - name: Otestovaný strom
+        id: strom
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          strom=$(git rev-parse 'HEAD^{tree}')
+          echo "strom=$strom" >> "$GITHUB_OUTPUT"
+          hotovo=false
+          if [ "${{ github.event_name }}" = push ]; then
+            if pocet=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=otestovano-$strom" --jq '[.artifacts[] | select(.expired == false)] | length'); then
+              if [ "$pocet" -gt 0 ]; then hotovo=true; fi
+            else
+              echo "::warning::Značku otestovaného stromu nejde ověřit, poběží všechny testy."
+            fi
+          fi
+          echo "hotovo=$hotovo" >> "$GITHUB_OUTPUT"
+          if [ "$hotovo" = true ]; then echo "::notice::Strom $strom už prošel v PR, testy se přeskakují."; fi
+      - if: steps.strom.outputs.hotovo != 'true'
+        uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - run: python -I tests/test_kontext.py
-      - run: python -I tests/test_uzivatel.py
-      - run: python -I tests/test_pojistka.py
-      - run: python -I tests/test_env_nastav.py
-      - run: python -I tests/test_uklid.py
-      - run: python -I tests/test_pro_tebe.py
-      - run: python -I tests/test_verze.py
-      - run: python -I tests/test_vercel_kontrola.py
-      - run: python -I tests/test_vercel_ucet.py
-      - run: python -I tests/test_stitky.py
+      - name: Testy
+        if: steps.strom.outputs.hotovo != 'true'
+        run: |
+          for t in tests/test_*.py; do
+            echo "::group::$t"
+            python -I "$t"
+            echo "::endgroup::"
+          done
+      # Jen když všechno výše prošlo (výchozí podmínka success()).
+      - name: Značka otestovaného stromu
+        if: github.event_name == 'pull_request'
+        run: echo "${{ github.sha }}" > otestovano.txt
+      # Chybějící značka jen způsobí plný běh na main, proto nesmí shodit kontrolu.
+      - if: github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: otestovano-${{ steps.strom.outputs.strom }}
+          path: otestovano.txt
+          retention-days: 7
