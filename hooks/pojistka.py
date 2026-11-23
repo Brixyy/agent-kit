@@ -83,13 +83,27 @@ def bez_prepinacu_gitu(prikaz):
 # potvrzení, pokud volání přesně neodpovídá bezpečnému tvaru (čtení logů a stavu, tunel, stažení
 # ze serveru, místní kopie). Slovo ssh jako argument (grep ssh, ssh://) se nehlídá.
 SSH_NAZVY = r"(?P<nazev>ssh|scp|rsync|sftp|ssh-copy-id|autossh|plink|mosh)(\.exe)?"
-SSH_VOLANI = re.compile(
-    r"(^|(?<=[;&|(\n`{\"']))[ \t]*"
-    r"((sudo|nohup|time|command|exec|if|then|do|else|xargs)[ \t]+|timeout[ \t]+\S+[ \t]+|env[ \t]+"
-    r"|\w+=\S*[ \t]+|&[ \t]*|\$\w+[ \t]*=[ \t]*)*"
-    r"(?P<q>[\"']?)(\S*[\\/])?" + SSH_NAZVY + r"(?P=q)(?=[ \t]|$)",
-    re.I | re.M,
-)
+PSQL_NAZEV = r"psql(\.exe)?"
+
+
+def _volani(nazev):
+    """Volání programu na místě příkazu (i za sudo, env, PROMENNA=…, s cestou nebo v uvozovkách)."""
+    return re.compile(
+        r"(^|(?<=[;&|(\n`{\"']))[ \t]*"
+        r"((nohup|time|command|exec|if|then|do|else|xargs|nice|!)[ \t]+|timeout[ \t]+\S+[ \t]+|env[ \t]+"
+        r"|sudo([ \t]+-[a-zA-Z]*[ugCDhpr][ \t]+\S+|[ \t]+-[a-zA-Z-]+)*[ \t]+"
+        # Obálky, které spustí příkaz s produkčním prostředím nebo v kontejneru.
+        r"|(railway|doppler|infisical|op)[ \t]+run([ \t]+-\S+([ \t]+[^\s-]\S*)?)*([ \t]+--)?[ \t]+"
+        r"|((npx|pnpm|yarn)[ \t]+)?(dotenv|dotenv-cli)\b[^\n;&|]*?[ \t]--[ \t]+"
+        r"|(kubectl|oc)[ \t]+exec\b[^\n;&|]*?[ \t]--[ \t]+"
+        r"|\w+=\S*[ \t]+|&[ \t]*|\$\w+[ \t]*=[ \t]*)*"
+        r"(?P<q>[\"']?)(\S*[\\/])?" + nazev + r"(?P=q)(?=[ \t]|$)",
+        re.I | re.M,
+    )
+
+
+SSH_VOLANI = _volani(SSH_NAZVY)
+PSQL_VOLANI = _volani(PSQL_NAZEV)
 SSH_ZA = r"(?=[ \t]*($|\n|&|\|\|?|;|[12]?>))"
 SLOVO = r"[\w./\\~:@=,+%*-]+"
 SSH_BEZPECNE = re.compile(
@@ -137,7 +151,7 @@ def _maskuj(text):
     zůstane vidět."""
     def nahrad(m):
         obsah = m.group(0)
-        if re.search(r"[\\/]" + SSH_NAZVY + r"[\"']$", obsah, re.I):
+        if re.search(r"[\\/](" + SSH_NAZVY + r"|" + PSQL_NAZEV + r")[\"']$", obsah, re.I):
             return re.sub(r"\s", "_", obsah)
         return obsah[0] + re.sub(r"[^\n]", " ", obsah[1:-1]) + obsah[-1] if re.search(r"\s", obsah) else obsah
     text = re.sub(r"@'[\s\S]*?\n'@|@\"[\s\S]*?\n\"@", lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
@@ -194,6 +208,124 @@ def ssh_riziko(prikaz, maskovat=True):
     return None
 
 
+# psql: bez potvrzení projde čtení (-c se SELECT, SHOW, EXPLAIN, \d…), výpis databází a místní databáze.
+# Soubor (-f), standardní vstup a neznámý obsah ($PROMENNA) se berou jako zápis (audit Brixyy/agent-kit#96).
+PSQL_SLOVO = re.compile(r"\\\n|`\n|'[^']*'|\"(?:\\.|[^\"\\])*\"|(?:[^\s'\";&|<>\\`]|[\\`](?!\n))+|[<>]|[ \t]+|.", re.S)
+PSQL_HODNOTA = set("cdfhLoUpPTvFR")
+PSQL_DLOUHE = {"--command", "--file", "--host", "--dbname", "--port", "--username", "--variable", "--set",
+               "--output", "--log-file", "--field-separator", "--record-separator", "--pset", "--table-attr"}
+MISTNI_HOST = r"(localhost|127\.0\.0\.1|::1|\[::1\])"
+SQL_CTENI = re.compile(r"\s*((select|show|explain|table|values|with)\b|\\(d[a-z]*\+?|l\+?|conninfo|x|timing)(\s+[\w.*\"']+)*\s*$)", re.I)
+# Příkaz musí začínat čtením; hledají se jen zápisy, které se do čtení dají schovat (CTE, INTO, EXPLAIN, funkce).
+SQL_ZAPIS = re.compile(
+    r"\b(insert|update|delete|merge|create|execute|into|nextval|setval"
+    r"|pg_terminate_backend|pg_cancel_backend|pg_reload_conf|set_config|lo_\w+|dblink\w*)\b",
+    re.I,
+)
+# Místní databáze jen na výchozím portu (5432, místní Supabase 54322): jiný port bývá ssh tunel na server.
+MISTNI_PORTY = {"", "5432", "54322"}
+
+
+def _sql_jen_cte(sql):
+    sql = re.sub(r"'(?:[^']|'')*'|\"[^\"]*\"", "''", sql)
+    prikazy = [p for p in sql.split(";") if p.strip()]
+    return bool(prikazy) and all(
+        SQL_CTENI.match(p) and not SQL_ZAPIS.search(p) and "\\" not in p.strip()[1:] for p in prikazy)
+
+
+def _psql_slova(text):
+    """Slova volání psql až po konec příkazu (; & | nový řádek). Vrátí (slova, čte ze vstupu)."""
+    slova, slovo, vstup = [], None, False
+    for t in PSQL_SLOVO.findall(text):
+        if t in (";", "&", "|", "\n"):
+            break
+        if t == "<":
+            vstup = True
+        if t in ("\\\n", "`\n") or t.isspace() or t in "<>":
+            if slovo is not None:
+                slova.append(slovo)
+            slovo = None
+            continue
+        slovo = (slovo or ("", False))
+        promenna = t[:1] == '"' and re.search(r"[$`]", t) or t[:1] not in "'\"" and "$" in t
+        slovo = (slovo[0] + (t[1:-1] if t[:1] in "'\"" else t), slovo[1] or bool(promenna))
+    if slovo is not None:
+        slova.append(slovo)
+    return slova, vstup
+
+
+def _hosty(text, promenna):
+    """Servery z adresy postgres://…@server nebo z „host=…“; neznámá hodnota ($PROMENNA) je cizí server."""
+    if promenna:
+        return ["$"]
+    if "://" not in text and "=" not in text:
+        return []  # jméno databáze, ne adresa
+    hosty = [a or b for a, b in re.findall(r"@\[?([^:/?\]@]+)|host(?:addr)?=([^\s&]+)", text)]
+    porty = re.findall(r"@[^/?\s]*:(\d+)|port=(\d+)", text)
+    return hosty + ["port:" + (a or b) for a, b in porty]
+
+
+def psql_riziko(prikaz, maskovat=True):
+    """Vrátí popis rizika pro zápis do databáze přes psql, nebo None."""
+    prikaz = prikaz.replace("\r", "")
+    hledany = _maskuj(prikaz) if maskovat else prikaz
+    for m in PSQL_VOLANI.finditer(hledany):
+        slova, vstup = _psql_slova(prikaz[m.end():])
+        sql, soubor, info, hosty, i = [], vstup, False, [], 0
+        while i < len(slova):
+            s, promenna = slova[i]
+            dalsi = slova[i + 1] if i + 1 < len(slova) else ("", False)
+            if s.startswith("--"):
+                nazev, je_rovno, hodnota = s.partition("=")
+                if not je_rovno and nazev in PSQL_DLOUHE:
+                    hodnota, promenna, i = dalsi[0], dalsi[1], i + 1
+                if nazev == "--command":
+                    sql.append((hodnota, promenna))
+                elif nazev == "--file":
+                    soubor = True
+                elif nazev == "--host":
+                    hosty.append("$" if promenna else hodnota)
+                elif nazev == "--port":
+                    hosty.append("port:" + ("$" if promenna else hodnota))
+                elif nazev == "--dbname":
+                    hosty += _hosty(hodnota, promenna)
+                elif nazev in ("--list", "--version", "--help"):
+                    info = True
+            elif s.startswith("-") and len(s) > 1:
+                for k, znak in enumerate(s[1:], 1):
+                    if znak in "lV?":
+                        info = True
+                    if znak in PSQL_HODNOTA:
+                        hodnota, prom = (s[k + 1:], promenna) if s[k + 1:] else (dalsi[0], dalsi[1])
+                        if not s[k + 1:]:
+                            i += 1
+                        if znak == "c":
+                            sql.append((hodnota, prom))
+                        elif znak == "f":
+                            soubor = True
+                        elif znak == "h":
+                            hosty.append("$" if prom else hodnota)
+                        elif znak == "p":
+                            hosty.append("port:" + ("$" if prom else hodnota))
+                        elif znak == "d":
+                            hosty += _hosty(hodnota, prom)
+                        break
+            else:
+                # Pozice: databáze, adresa postgres://… nebo „host=… dbname=…“.
+                hosty += _hosty(s, promenna)
+            i += 1
+        servery = [h for h in hosty if not h.startswith("port:")]
+        if servery and all(re.fullmatch(MISTNI_HOST, h, re.I) or h.startswith("/") and "cloudsql" not in h.lower()
+                           for h in servery) and all(h[5:] in MISTNI_PORTY for h in hosty if h.startswith("port:")):
+            continue  # místní databáze (vývoj) na výchozím portu
+        if info and not sql and not soubor:
+            continue
+        if not soubor and sql and all(not prom and _sql_jen_cte(text) for text, prom in sql):
+            continue
+        return "zápis do databáze přes psql (neznámý obsah, soubor nebo vstup se bere jako zápis)"
+    return None
+
+
 # Začátek příkazu: začátek řádku nebo za ; & | ( (volitelně sudo).
 ZACATEK_PRIKAZU = r"(^|(?<=[;&|(\n]))\s*(sudo\s+)?"
 # Příkazy, které find spustí nad nalezenými soubory a které soubor mění.
@@ -203,6 +335,8 @@ RIZIKOVE_PRIKAZY = [
     (r"\bgit\s+push\b[^\n;&|]*\b(main|master)\b", "push do main/master"),
     (r"\bgit\s+push\b[^\n;&|]*(\s--force\b|\s-f\b|\s--delete\b|\s:\S|\s\+\S)", "force push nebo mazání větve na GitHubu"),
     (r"\bgh\s+repo\s+(delete|archive|rename)\b", "mazání/archivace repozitáře"),
+    # Sloučení přes administrátora obchází povinné kontroly (audit Brixyy/agent-kit#96).
+    (r"\bgh\s+pr\s+merge\b[^\n;&|]*\s--admin\b", "sloučení PR mimo povinné kontroly (gh pr merge --admin)"),
     # Úpravy issues (zavřít, štítek, komentář) jsou vratné a sloučení PR je trvale povolené (i přes REST v cloudu);
     # hlídají se zápisy do nastavení, větví a obsahu.
     (r"\bgh\s+api\b(?![^\n]*\brepos/[^/\s]+/[^/\s]+/(issues\b|pulls/\d+/merge\b))[^\n]*(-X|--method)\s*(DELETE|PUT|PATCH)\b", "zápis přes GitHub API"),
@@ -419,9 +553,9 @@ def main():
                 break
         if popis is None:
             # Vzdálený příkaz bývá v uvozovkách: hledá se v textu s maskovanými uvozovkami, posuzuje v původním.
-            popis = ssh_riziko(bez_heredocu(prikaz))
+            popis = ssh_riziko(bez_heredocu(prikaz)) or psql_riziko(bez_heredocu(prikaz))
             for obsah in re.findall(SPOUSTI_OBSAH, prikaz, re.I):
-                popis = popis or ssh_riziko(obsah[1] or obsah[2])
+                popis = popis or ssh_riziko(obsah[1] or obsah[2]) or psql_riziko(obsah[1] or obsah[2])
         # Push do main/master chce potvrzení v každém repu, i v agent-kitu a šabloně (Brixyy/agent-kit#95):
         # výjimka podle textu cwd + příkazu pouštěla i push do jiného repa.
     elif RIZIKOVE_MCP.search(nastroj) and not VOLNE_MCP.search(nastroj):
