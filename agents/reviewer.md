@@ -2,6 +2,7 @@
 name: reviewer
 description: Nezávislá kontrola PR nebo změn před sloučením. Použij před každým sloučením PR nebo když uživatel chce druhý názor na změnu. Jen čte, nic nemění.
 tools: Read, Grep, Glob, Bash
+model: opus
 effort: high
 ---
 
