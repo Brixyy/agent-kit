@@ -58,6 +58,24 @@ INSTALACE = (
     r"(\.claude([\\/](plugins([\\/](cache|marketplaces))?))?[\\/]?(\*|\s|$)|\.claude[\\/]plugins[\\/]\S*agent-kit"
     r"|\.agents([\\/]agent-kit)?[\\/]?(\*|\s|$)|(?<![\w./\\-])agent-kit[\\/]?(\*|\s|$))"
 )
+# Globální přepínače gitu před podpříkazem (git -C . push, git -c a=b push, git --no-pager push,
+# Brixyy/agent-kit#95). Přepínače s hodnotou v dalším slově jsou vyjmenované, ostatní jsou bez hodnoty
+# nebo s ní za „=“.
+HODNOTA = r"""('[^']*'|"[^"]*"|\S+)"""
+GIT_PREPINACE = re.compile(
+    r"\bgit(\.exe)?((\s+(-C|-c|--git-dir|--work-tree|--namespace|--super-prefix|--config-env|--attr-source)"
+    r"(\s+|=)" + HODNOTA + r"|\s+--?[\w-]+(=" + HODNOTA + r")?))*(?=\s)",
+    re.I,
+)
+
+
+def bez_prepinacu_gitu(prikaz):
+    """git <globální přepínače> <podpříkaz> → git <podpříkaz>, aby vzory push viděly podpříkaz hned za gitem.
+    Pokračování řádku (\\ + nový řádek) se spojí. Upravený text se kontroluje navíc k původnímu, protože
+    slovo „git“ jako argument jiného příkazu (find … -name git -delete) by jinak smazalo přepínače za ním."""
+    return GIT_PREPINACE.sub("git", re.sub(r"\\\r?\n", " ", prikaz))
+
+
 # Začátek příkazu: začátek řádku nebo za ; & | ( (volitelně sudo).
 ZACATEK_PRIKAZU = r"(^|(?<=[;&|(\n]))\s*(sudo\s+)?"
 # Příkazy, které find spustí nad nalezenými soubory a které soubor mění.
@@ -276,14 +294,13 @@ def main():
         # Text v uvozovkách se ignoruje, kromě případů, kdy se spouští jako příkaz (sh -c, eval, PowerShell -Command).
         spousti_text = re.search(r"\b(sh|bash|zsh|pwsh|powershell|cmd)(\.exe)?\b[^\n]*\s(-c|-Command|/c)\b|\beval\b", prikaz, re.I)
         kontrolovany = prikaz if spousti_text else bez_textu(prikaz)
+        upraveny = bez_prepinacu_gitu(kontrolovany)
         for vzor, nazev in RIZIKOVE_PRIKAZY:
-            if re.search(vzor, kontrolovany, re.IGNORECASE):
+            if re.search(vzor, kontrolovany, re.IGNORECASE) or re.search(vzor, upraveny, re.IGNORECASE):
                 popis = nazev
                 break
-        # Nástrojová repa bez produkce (agent-kit, šablona) smí pushovat do main bez potvrzení.
-        misto = (str(data.get("cwd", "")) + " " + prikaz).replace("\\", "/").lower()
-        if popis == "push do main/master" and re.search(r"/dev/(agent-kit|project-template)\b", misto):
-            popis = None
+        # Push do main/master chce potvrzení v každém repu, i v agent-kitu a šabloně (Brixyy/agent-kit#95):
+        # výjimka podle textu cwd + příkazu pouštěla i push do jiného repa.
     elif RIZIKOVE_MCP.search(nastroj) and not VOLNE_MCP.search(nastroj):
         popis = "produkční akce přes " + nastroj.split("__")[-1]
 
