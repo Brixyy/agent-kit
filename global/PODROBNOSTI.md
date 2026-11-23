@@ -39,6 +39,8 @@ Nevratné akce hlídá pojistka z agent-kitu; potvrzovací soubor `~/.agents/pot
 
 **Servery:** `ssh` na server bez potvrzení projde jen se čtením (logy, `systemctl status`, `docker ps`, výpis souborů) nebo jako tunel `ssh -N -L`. Příkaz, který něco mění (restart, `git pull`, zápis souboru, `psql`), interaktivní přihlášení a nahrání souborů na server (`scp`, `rsync`) chtějí potvrzení. Neznámý příkaz pojistka bere jako změnu. Pojistka chytá omyly, ne záměrné obcházení; skutečnou ochranu serveru dávají jeho práva (agent má klíč jen pro čtení) (Brixyy/agent-kit#96).
 
+**Databáze a sloučení:** `psql` bez potvrzení projde jen se čtením v `-c` (`SELECT`, `SHOW`, `EXPLAIN`, `\d`), s výpisem databází a nad místní databází (`-h localhost`, `@127.0.0.1`). Zápis, soubor (`-f`), vstup (`<`, roura, heredoc) a neznámý obsah (`$DATABASE_URL` bez `-c`, `-c "$SQL"`) chtějí potvrzení. `gh pr merge --admin` obchází povinné kontroly, proto chce potvrzení vždy (Brixyy/agent-kit#96).
+
 Vypnutí nebo úprava vlastních kontrol: pojistka, hooky, vypnutí či smazání GitHub workflow. Úprava workflow v PR je v pořádku (Brixyy/asistent#105). Zápis do cizího repozitáře (PR, issue nebo komentář v open-source projektu): veřejný text piš obecně, bez interních údajů.
 
 ## Soubory `.env`
