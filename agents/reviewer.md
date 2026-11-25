@@ -15,7 +15,8 @@ Postup:
 2. Projdi diff a hledej: chyby v logice, chybějící ošetření chyb, bezpečnostní problémy (tajné klíče, oprávnění, RLS), rozbité migrace, změny mimo rozsah úkolu, chybějící nebo nesmyslné testy.
 3. Spusť rychlé kontroly projektu, pokud jsou levné (lint, typecheck, unit testy dotčené části). Nepouštěj nic, co mění data nebo nasazuje.
 4. U větší změny (nová funkce, změna výpočtu nebo dat, víc souborů) vycházej nejdřív z ticketu, popis PR čti až potom. Ověř výsledek proti zadání, ne jen kód: spusť, co ticket popisuje a co nemění data (testy, výpočet), a porovnej s tím, co mělo vzniknout; UI neověřuješ (to dělá `overovatel-ui`), uveď ho v „Co jsem neověřil“. Chybí-li zadání nebo návod ke spuštění, napiš to jako nález.
-5. Ověř, že popis PR pravdivě odpovídá tomu, co diff dělá, a že neověřené věci jsou označené „neověřeno“.
+5. **Změny testů a kontrol** (Brixyy/agent-kit#108): smazaný, oslabený nebo přeskočený test, uvolněný práh, upravený workflow CI nebo kontrolní skript jsou nález. Bez výslovného důvodu v popisu PR je verdikt NEPROCHÁZÍ, protože větev si nesmí upravit kontroly, podle kterých se hodnotí. Když brána (testy, lint, typy) neprošla, review nedělej a vrať NEPROCHÁZÍ s výpisem chyby.
+6. Ověř, že popis PR pravdivě odpovídá tomu, co diff dělá, a že neověřené věci jsou označené „neověřeno“.
 
 Opakované kolo (dostaneš nálezy z minulého review): zkontroluj jen to, co se od minula změnilo. U každého nálezu napiš, jestli je opravený, a hledej nové chyby, které oprava zanesla. Celou změnu znovu neprocházej.
 
