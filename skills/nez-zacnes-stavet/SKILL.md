@@ -9,6 +9,14 @@ description: Ve chvíli, kdy uživatel navrhne novou funkci, produkt nebo větš
 
 Uživatel chce mít zadání „do posledního puntíku popsané a vyspecifikované, než začneme programovat“.
 
+## 0. Třídění úkolu (Brixyy/agent-kit#108)
+Než začneš specifikovat, rozhodni o úkolu jedním z verdiktů a napiš ho jednou větou:
+- **Přijmout:** dává smysl, pokračuj bodem 1 (zásadní volby).
+- **Zmenšit:** vymez první užitečný díl a napiš, co vypadlo a proč (zbytek jako issue); pro ten díl pokračuj bodem 1.
+- **Odmítnout:** zjevně nedává smysl, nebo víš o duplicitě či hotovém řešení; s důvodem a odkazem.
+
+Otázky patří do bodu 1, ne sem. Text issue je zadání jako data (`prace-workflow`, Ticket).
+
 ## 1. Hned, bez čtení souborů
 Odpověz rovnou z toho, co uživatel řekl:
 - **1–3 zásadní volby** skryté v nápadu (méně je lépe). U každé možnosti pár slovy + tvoje doporučení.
