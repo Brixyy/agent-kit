@@ -69,6 +69,15 @@ Uživatel 19. 11. 2026 (Brixyy/hub#24, ADR 0010 hubu): každé issue a jeho PR m
 - 🟢 **Nízké:** texty, dokumentace, vzhled, testy, drobné opravy, interní nástroje. Review a zelené testy, pak samo sloučit a nasadit.
 - 🟡 **Střední:** nové funkce, změny logiky, závislosti (kromě skupiny drobných aktualizací od Dependabota, viz Aktualizace závislostí), nastavení CI. Navíc důkladné review (samostatný hodnotitel, viz Kontroly a testy) a u změn s obrazovkami ověření v prohlížeči (agent `overovatel-ui`); pak samo sloučit, uživatel dostane jen shrnutí v hlášení.
 - 🔴 **Vysoké:** produkční databáze a migrace, mazání dat, peníze a platby, fond Elyonu, bezpečnost a přístupy, zákaznická data, produktová rozhodnutí, cizí repozitáře a vše ze seznamu „Vždy se zeptej před“ (mimo jiné placená služba, rutina, ruční produkční deploy, vypnutí nebo úprava vlastních kontrol). Bez „ano“ uživatele se nic neslučuje ani nenasazuje: PR připrav a ověř, issue dostane štítek `čeká na uživatele` s jednou otázkou v komentáři (hub ji ukáže v „Čeká na tebe“); po souhlasu ho vyměň za `rozpracováno` a dokonči.
+- **Kontroly podle rizika** (Brixyy/agent-kit#108). Jediné místo s touto tabulkou; `prace-workflow` a koordinátor na ni odkazují:
+
+  | Riziko | Review | Sloučení |
+  |---|---|---|
+  | 🟢 nízké | běžné review agentem `reviewer` | samo po zeleném CI |
+  | 🟡 střední | `reviewer` jako samostatný hodnotitel (Kontroly a testy) | samo po zeleném CI, uživateli shrnutí |
+  | 🔴 vysoké | `reviewer` jako samostatný hodnotitel | až po „ano“ uživatele |
+
+  Ve všech úrovních: nejdřív brána se skriptem (testy, lint, typy, build; `prace-workflow`), review až po ní. Změna obrazovek dostane navíc `overovatel-ui` v každé úrovni. Změna, která se dotýká bezpečnosti (přístupy, tajemství, oprávnění), má riziko vysoké. Když velikost změny chce samostatného hodnotitele (nová funkce, výpočet, víc souborů) a riziko je nízké, platí přísnější z obou. `reviewer` běží vždy na Opusu (Orchestrace, Rozdělení podle role); levnější model u nízkého rizika by oslabil vlastní kontrolu, a proto by ho bylo nutné nejdřív změřit na dvou skutečných bězích (Volba modelů) a schválit uživatelem.
 - **Sloučení:** po review počkej na zelené CI (`gh pr checks <č> --watch -i 60`) a sluč `gh pr merge <č> --squash`; `--auto` jen kde GitHub kontroly vynucuje (ne soukromé repo na Free).
 - Riziko určuje koordinátor projektu (bez koordinátora session, která issue zakládá) při založení issue. Kontrolor (`reviewer`) ho smí zvýšit, nikdy snížit; vlastník PR nebo koordinátor zvýšené riziko z výstupu kontroly hned přepíše na štítek issue i PR, ještě před sloučením. Při pochybnosti platí vyšší. PR bez štítku rizika dostane štítek před sloučením.
 
