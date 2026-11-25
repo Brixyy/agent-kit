@@ -69,6 +69,15 @@ Uživatel 19. 11. 2026 (Brixyy/hub#24, ADR 0010 hubu): každé issue a jeho PR m
 - 🟢 **Nízké:** texty, dokumentace, vzhled, testy, drobné opravy, interní nástroje. Review a zelené testy, pak samo sloučit a nasadit.
 - 🟡 **Střední:** nové funkce, změny logiky, závislosti (kromě skupiny drobných aktualizací od Dependabota, viz Aktualizace závislostí), nastavení CI. Navíc důkladné review (samostatný hodnotitel, viz Kontroly a testy) a u změn s obrazovkami ověření v prohlížeči (agent `overovatel-ui`); pak samo sloučit, uživatel dostane jen shrnutí v hlášení.
 - 🔴 **Vysoké:** produkční databáze a migrace, mazání dat, peníze a platby, fond Elyonu, bezpečnost a přístupy, zákaznická data, produktová rozhodnutí, cizí repozitáře a vše ze seznamu „Vždy se zeptej před“ (mimo jiné placená služba, rutina, ruční produkční deploy, vypnutí nebo úprava vlastních kontrol). Bez „ano“ uživatele se nic neslučuje ani nenasazuje: PR připrav a ověř, issue dostane štítek `čeká na uživatele` s jednou otázkou v komentáři (hub ji ukáže v „Čeká na tebe“); po souhlasu ho vyměň za `rozpracováno` a dokonči.
+- **Kontroly podle rizika** (Brixyy/agent-kit#108). Jediné místo s touto tabulkou; prompty a skills na ni odkazují:
+
+  | Riziko | Review | Navíc |
+  |---|---|---|
+  | 🟢 nízké | jeden `reviewer` s parametrem `model: sonnet` (levnější), běžné review | — |
+  | 🟡 střední | `reviewer` na Opusu (výchozí) jako samostatný hodnotitel (Kontroly a testy) | změna obrazovek: `overovatel-ui` |
+  | 🔴 vysoké | totéž jako střední | „ano“ uživatele před sloučením |
+
+  Ve všech úrovních platí: nejdřív brána se skriptem (testy, lint, typy, build; skill `prace-workflow`), review až po ní. Změna, která se dotýká bezpečnosti (přístupy, tajemství, ověřování vstupů, oprávnění), dostane navíc bezpečnostní kontrolu (`/security-review`) na Opusu bez ohledu na štítek. Kontrolu chyb nikdy nedělá Haiku (Orchestrace, Rozdělení podle role).
 - **Sloučení:** po review počkej na zelené CI (`gh pr checks <č> --watch -i 60`) a sluč `gh pr merge <č> --squash`; `--auto` jen kde GitHub kontroly vynucuje (ne soukromé repo na Free).
 - Riziko určuje koordinátor projektu (bez koordinátora session, která issue zakládá) při založení issue. Kontrolor (`reviewer`) ho smí zvýšit, nikdy snížit; vlastník PR nebo koordinátor zvýšené riziko z výstupu kontroly hned přepíše na štítek issue i PR, ještě před sloučením. Při pochybnosti platí vyšší. PR bez štítku rizika dostane štítek před sloučením.
 
