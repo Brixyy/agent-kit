@@ -17,11 +17,17 @@ JADRO = 8_500  # rezerva pro výtah o uživateli a delší cesty (audit Brixyy/a
 CESTA = 150  # rozpočet na absolutní cestu k podrobnostem; skutečná délka závisí na stroji
 CLOUD_HLAVICKA = 600  # úvodní řádky, odkaz na podrobnosti a na výtah o uživateli z cloud-bootstrap.sh
 
-vystup = subprocess.run(
-    [sys.executable, "-I", os.path.join(KOREN, "hooks", "kontext.py")],
-    capture_output=True, text=True, encoding="utf-8", check=True,
-).stdout
-text = json.loads(vystup)["hookSpecificOutput"]["additionalContext"]
+def spust(source):
+    vystup = subprocess.run(
+        [sys.executable, "-I", os.path.join(KOREN, "hooks", "kontext.py")],
+        input=json.dumps({"hook_event_name": "SessionStart", "source": source}),
+        capture_output=True, text=True, encoding="utf-8", check=True,
+    ).stdout
+    return json.loads(vystup)["hookSpecificOutput"]["additionalContext"]
+
+
+start = spust("startup")
+text = spust("compact")  # nejdelší varianta (s připomínkou jazyka), měří se rozpočet
 with open(os.path.join(KOREN, "global", "AGENTS.md"), encoding="utf-8") as f:
     jadro = f.read()
 
@@ -38,6 +44,9 @@ for nazev, ok in [
     ("hook předá cestu k podrobnostem, soubor existuje",
      "PODROBNOSTI.md" in text and os.path.isfile(os.path.join(KOREN, "global", "PODROBNOSTI.md"))),
     ("pravidlo o vykreslování diagramů je v jádru", "vykresli jako obrázek" in jadro),
+    # Brixyy/asistent#390: po zkrácení kontextu agent opakovaně přešel do angličtiny
+    ("po zkrácení kontextu je navrch připomínka češtiny", text.startswith("Kontext byl právě zkrácen")),
+    ("při běžném startu připomínka není", start.startswith(jadro[:40])),
     # 20. 11. 2026: pod-session 2,5 h stála na „čekám na doběhnutí testů“
     ("pravidlo „žádné čekám bez budíku“ je v podrobnostech i ve skillu koordinátora",
      "čekám“ bez budíku" in open(os.path.join(KOREN, "global", "PODROBNOSTI.md"), encoding="utf-8").read()
