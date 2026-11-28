@@ -151,8 +151,24 @@ CTENI_VZDALENE = re.compile(
 
 
 # Obsah, který shell spustí jako příkaz (sh -c '…', eval, iex).
-SPOUSTI_OBSAH = (r"(?:\b(?:sh|bash|zsh|pwsh|powershell|cmd)(?:\.exe)?\s+(?:-c|-Command|/c)|\beval|\biex|\bInvoke-Expression)"
-                 r"\s+('([^']*)'|\"([^\"]*)\")")
+# Shell s přepínači před -c (bash -lc, bash -e -c, sh -xc) také (agent-kit#116).
+SPOUSTI_OBSAH = (r"(?:\b(?:sh|bash|zsh|pwsh|powershell|cmd)(?:\.exe)?(?:\s+-o\s+\w+|\s+--?[a-zA-Z-]+|\s+/[a-zA-Z])*?"
+                 r"\s+(?:-Command|-[a-zA-Z]*c|/c)"  # i bash -o pipefail -c, --login, cmd /d /c (agent-kit#116)
+                 r"|\beval|\biex|\bInvoke-Expression)"
+                 r"\s+('([^']*)'|\"((?:\\.|[^\"\\])*)\")")  # i s \" uvnitř (agent-kit#116)
+
+
+def obsah_spusteni(prikaz):
+    """Texty, které shell spustí jako příkaz (sh -c, eval, iex); v dvojitých uvozovkách bez escapování."""
+    return [m[1] or re.sub(r"\\([\"\\$`])", r"\1", m[2]) for m in re.findall(SPOUSTI_OBSAH, prikaz, re.I)]
+
+
+def bez_rozdeleni_slov(prikaz):
+    """Program zapsaný po kouskách, který shell spojí do jednoho slova: s\\sh, s''sh, 's'sh (agent-kit#116)."""
+    for _ in range(4):  # pevný počet kol: rychlé i na dlouhém textu (agent-kit#116)
+        prikaz = re.sub(r"(?<=\w)\\(?=\w)", "", prikaz)  # ne \dt v psql -c
+        prikaz = re.sub(r"(?<=\w)(['\"])(\w*)\1|(['\"])(\w*)\3(?=\w)", lambda m: m.group(2) or m.group(4) or "", prikaz)
+    return prikaz
 
 
 def _maskuj(text):
@@ -192,8 +208,22 @@ def ssh_riziko(prikaz, maskovat=True):
     ma_cr = "\r" in prikaz  # \r mění dělení na slova v bash: výjimka SSH_CTECI_VSTUP pak neplatí
     prikaz = prikaz.replace("\r", "")
     hledany = _maskuj(prikaz) if maskovat else prikaz
+    # find -exec ssh … spustí ssh bez oddělovače příkazů, SSH_VOLANI ho nevidí (agent-kit#116).
+    # Přepínače a obálky mezi xargs / parallel / find -exec a ssh (xargs -n1 sudo ssh …, agent-kit#116).
+    obalky = (r"(\s+(-[nLPIdEsajS]\s+\S+|--(max-args|max-lines|max-procs|replace|delimiter|arg-file|eof|jobs)\s+\S+"
+              r"|--[\w-]+(=\S+)?|-\S+|\d+|sudo|env|nohup|nice|stdbuf|time"  # (agent-kit#116)
+              r"|command|exec|timeout\s+\S+|\w+=\S*))*?\s+[\"']?(\S*[\\/])?" + SSH_NAZVY + r"[\"']?(\s|$)")
+    m = re.search(r"(^|\s)-(exec|execdir|ok|okdir)" + obalky, hledany, re.I)
+    if m:
+        return "příkaz na vzdáleném serveru (" + m.group("nazev").lower() + " z find -exec)"
+    m = re.search(r"\b(xargs|parallel)(\.exe)?" + obalky, hledany, re.I)
+    if m:
+        return "příkaz na vzdáleném serveru (" + m.group("nazev").lower() + " přes " + m.group(1).lower() + ")"
     for m in SSH_VOLANI.finditer(hledany):
         nastroj, zacatek = m.group("nazev").lower(), m.start("nazev")
+        if re.search(r"\b(xargs|parallel)\b", prikaz[m.start():zacatek], re.I):
+            # xargs přidá obsah vstupu jako argumenty: vzdálený příkaz nejde posoudit (agent-kit#116).
+            return "příkaz na vzdáleném serveru (" + nastroj + " přes xargs)"
         if nastroj in ("scp", "rsync"):
             # Kopie mezi místními složkami (bez host:) a stažení ze serveru projdou.
             volani = re.match(r"[^\n;&|]*", prikaz[zacatek:]).group(0)
@@ -400,7 +430,9 @@ VOLNE_MCP = re.compile(r"^mcp__scheduled-tasks__")
 ENV_SOUBOR = r"\.env(?!\.(example|sample|template)\b)[\w.-]*"
 ENV_CTENI = re.compile(
     r"\b(cat|type|less|more|head|tail|Get-Content|gc|bat|xxd|strings|grep|rg|findstr|Select-String|sed|awk|"
-    r"base64|sort|nl|diff)\b[^\n|;&]*(^|[\\/\s\"'<])" + ENV_SOUBOR + r"([\s\"']|$)"
+    # Konec názvu i ; & | ) < > `; glob (.env*) jen bez uvozovek, '.env*' je vzor (agent-kit#116).
+    r"base64|sort|nl|diff)\b[^\n|;&]*((^|[\\/\s<])" + ENV_SOUBOR + r"([\s\"';&|)<>`*?[{},]|$)"
+    r"|[\"']" + ENV_SOUBOR + r"([\s\"';&|)<>`]|$))"
 )
 
 
@@ -420,6 +452,58 @@ def _uvozovky(m):
 HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1")
 
 
+# Heredoc, který čte shell jako skript (agent-kit#116).
+SHELL_CTE_HEREDOC = re.compile(r"(^|[;&|(]|\bsudo)\s*(\S*[\\/])?(bash|sh|zsh|dash|ksh)(\.exe)?(\s+-[a-zA-Z]+)*\s*<<(?!<)"
+                               r"|\|\s*(sudo\s+)?(\S*[\\/])?(bash|sh|zsh|dash|ksh)(\.exe)?\b", re.I)
+
+
+def _zacatek_heredocu(radek, stav):
+    """Najde začátek heredocu (<<EOF) jen tam, kde ho shell opravdu bere (agent-kit#116): ne v uvozovkách
+    (i přes více řádků), v komentáři, za \\, v $((…)) ani <<<. Stav uvozovek a $( ) nese mezi řádky."""
+    nalez, j, n = None, 0, len(radek)
+    while j < n:
+        c, vrch = radek[j], stav[-1]
+        if vrch == "'":
+            if c == "'":
+                stav.pop()
+        elif vrch in ('"', "$'"):
+            if c == "\\":
+                j += 1
+            elif c == vrch[-1]:
+                stav.pop()
+            elif vrch == '"' and radek.startswith("$(", j) and not radek.startswith("$((", j):
+                stav.append("n")
+                j += 1
+        elif c == "\\":
+            j += 1
+        elif c == "#" and (j == 0 or radek[j - 1] in " \t;&|()"):
+            break
+        elif radek.startswith("$((", j):
+            konec = radek.find("))", j)
+            if konec < 0:
+                break
+            j = konec + 1
+        elif radek.startswith("$'", j):
+            stav.append("$'")
+            j += 1
+        elif c in "'\"":
+            stav.append(c)
+        elif c == "(":
+            stav.append("n")
+        elif c == ")" and len(stav) > 1:
+            stav.pop()
+        elif radek.startswith("<<<", j):
+            j += 2
+        elif radek.startswith("<<", j):
+            m = HEREDOC.match(radek, j)
+            if m and nalez is None:
+                nalez = m
+            if m:
+                j = m.end() - 1
+        j += 1
+    return nalez
+
+
 def bez_heredocu(prikaz):
     """Vynechá těla heredoců (po řádek začínající ukončovacím slovem). Zbytek prvního řádku
     (cat <<EOF > soubor) zůstává ke kontrole. Po řádcích a přes rejstřík, aby dlouhý text
@@ -430,9 +514,11 @@ def bez_heredocu(prikaz):
         m = re.match(r"\s*(\w+)", radek)
         if m:
             zacatky.setdefault(m.group(1), []).append(i)
-    vysledek, i = [], 0
+    vysledek, i, stav = [], 0, ["n"]
     while i < len(radky):
-        m = HEREDOC.search(radky[i])
+        m = _zacatek_heredocu(radky[i], stav)
+        if m and SHELL_CTE_HEREDOC.search(radky[i]):
+            m = None  # bash <<'EOF' / cat <<EOF | bash: tělo je příkaz, kontroluje se (agent-kit#116)
         indexy = zacatky.get(m.group(2), []) if m else []
         k = bisect.bisect_right(indexy, i)
         if k < len(indexy):
@@ -557,7 +643,8 @@ def main():
         if ENV_CTENI.search(prikaz):
             vystup("deny", "Pojistka: vypisování souborů .env je zakázané. Hodnoty smíš jen načíst do procesu (`set -a; . ./.env; set +a`, `--env-file`) a použít, nikdy je nevypisuj.")
         # Text v uvozovkách se ignoruje, kromě případů, kdy se spouští jako příkaz (sh -c, eval, PowerShell -Command).
-        spousti_text = re.search(r"\b(sh|bash|zsh|pwsh|powershell|cmd)(\.exe)?\b[^\n]*\s(-c|-Command|/c)\b|\b(eval|iex|Invoke-Expression)\b", prikaz, re.I)
+        spousti_text = re.search(r"\b(sh|bash|zsh|pwsh|powershell|cmd)(\.exe)?\b[^\n]*\s(-[a-zA-Z]*c|-Command|/c)\b"
+                                 r"|\b(eval|iex|Invoke-Expression)\b", prikaz, re.I)  # i bash -lc (agent-kit#116)
         kontrolovany = prikaz if spousti_text else bez_textu(prikaz)
         upraveny = bez_prepinacu_gitu(kontrolovany)
         for vzor, nazev in RIZIKOVE_PRIKAZY:
@@ -566,9 +653,10 @@ def main():
                 break
         if popis is None:
             # Vzdálený příkaz bývá v uvozovkách: hledá se v textu s maskovanými uvozovkami, posuzuje v původním.
-            popis = ssh_riziko(bez_heredocu(prikaz)) or psql_riziko(bez_heredocu(prikaz))
-            for obsah in re.findall(SPOUSTI_OBSAH, prikaz, re.I):
-                popis = popis or ssh_riziko(obsah[1] or obsah[2]) or psql_riziko(obsah[1] or obsah[2])
+            # Kontroluje se i tvar se spojenými slovy (s\sh, s''sh) a obsah sh -c / eval (agent-kit#116).
+            for text in (bez_heredocu(prikaz), *obsah_spusteni(prikaz)):
+                for tvar in (text, bez_rozdeleni_slov(text)):
+                    popis = popis or ssh_riziko(tvar) or psql_riziko(tvar)
         # Push do main/master chce potvrzení v každém repu, i v agent-kitu a šabloně (Brixyy/agent-kit#95):
         # výjimka podle textu cwd + příkazu pouštěla i push do jiného repa.
     elif RIZIKOVE_MCP.search(nastroj) and not VOLNE_MCP.search(nastroj):
