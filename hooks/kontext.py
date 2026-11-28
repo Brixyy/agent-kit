@@ -22,6 +22,8 @@ PO_ZKRACENI = (
 def zdroj():
     """Zdroj spuštění SessionStart (startup, resume, clear, compact); při chybě None."""
     try:
+        if sys.stdin is None or sys.stdin.isatty():  # ruční spuštění v terminálu: nečekat na vstup
+            return None
         return json.loads(sys.stdin.read() or "{}").get("source")
     except Exception:
         return None
