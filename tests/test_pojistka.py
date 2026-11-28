@@ -380,7 +380,8 @@ PRIPADY = [
         ("sql", "x.py"), ("py", "x.sql"), ("sql", ".env.local"), ("py", "~/.agents/.env.sluzby"),
         ("sql", "~/." + SSH + "/id_ed25519"), ("py", "/proc/self/environ"), ("sql", ".env.sql"),
         ("py", "~/." + SSH + "/x.py"), ("sql", "a/.agents/x.sql"), ("sql", "//evil.example/share/x.sql"),
-        ("sql", "x.sqlx"), ("py", "x.py.txt"), ("sql", "~/x.sql"))],
+        ("sql", "x.sqlx"), ("py", "x.py.txt"), ("sql", "~/x.sql"), ("sql", "dir/.Env/x.sql"),
+        ("py", "a/.SSH/k.py"), ("sql", "/.//h/s/x.sql"), ("sql", "x.SQL"))],
     (SSH + f" vps '{CTENI} sql' <dotaz.sql", "PROJDE"),
     *[(SSH + f" vps '{CTENI} sql' {za}", "deny") for za in (
         "", "< dotaz.sql; rm x", "< dotaz.sql && rm x", "< dotaz.sql || rm x", "< dotaz.sql | tee x",

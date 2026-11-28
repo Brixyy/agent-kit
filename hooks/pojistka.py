@@ -121,7 +121,7 @@ SSH_VERZE = re.compile(r"ssh(\.exe)?[ \t]+-V" + SSH_ZA, re.I)
 SSH_CTECI_VSTUP = re.compile(
     r"ssh vps 'sudo -u trading /opt/trading/cteni\.sh (?P<rezim>sql|py)'[ \t]*<[ \t]*"
     # Soubor jen s příponou režimu (.sql / .py), bez síťové cesty a tajných složek (.env, .ssh, .agents).
-    r"(?!//)(?![\w./:-]*(\.env|\.ssh|\.agents))[\w./:-]+\.(?P=rezim)[ \t]*\Z")
+    r"(?![\w./:-]*//)(?i:(?![\w./:-]*(\.env|\.ssh|\.agents)))[\w./:-]+\.(?P=rezim)[ \t]*\Z")
 # SSH_CTECI_VSTUP smí stát jen na začátku příkazu: na začátku textu, za novým řádkem, ; nebo &&
 # (ne za \, uvozovkou, rourou ani předponou jako xargs, sudo, X=1).
 SSH_CTECI_PRED = re.compile(r"(\A|(?<!\\)(\n|;|&&))[ \t]*\Z")
