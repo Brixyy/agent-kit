@@ -412,6 +412,63 @@ PRIPADY = [
     ('bash -c "' + SSH + f" vps '{CTENI} sql' < f\\\"\\\"; " + SSH + " vps 'rm -rf /x'\"", "deny"),
     *[(pred + SSH + f" vps '{CTENI} py' < x.py", "PROJDE") for pred in (
         "true && ", "cd repo; ", "cd repo\n", "  ")],
+    # Staré díry z review (Brixyy/agent-kit#116).
+    # 1. „<<“ v uvozovkách nezačíná heredoc a nesmí schovat další řádky.
+    ("echo '<<A'\n" + SSH + " vps 'rm -rf /x'\nA", "deny"),
+    ('echo "<<A"\n' + SSH + " vps 'rm -rf /x'\nA", "deny"),
+    ("echo 'x\n<<A'\n" + SSH + " vps 'rm -rf /x'\nA", "deny"),
+    ("echo '<<A'\n" + SSH + " vps 'rm -rf /x'\nA\n" + SSH + f" vps '{CTENI} sql' < x.sql", "deny"),
+    ("echo '<<A'\n" + PUSH + "\nA", "deny"),
+    ("cat <<'EOF'\n" + SSH + " vps rm x\nEOF", "PROJDE"),
+    ('cat <<"EOF" > poznamka.txt\n' + SSH + " vps rm x\nEOF", "PROJDE"),
+    ("gh pr create --body-file - <<EOF\nIt's " + SSH + " vps rm x\nEOF", "PROJDE"),
+    ("echo \\<<A\n" + SSH + " vps 'rm -rf /x'\nA", "deny"),
+    ("true # <<A\n" + SSH + " vps 'rm -rf /x'\nA", "deny"),
+    ("echo $((1<<A))\n" + SSH + " vps 'rm -rf /x'\nA", "deny"),
+    ("cat <<<A\n" + SSH + " vps 'rm -rf /x'\nA", "deny"),
+    ("echo $'\\'<<A'\n" + SSH + " vps 'rm -rf /x'\nA", "deny"),
+    # Review: lichá uvozovka v komentáři, za \ nebo v těle $(cat <<'EOF') heredoc neschová.
+    ("# Don't touch\ncat > notes.md <<'EOF'\n" + SSH + " vps rm x\nEOF", "PROJDE"),
+    ("# it's a test\ngh pr create --body-file - <<'EOF'\nOvěřeno: " + PUSH + " blokuje\nEOF", "PROJDE"),
+    ("git commit -m \"$(cat <<'EOF'\nHe said \"hi\n" + PUSH + " je blokovaný\nEOF\n)\"", "PROJDE"),
+    ("echo it\\'s; cat <<'EOF'\n" + SSH + " vps rm x\nEOF", "PROJDE"),
+    ("cat <<EOF\nint x = 1 << 3;\n" + SSH + " vps rm x\nEOF", "PROJDE"),
+    # 2. .env hned za ním ; & | ) < > `
+    *[("cat " + ".env.local" + za, "deny") for za in ("; echo x", ";", "|wc -l", "&& x", ")", ">x", "<x")],
+    *[("cat " + ".env" + za, "deny") for za in ("*", "?local", "[.]local", "{,.local}")],
+    ("cat " + ".env.example; echo x", "PROJDE"),
+    # 3. xargs a find -exec přidají argumenty ze vstupu: vzdálený příkaz nejde posoudit.
+    ("cat d | xargs " + SSH + " vps uptime", "deny"),
+    ("xargs -n1 " + SSH + " vps uptime < d", "deny"),
+    ("xargs -n 1 -I {} " + SSH + " vps uptime < d", "deny"),
+    ("xargs -0 -P4 " + SSH + " vps uptime < d", "deny"),
+    *[(pred + SSH + " vps uptime < d", "deny") for pred in (
+        "xargs --max-args 1 ", "xargs -tn 1 ", "xargs -n1 sudo ", "xargs -n1 env ", "xargs -I{} timeout 5 ",
+        "parallel --jobs 4 ", "find . -exec sudo ", "find . -exec env ")],
+    ("ls | xargs -I{} grep -c " + SSH + " {}", "PROJDE"),
+    ("find ~/." + SSH + " -exec ls {} +", "PROJDE"),
+    ("parallel " + SSH + " vps uptime ::: a", "deny"),
+    ("find . -exec " + SSH + " vps rm {} \\;", "deny"),
+    ("find . -execdir /usr/bin/" + SSH + " vps rm {} +", "deny"),
+    ("find . -name " + SSH + " -print", "PROJDE"),
+    ("ls | xargs grep " + SSH, "PROJDE"),
+    ("ls | xargs -n1 echo " + SSH, "PROJDE"),
+    ("find . -exec grep " + SSH + " {} +", "PROJDE"),
+    # 4. sh -c "…" s \" uvnitř.
+    ('bash -c "echo \\"; ' + SSH + " vps 'rm -rf /x'\"", "deny"),
+    ('eval "echo \\"; ' + SSH + ' vps rm x"', "deny"),
+    ('bash -c "echo \\"ahoj\\""', "PROJDE"),
+    *[(sh + " '" + SSH + " vps rm x'", "deny") for sh in ("bash -lc", "bash -e -c", "sh -xc")],
+    ("bash -lc 'git status'", "PROJDE"),
+    # 5. Program zapsaný po kouskách, které shell spojí.
+    (SSH + "() { s\\sh vps 'rm -rf /x'; }; " + SSH + " vps uptime", "deny"),
+    ("s\\sh vps rm x", "deny"),
+    ("s''sh vps rm x", "deny"),
+    ("'s'sh vps rm x", "deny"),
+    ('s"s"h vps rm x', "deny"),
+    ("ps\\ql -h db.example.com -c 'drop table x'", "deny"),
+    ("echo C:\\Users\\x\\" + SSH + ".exe", "PROJDE"),
+    ("grep -rn 'x\\" + SSH + "' hooks", "PROJDE"),
 ]
 
 
