@@ -460,6 +460,18 @@ PRIPADY = [
     ('bash -c "echo \\"ahoj\\""', "PROJDE"),
     *[(sh + " '" + SSH + " vps rm x'", "deny") for sh in ("bash -lc", "bash -e -c", "sh -xc")],
     ("bash -lc 'git status'", "PROJDE"),
+    *[(sh + " '" + SSH + " vps rm x'", "deny") for sh in ("bash -o pipefail -c", "bash --login -c")],
+    ('cmd.exe /d /c "' + SSH + ' vps rm x"', "deny"),
+    # Druhé review #118: heredoc, který čte shell, je příkaz; xargs --null grep a '.env*' jako vzor projdou.
+    ("bash <<'EOF'\n" + SSH + " vps 'rm -rf /x'\nEOF", "deny"),
+    ("cat <<EOF | bash\n" + SSH + " vps rm x\nEOF", "deny"),
+    ("sudo sh -s <<EOF\n" + PUSH + "\nEOF", "deny"),
+    ("cat > skript.sh <<'EOF'\n" + SSH + " vps rm x\nEOF", "PROJDE"),
+    *[(p, "PROJDE") for p in (
+        "git ls-files | xargs --null grep -n " + SSH, "rg -l foo | xargs --no-run-if-empty grep -l " + SSH,
+        "ls | xargs --verbose grep " + SSH, "grep -qxF '" + ".env*' .gitignore || echo '" + ".env*' >> .gitignore",
+        "grep -rn API_KEY --exclude='" + ".env*' .", "rg --files -g '" + ".env*'", "rg KEY -g '!" + ".env*'")],
+    ('cat ".env.local"; echo x', "deny"),
     # 5. Program zapsaný po kouskách, které shell spojí.
     (SSH + "() { s\\sh vps 'rm -rf /x'; }; " + SSH + " vps uptime", "deny"),
     ("s\\sh vps rm x", "deny"),

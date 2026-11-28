@@ -152,7 +152,8 @@ CTENI_VZDALENE = re.compile(
 
 # Obsah, který shell spustí jako příkaz (sh -c '…', eval, iex).
 # Shell s přepínači před -c (bash -lc, bash -e -c, sh -xc) také (agent-kit#116).
-SPOUSTI_OBSAH = (r"(?:\b(?:sh|bash|zsh|pwsh|powershell|cmd)(?:\.exe)?(?:\s+-[a-zA-Z]+)*?\s+(?:-Command|-[a-zA-Z]*c|/c)"
+SPOUSTI_OBSAH = (r"(?:\b(?:sh|bash|zsh|pwsh|powershell|cmd)(?:\.exe)?(?:\s+-o\s+\w+|\s+--?[a-zA-Z-]+|\s+/[a-zA-Z])*?"
+                 r"\s+(?:-Command|-[a-zA-Z]*c|/c)"  # i bash -o pipefail -c, --login, cmd /d /c (agent-kit#116)
                  r"|\beval|\biex|\bInvoke-Expression)"
                  r"\s+('([^']*)'|\"((?:\\.|[^\"\\])*)\")")  # i s \" uvnitř (agent-kit#116)
 
@@ -209,7 +210,8 @@ def ssh_riziko(prikaz, maskovat=True):
     hledany = _maskuj(prikaz) if maskovat else prikaz
     # find -exec ssh … spustí ssh bez oddělovače příkazů, SSH_VOLANI ho nevidí (agent-kit#116).
     # Přepínače a obálky mezi xargs / parallel / find -exec a ssh (xargs -n1 sudo ssh …, agent-kit#116).
-    obalky = (r"(\s+(-[nLPIdEsajS]\s+\S+|--[\w-]+(=\S+|\s+(?!-)\S+)?|-\S+|\d+|sudo|env|nohup|nice|stdbuf|time"
+    obalky = (r"(\s+(-[nLPIdEsajS]\s+\S+|--(max-args|max-lines|max-procs|replace|delimiter|arg-file|eof|jobs)\s+\S+"
+              r"|--[\w-]+(=\S+)?|-\S+|\d+|sudo|env|nohup|nice|stdbuf|time"  # (agent-kit#116)
               r"|command|exec|timeout\s+\S+|\w+=\S*))*?\s+[\"']?(\S*[\\/])?" + SSH_NAZVY + r"[\"']?(\s|$)")
     m = re.search(r"(^|\s)-(exec|execdir|ok|okdir)" + obalky, hledany, re.I)
     if m:
@@ -428,7 +430,9 @@ VOLNE_MCP = re.compile(r"^mcp__scheduled-tasks__")
 ENV_SOUBOR = r"\.env(?!\.(example|sample|template)\b)[\w.-]*"
 ENV_CTENI = re.compile(
     r"\b(cat|type|less|more|head|tail|Get-Content|gc|bat|xxd|strings|grep|rg|findstr|Select-String|sed|awk|"
-    r"base64|sort|nl|diff)\b[^\n|;&]*(^|[\\/\s\"'<])" + ENV_SOUBOR + r"([\s\"';&|)<>`*?[{},]|$)"  # i cat .env; a .env* (agent-kit#116)
+    # Konec názvu i ; & | ) < > `; glob (.env*) jen bez uvozovek, '.env*' je vzor (agent-kit#116).
+    r"base64|sort|nl|diff)\b[^\n|;&]*((^|[\\/\s<])" + ENV_SOUBOR + r"([\s\"';&|)<>`*?[{},]|$)"
+    r"|[\"']" + ENV_SOUBOR + r"([\s\"';&|)<>`]|$))"
 )
 
 
@@ -446,6 +450,11 @@ def _uvozovky(m):
 
 
 HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1")
+
+
+# Heredoc, který čte shell jako skript (agent-kit#116).
+SHELL_CTE_HEREDOC = re.compile(r"(^|[;&|(]|\bsudo)\s*(\S*[\\/])?(bash|sh|zsh|dash|ksh)(\.exe)?(\s+-[a-zA-Z]+)*\s*<<(?!<)"
+                               r"|\|\s*(sudo\s+)?(\S*[\\/])?(bash|sh|zsh|dash|ksh)(\.exe)?\b", re.I)
 
 
 def _zacatek_heredocu(radek, stav):
@@ -508,6 +517,8 @@ def bez_heredocu(prikaz):
     vysledek, i, stav = [], 0, ["n"]
     while i < len(radky):
         m = _zacatek_heredocu(radky[i], stav)
+        if m and SHELL_CTE_HEREDOC.search(radky[i]):
+            m = None  # bash <<'EOF' / cat <<EOF | bash: tělo je příkaz, kontroluje se (agent-kit#116)
         indexy = zacatky.get(m.group(2), []) if m else []
         k = bisect.bisect_right(indexy, i)
         if k < len(indexy):
