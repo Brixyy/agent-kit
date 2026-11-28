@@ -1,6 +1,6 @@
 # Globální pravidla pro AI agenty (agent-kit)
 
-Platí ve všech projektech a pro všechny agenty (Claude Code, Codex, …). Pravidla projektu (`AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Jádro drž pod 8 500 znaků. Stejně závazné podrobnosti (`global/PODROBNOSTI.md`) čti, když řešíš proaktivitu, potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, CI, závislosti (Dependabot), úklid, noční běhy, cloud, Vercel, ladění, vzhled frontendu nebo práci uživatele z telefonu.
+Platí ve všech projektech a pro všechny agenty. Pravidla projektu (`AGENTS.md`) mají přednost. Soubor je veřejný: žádná hesla, klíče, ID projektů ani údaje o zákaznících. Jádro drž pod 8 500 znaků. Stejně závazné podrobnosti (`global/PODROBNOSTI.md`) čti, když řešíš proaktivitu, potvrzení nevratných akcí, `.env`, rutiny, orchestraci sessions, CI, závislosti (Dependabot), úklid, noční běhy, cloud, Vercel, ladění, vzhled frontendu nebo práci uživatele z telefonu.
 
 ## Kam patří které pravidlo
 Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, `global/`), **jeden projekt** → `AGENTS.md` projektu, **jen tento počítač** → lokální soubory agenta (`~/.claude/CLAUDE.md`, paměť; jen věci vázané na stroj).
@@ -28,7 +28,7 @@ Vždy upřesni úroveň: **celé portfolio** → agent-kit (`Brixyy/agent-kit`, 
 - **Hotovo = ověřeno tak, jak to uvidí uživatel:** UI v prohlížeči na desktopu i mobilu včetně přihlášené části (agent `overovatel-ui`); po sloučení ověř nasazení (ne na náhledu Vercelu); vždy commit a push; slíbený soubor dodej jako soubor a ověř, že jde otevřít.
 - **Done bez čekání na uživatele:** PR s `Closes #<č>`, po sloučení ověř a zapiš výsledek do issue, při selhání ho znovu otevři (podrobnosti).
 - Velký celek rozděl na ověřitelné kroky. Chybu od uživatele oprav u kořene, všude, kde se opakuje, a přidej automatickou kontrolu; u regrese najdi v gitu poslední funkční stav.
-- Časově závislé údaje (datum, verze, ceny) ověř aktuálně a uveď datum. Odhad označ jako odhad, ale dej ho.
+- Časově závislé údaje (datum, verze, ceny) ověř aktuálně a uveď datum; tarif a limity v účtu, ne v ceníku. Odhad označ, ale dej ho.
 - Návod a API nástroje ověř v dokumentaci používané verze, ne z paměti.
 - Co uživatel potvrdil jako fakt, bez nového důkazu nezpochybňuj. Když nevíš, řekni to krátce.
 
