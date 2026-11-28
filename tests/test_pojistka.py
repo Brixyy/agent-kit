@@ -16,6 +16,7 @@ MERGE = "gh pr " + "merge 5"
 SSH = "ss" + "h"
 PSQL = "ps" + "ql"
 ENV = "cat " + ".env"
+CTENI = "sudo -u trading /opt/trading/cteni.sh"
 
 PRIPADY = [
     (PUSH, "deny"),
@@ -372,6 +373,45 @@ PRIPADY = [
     ("rg " + PSQL + " docs", "PROJDE"),
     ("git commit -F - <<'EOF'\nrm hooks/" + "pojistka.py\nEOF", "PROJDE"),
     ('git commit -m "$(cat <<\'EOF\'\nOprava: rm hooks/' + 'pojistka.py\nEOF\n)"', "PROJDE"),
+    # Čtecí vstup Elyonu (Brixyy/elyon#1986): projdou přesně dva tvary se vstupem ze souboru, nic navíc.
+    *[(SSH + f" vps '{CTENI} {d}' < {s}.{d}", "PROJDE") for d in ("sql", "py") for s in ("dotaz", "C:/tmp/x", "./a-b/c_1")],
+    # Soubor jen s příponou režimu, bez tajných souborů a síťové cesty (vstup odchází na server).
+    *[(SSH + f" vps '{CTENI} {d}' < {s}", "deny") for d, s in (
+        ("sql", "x.py"), ("py", "x.sql"), ("sql", ".env.local"), ("py", "~/.agents/.env.sluzby"),
+        ("sql", "~/." + SSH + "/id_ed25519"), ("py", "/proc/self/environ"), ("sql", ".env.sql"),
+        ("py", "~/." + SSH + "/x.py"), ("sql", "a/.agents/x.sql"), ("sql", "//evil.example/share/x.sql"),
+        ("sql", "x.sqlx"), ("py", "x.py.txt"), ("sql", "~/x.sql"), ("sql", "dir/.Env/x.sql"),
+        ("py", "a/.SSH/k.py"), ("sql", "/.//h/s/x.sql"), ("sql", "x.SQL"))],
+    (SSH + f" vps '{CTENI} sql' <dotaz.sql", "PROJDE"),
+    *[(SSH + f" vps '{CTENI} sql' {za}", "deny") for za in (
+        "", "< dotaz.sql; rm x", "< dotaz.sql && rm x", "< dotaz.sql || rm x", "< dotaz.sql | tee x",
+        "< dotaz.sql & rm x", "< dotaz.sql &", "< dotaz.sql > out.txt", "< dotaz.sql 2>&1", "< $SOUBOR",
+        "< ${SOUBOR}", "< `echo x`", "< $(echo x)", "<< EOF\nselect 1\nEOF", "<<< 'select 1'",
+        "< <(echo x)", "< 'dotaz.sql'", "< dotaz.sql\nrm x", "< dotaz.sql extra", "< a.sql < b.sql",
+        "<> dotaz.sql", "< dotaz.sql #", "x < dotaz.sql")],
+    *[(SSH + f" vps '{uvnitr}' < dotaz.sql", "deny") for uvnitr in (
+        CTENI + " sql; rm x", CTENI + " sql && rm x", CTENI + " sql | sh", CTENI + " sql > /x", CTENI + " sql &",
+        CTENI + " $X", CTENI + " sql $X", CTENI + " `id`", CTENI + " sh", CTENI + " sql extra", CTENI + " ",
+        CTENI + "  sql", "sudo -u root /opt/trading/cteni.sh sql", "sudo /opt/trading/cteni.sh sql",
+        "sudo -u trading /opt/trading/zapis.sh sql", "sudo -u trading /opt/trading/cteni.shx sql",
+        "sudo -u trading /opt/trading/cteni.sh SQL", " " + CTENI + " sql")],
+    (SSH + f' vps "{CTENI} sql" < dotaz.sql', "deny"),
+    (SSH + f" -t vps '{CTENI} sql' < dotaz.sql", "deny"),
+    (SSH + f" root@vps '{CTENI} sql' < dotaz.sql", "deny"),
+    (SSH + f" vps2 '{CTENI} sql' < dotaz.sql", "deny"),
+    (SSH + f" vps {CTENI} sql < dotaz.sql", "deny"),
+    ("X=1 " + SSH + f" vps '{CTENI} sql' < dotaz.sql", "deny"),
+    ("sudo " + SSH + f" vps '{CTENI} sql' < dotaz.sql", "deny"),
+    ("cat x | " + SSH + f" vps '{CTENI} sql' < dotaz.sql", "deny"),
+    # Review: předpona přes pokračování řádku nebo uvozovku, CR a zpětné lomítko v názvu souboru.
+    *[(pred + SSH + f" vps '{CTENI} sql' < dotaz.sql", "deny") for pred in (
+        "xargs \\\n", "sudo -u root \\\n", "X=1 \\\n", "cat x | \\\n", "xargs -L'1' ", "nice -n '5' ",
+        "echo 'a b'", "cat x |& ", "echo \\; ", "( ", "{ ")],
+    *[(SSH + f" vps '{CTENI} sql' {za}", "deny") for za in ("<\r --help", "< dotaz.sql\r", "< C:\\tmp\\x.sql")],
+    (SSH + f" vps\r '{CTENI} sql' < dotaz.sql", "deny"),
+    ('bash -c "' + SSH + f" vps '{CTENI} sql' < f\\\"\\\"; " + SSH + " vps 'rm -rf /x'\"", "deny"),
+    *[(pred + SSH + f" vps '{CTENI} py' < x.py", "PROJDE") for pred in (
+        "true && ", "cd repo; ", "cd repo\n", "  ")],
 ]
 
 

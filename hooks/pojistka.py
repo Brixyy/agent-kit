@@ -115,6 +115,16 @@ SSH_BEZPECNE = re.compile(
     re.I,
 )
 SSH_VERZE = re.compile(r"ssh(\.exe)?[ \t]+-V" + SSH_ZA, re.I)
+# Čtecí vstup Elyonu (Brixyy/elyon#1986): kontejner jen pro čtení, bez klíčů, databázová role bez
+# zápisu. Projdou přesně tyto dva tvary se vstupem jen ze souboru (< soubor) a nic dalšího:
+# žádná předpona, roura, přepínač, proměnná ani další znak shellu uvnitř ani za voláním.
+SSH_CTECI_VSTUP = re.compile(
+    r"ssh vps 'sudo -u trading /opt/trading/cteni\.sh (?P<rezim>sql|py)'[ \t]*<[ \t]*"
+    # Soubor jen s příponou režimu (.sql / .py), bez síťové cesty a tajných složek (.env, .ssh, .agents).
+    r"(?![\w./:-]*//)(?i:(?![\w./:-]*(\.env|\.ssh|\.agents)))[\w./:-]+\.(?P=rezim)[ \t]*\Z")
+# SSH_CTECI_VSTUP smí stát jen na začátku příkazu: na začátku textu, za novým řádkem, ; nebo &&
+# (ne za \, uvozovkou, rourou ani předponou jako xargs, sudo, X=1).
+SSH_CTECI_PRED = re.compile(r"(\A|(?<!\\)(\n|;|&&))[ \t]*\Z")
 STAZENI = re.compile(
     r"(scp|rsync)(\.exe)?([ \t]+-(?![a-zA-Z]*[eoFSJ])[a-zA-Z]+|[ \t]+-P[ \t]+\d+"
     r"|[ \t]+--(archive|verbose|compress|progress|partial|human-readable|dry-run|stats|checksum|times|recursive"
@@ -179,6 +189,7 @@ def _vzdaleny_jen_cte(cmd):
 
 def ssh_riziko(prikaz, maskovat=True):
     """Vrátí popis rizika pro ssh/scp/rsync/… na server, nebo None."""
+    ma_cr = "\r" in prikaz  # \r mění dělení na slova v bash: výjimka SSH_CTECI_VSTUP pak neplatí
     prikaz = prikaz.replace("\r", "")
     hledany = _maskuj(prikaz) if maskovat else prikaz
     for m in SSH_VOLANI.finditer(hledany):
@@ -192,6 +203,8 @@ def ssh_riziko(prikaz, maskovat=True):
         if nastroj != "ssh":
             return "příkaz na vzdáleném serveru (" + nastroj + ")"
         if SSH_VERZE.match(prikaz, zacatek):
+            continue
+        if not ma_cr and SSH_CTECI_VSTUP.match(prikaz, zacatek) and SSH_CTECI_PRED.search(prikaz[:zacatek]):
             continue
         b = SSH_BEZPECNE.match(prikaz, zacatek)
         if not b:
